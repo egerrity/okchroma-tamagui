@@ -8,13 +8,13 @@
   ],
   "scripts": {
     "tokens": "npm run build -w @poc/theme",
-    "check": "node scripts/check-tokens.mjs",
+    "check": "node --experimental-strip-types scripts/check-tokens.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run tokens && npm run check && npm run typecheck",
     "web": "npm run dev -w web",
     "native": "npm run start -w native",
-    "figma:print": "node scripts/figma/print.ts",
-    "figma:print:mcp": "node scripts/figma/print.ts --mcp"
+    "figma:print": "node --experimental-strip-types scripts/figma/print.ts",
+    "figma:print:mcp": "node --experimental-strip-types scripts/figma/print.ts --mcp"
   },
   "overrides": {
     "react": "19.2.3",
@@ -27,5 +27,8 @@
   "devDependencies": {
     "@figma/code-connect": "^2.0.1"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=22.6"
+  }
 }

@@ -14,7 +14,7 @@
     "./parts": "./src/parts.tsx"
   },
   "scripts": {
-    "build": "node src/build.ts",
+    "build": "node --experimental-strip-types src/build.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

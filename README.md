@@ -18,3 +18,6 @@ npm run figma:print  # the Figma print as a development plugin (scripts/figma/pl
 ```
 
 The seed lives in one place, `packages/theme/src/seed.ts`.
+
+Node 22.6 or newer. The generator, the check and the print run TypeScript through Node's
+type stripping; the scripts pass the flag it needs on 22.x, where it is not yet the default.

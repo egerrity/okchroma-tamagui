@@ -123,6 +123,8 @@ UI is not installed and not planned.
 - Native cannot evaluate CSS color functions; the engine's rung rows are literals per
   mode, and the generator writes the slash syntax the engine's system tokens use as the
   comma syntax React Native parses. Same color, one grammar.
+- Node below 22.18 strips types only behind `--experimental-strip-types`; the scripts pass
+  it, and relative imports in files Node runs spell their `.ts` extension.
 - A file with a `.native.ts` twin is imported without an extension, or Metro loads the
   web file on native (decision 18).
 - Tamagui 2 names the animation prop `transition`; `animation` does not type.
