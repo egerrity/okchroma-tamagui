@@ -128,9 +128,9 @@ UI is not installed and not planned.
 - A file with a `.native.ts` twin is imported without an extension, or Metro loads the
   web file on native (decision 18).
 - Tamagui 2 names the animation prop `transition`; `animation` does not type.
-- `Dialog.Trigger asChild` renders its child as a span with a button role that the keyboard
-  cannot activate on web; open dialogs from a real Button with the controlled API
-  (decision 17).
+- `Dialog.Trigger asChild` renders its child as a span with a button role; open dialogs
+  from a real Button with the controlled API, and return focus on close through the
+  content's `onCloseAutoFocus`, since the kit only focuses a `Dialog.Trigger` (decision 17).
 - The kit's Input passes `placeholderTextColor` through to the DOM and React warns about
   it in development. The warning is the kit's; the color is right.
 - Comments say why the code is as it is, in the present tense, with no date.

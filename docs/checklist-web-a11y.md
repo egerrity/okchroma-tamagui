@@ -42,3 +42,17 @@ dialog is open, because the automated browser's key events activate no button at
 plain native button included); and whether the page behind is marked inert, which no
 attribute showed. These four lines are run with a real keyboard, and the answer is written
 here before decision 2 is weighed.
+
+**2026-09-15, later, light, Vite dev server, trusted key events through Chrome's debugging
+protocol (a script outside the repository).** Passed: Tab reaches the opening button;
+Enter opens with focus inside; Space opens with focus inside; six Tabs and three
+Shift+Tabs cycle between the dialog's two buttons and never leave it; Escape closes and
+focus returns to the opening button. The one failure found on the way, focus landing on
+the body after close, was the kit focusing an unset trigger ref, fixed through
+`onCloseAutoFocus` (decision 17). Inert marking of the page behind is still not shown by
+any attribute; the trap holds by focus, not by `aria-hidden`.
+
+A hand run on another machine the same day reported Space, the tab trap and Escape as
+failing; the order of presses there compounded (a Space pressed while the dialog was
+already open moves focus), so it is re-run in this order from a fresh reload: Tab to the
+button, Space, Escape, Enter, Tab three times, Escape. Browser name recorded with it.

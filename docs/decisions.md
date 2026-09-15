@@ -61,8 +61,11 @@ the rule it serves. Code cites a decision by number, never by date.
     automated browser's key events activate no button at all, not even a plain native one.
     The screen opens the dialog from a real Button through `open` and `onOpenChange`, the
     kit's controlled API, with `aria-haspopup` and `aria-expanded` on the button, so
-    activation is the browser's own and depends on no kit code. The keyboard lines of the
-    checklist are run with a real keyboard before the contingency question is asked.
+    activation is the browser's own and depends on no kit code. On close the kit focuses
+    its trigger ref, which only a `Dialog.Trigger` sets, so the content's
+    `onCloseAutoFocus` cancels that default and focuses the button itself. With trusted
+    key events through Chrome's debugging protocol every keyboard line then passes:
+    Enter and Space open, Tab and Shift+Tab stay inside, Escape closes and returns focus.
 18. 2026-09-15. **Platform-split imports are extensionless.** `shared.ts` imported
     `./animations.ts` with the extension spelled out, and Metro then loaded the CSS driver
     on native (the panel's `y` motion threw as a unitless `translateY`, and the overlay's
