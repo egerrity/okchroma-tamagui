@@ -1,0 +1,31 @@
+{
+  "name": "okchroma-tamagui",
+  "private": true,
+  "description": "A proof of concept: one okchroma seed themes Tamagui on web and on native.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "tokens": "npm run build -w @poc/theme",
+    "check": "node scripts/check-tokens.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "build": "npm run tokens && npm run check && npm run typecheck",
+    "web": "npm run dev -w web",
+    "native": "npm run start -w native",
+    "figma:print": "node scripts/figma/print.ts",
+    "figma:print:mcp": "node scripts/figma/print.ts --mcp"
+  },
+  "overrides": {
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "@types/react": "~19.2.2"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  },
+  "devDependencies": {
+    "@figma/code-connect": "^2.0.1"
+  },
+  "type": "module"
+}

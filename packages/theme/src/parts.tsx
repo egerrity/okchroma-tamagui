@@ -1,0 +1,15 @@
+// The two exceptions under decision 6, each one line of style and no prop of its own
+// (decision 15). Every other component is Tamagui's, used as it comes.
+import { Button as KitButton, Input as KitInput, styled, withStaticProperties } from 'tamagui'
+import { disabledOpacity } from '../dist/theme.ts'
+
+// The kit rests a Button's border on transparent and reads the theme only on hover. The
+// stamp's edge is always rendered, so the resting border reads the theme too; and disabled
+// is the engine's opacity on the component, which no theme key can carry.
+export const Button = withStaticProperties(
+  styled(KitButton, { borderColor: '$borderColor', disabledStyle: { opacity: disabledOpacity } }),
+  { Text: KitButton.Text, Icon: KitButton.Icon },
+)
+
+// The kit colors the placeholder only through this prop; the theme names the key.
+export const Input = styled(KitInput, { placeholderTextColor: '$placeholderColor' })

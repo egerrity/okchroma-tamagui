@@ -1,0 +1,25 @@
+{
+  "name": "native",
+  "version": "1.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "TAMAGUI_TARGET=native expo start",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@poc/theme": "*",
+    "@tamagui/babel-plugin": "2.7.7",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.4",
+    "expo": "~57.0.21",
+    "expo-status-bar": "~57.0.1",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "~5.7.0",
+    "tamagui": "2.7.7"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.3"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@poc/theme",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "okchroma's map projected onto Tamagui themes; the config both apps mount.",
+  "exports": {
+    "./config": "./src/config.ts",
+    "./theme": "./dist/theme.ts",
+    "./seed": "./src/seed.ts",
+    "./screen": "./src/screen.tsx",
+    "./roster": "./src/roster.tsx",
+    "./stock": "./src/stock.ts",
+    "./parts": "./src/parts.tsx"
+  },
+  "scripts": {
+    "build": "node src/build.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tamagui/config": "2.7.7",
+    "tamagui": "2.7.7",
+    "@tamagui/animations-css": "2.7.7",
+    "@tamagui/animations-react-native": "2.7.7"
+  },
+  "devDependencies": {
+    "okchroma": "^0.6.0",
+    "@types/node": "^24.13.3",
+    "@types/react": "~19.2.2",
+    "typescript": "~6.0.2"
+  },
+  "peerDependencies": {
+    "react": "*"
+  }
+}
