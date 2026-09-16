@@ -14,7 +14,7 @@ npm run typecheck
 npm run web          # Vite on http://localhost:8350 (?mode=dark, ?theme=stock, #roster)
 scripts/start-ios.sh # Expo dev server on 8081; then open the app in Expo Go:
 xcrun simctl openurl booted exp://127.0.0.1:8081
-npm run figma:print  # the Figma print as a development plugin (scripts/figma/plugin/README.md)
+npm run figma:print  # regenerate the Figma print; the committed one is in scripts/figma/plugin/
 ```
 
 The seed lives in one place, `packages/theme/src/seed.ts`.

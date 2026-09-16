@@ -47,7 +47,7 @@ scripts/check-tokens.mjs             the check
 scripts/figma/print.ts               generates the Plugin API code for the print
 scripts/figma/lib.ts                 the path the extended plugin writes each name under
 scripts/figma/plugin/                the development-plugin wrapper for that code
-figma/*.figma.tsx                    Code Connect, one per roster member
+figma/*.snippet.tsx                  Code Connect examples, pasted in the Dev Mode UI
 ```
 
 The stock baseline is one flag, `THEME_SOURCE=stock` (`VITE_THEME_SOURCE` on web,
@@ -72,14 +72,14 @@ sets the opening mode, so a screenshot needs no click. Same screen, same code.
 
 1. Run okchroma's extended plugin in the file with the real seed on the WCAG lane; it
    writes the variables.
-2. `npm run figma:print` generates Plugin API code from the engine's structured emit and
-   the map: the interaction register as a `role` collection with one mode per family, and
+2. `scripts/figma/plugin/code.js` is the print, generated and committed (decision 20), so
+   nothing runs on that machine. It writes, from the engine's structured emit and the map: the interaction register as a `role` collection with one mode per family, and
    one component set per roster member with every color property bound to a variable by
    name, light and dark on the file's mode toggle.
 3. Run the code through the Figma MCP server where it is available; where it is not, load
    `scripts/figma/plugin` as a development plugin, which is the same code in a manifest.
-4. Publish Code Connect from `figma/` with an access token for the file's organization.
-   The `.figma.tsx` files map the family and tier properties to the `theme` prop.
+4. Connect each printed set in Dev Mode's Code Connect UI, pasting the matching snippet
+   from `figma/` as the example (decision 19). No command runs on that machine.
 
 ## The contingency
 
@@ -127,6 +127,9 @@ UI is not installed and not planned.
   it, and relative imports in files Node runs spell their `.ts` extension.
 - A file with a `.native.ts` twin is imported without an extension, or Metro loads the
   web file on native (decision 18).
+- In the Figma Plugin API, opacity on a paint bound to a variable is not kept; a rung goes
+  on a layer's opacity (decision 21). Screenshots taken inside a script render after the
+  script ends, so mode-dependent shots are taken with the screenshot tool between calls.
 - Tamagui 2 names the animation prop `transition`; `animation` does not type.
 - `Dialog.Trigger asChild` renders its child as a span with a button role; open dialogs
   from a real Button with the controlled API, and return focus on close through the

@@ -1,128 +1,12 @@
-// Prints the Plugin API script that puts the roster into a Figma file whose variables
-// okchroma's extended plugin has already written. Two things are printed:
-//
-//   1. The interaction register as one collection, `role`, whose modes are the families and
-//      whose variables are the register's generic rows. Alias rows point at the plugin's
-//      variables; the rows the engine composes (a family's tint at an opacity rung) collapse
-//      to one row, `tint`, and the rung rides the paint's opacity, since the Plugin API cannot
-//      write a compose-color expression. A `ladder` collection carries the rungs as numbers.
-//   2. Component sets on a page of their own: Button (Tier x State, bound to `role` rows so
-//      an instance picks its family by the collection's mode, the way the theme prop does in
-//      code), Input (State, bound to the roster), and Dialog (overlay and panel).
-//
-//   node scripts/figma/print.ts          plugin form: ends with figma.closePlugin(summary)
-//   node scripts/figma/print.ts --mcp    MCP form: ends with `return summary`
-//
-// Nothing is destroyed: a set or collection that already exists is updated or left alone and
-// reported. Run through the Figma MCP server, or save the plugin form as
-// scripts/figma/plugin/code.js and load that folder as a development plugin.
-import {
-  INTERACTION_FAMILIES,
-  INTERACTION_LADDER,
-  INTERACTION_ROWS,
-  interactionRows,
-  interactionTintName,
-  resolveTheme,
-  themeTokens,
-  interactionTokens,
-  type InteractionRow,
-} from 'okchroma'
-import { figmaPath } from './lib.ts'
-import { SEED, BRAND, PROFILE } from '../../packages/theme/src/seed.ts'
-
-const mcp = process.argv.includes('--mcp')
-
-const theme = resolveTheme({ primaryHex: SEED, name: BRAND, deriveSecondary: true, contrastProfile: PROFILE })
-const tokens = interactionTokens(
-  themeTokens({
-    slug: BRAND,
-    displayName: 'PoC',
-    brand: theme.themed,
-    secondary: theme.secondary?.scale ?? null,
-    secondaryStyle: theme.secondary?.style,
-    contrastProfile: PROFILE,
-  }),
-)
-
-const FAMILIES = [...INTERACTION_FAMILIES]
-const isRung = (row: InteractionRow) => /^(subtle|hint)-bg-/.test(row)
-const aliasTarget = (family: string, row: InteractionRow): string => {
-  // interactionRows gives the alias rows as var(--name); the name is what the plugin wrote
-  const pair = interactionRows(family, 'light', tokens).find(([r]) => r === row)
-  const m = pair && /^var\(--([^)]+)\)$/.exec(pair[1])
-  if (!m) throw new Error(`${family}-${row} is not an alias row`)
-  const path = figmaPath(m[1])
-  if (!path) throw new Error(`no plugin path for ${m[1]}`)
-  return path
-}
-
-type Row = { name: string; css: string | null; scopes: string[]; aliases: string[]; description: string }
-const rows: Row[] = []
-for (const row of INTERACTION_ROWS) {
-  if (isRung(row)) continue
-  const isText = /^(fg|solid-fg)/.test(row)
-  rows.push({
-    name: row,
-    css: `--${row}`,
-    scopes: isText ? ['TEXT_FILL'] : row === 'solid-border' ? ['STROKE_COLOR'] : ['FRAME_FILL', 'SHAPE_FILL'],
-    aliases: FAMILIES.map(f => aliasTarget(f, row)),
-    description: `The register's ${row} row; the mode picks the family.`,
-  })
-}
-rows.push({
-  name: 'tint',
-  css: null,
-  scopes: ['FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR'],
-  aliases: FAMILIES.map(f => {
-    const p = figmaPath(interactionTintName(f))
-    if (!p) throw new Error(`no plugin path for the tint of ${f}`)
-    return p
-  }),
-  description: 'The family’s highlighter-26, or the pole for the pole families: the layer every subtle, hint and outline ground is made of, at a rung from the ladder.',
-})
-const ladder = (['subtle', 'hint'] as const).flatMap(tier =>
-  (['enabled', 'hover', 'pressed', 'selected'] as const).map(state => ({
-    name: `${tier}/${state}`,
-    value: (INTERACTION_LADDER[tier][state] ?? 0) / 100,
-  })),
-)
-
-// what each Button variant binds, per tier and state
-const TIERS = ['solid', 'subtle', 'hint', 'outline'] as const
-const STATES = ['enabled', 'hover', 'pressed', 'disabled'] as const
-const buttonVariants = TIERS.flatMap(tier =>
-  STATES.map(state => {
-    const s = state === 'disabled' ? 'enabled' : state
-    const ground =
-      tier === 'solid'
-        ? { row: `solid-bg-${s}`, opacity: 1 }
-        : { row: 'tint', opacity: ladder.find(l => l.name === `${tier === 'outline' ? 'hint' : tier}/${s}`)!.value }
-    const text = tier === 'solid' ? 'solid-fg' : tier === 'subtle' ? 'fg' : 'fg-on-hint'
-    const stroke = tier === 'solid' ? 'solid-border' : tier === 'outline' ? 'tint' : null
-    return { tier, state, ground, text, stroke, opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
-  }),
-)
-const inputVariants = [
-  { state: 'enabled', stroke: figmaPath('neutral-highlighter-26') },
-  { state: 'focus', stroke: figmaPath('brand-highlighter-26') },
-  { state: 'invalid', stroke: figmaPath('critical-highlighter-26') },
-]
-const paths = {
-  surfaceHigh: figmaPath('surface-high'),
-  scrim: figmaPath('scrim'),
-  chalk: figmaPath('neutral-chalk-11'),
-  text: figmaPath('neutral-pen-70'),
-  placeholder: figmaPath('neutral-pencil-47'),
-}
-
-const body = `
+// GENERATED by scripts/figma/print.ts (plugin form). Save as scripts/figma/plugin/code.js and load that folder as a development plugin.
+(async () => {
 const PAGE = 'okchroma-tamagui print'
-const FAMILIES = ${JSON.stringify(FAMILIES)}
-const ROWS = ${JSON.stringify(rows)}
-const LADDER = ${JSON.stringify(ladder)}
-const BUTTON = ${JSON.stringify(buttonVariants)}
-const INPUT = ${JSON.stringify(inputVariants)}
-const PATHS = ${JSON.stringify(paths)}
+const FAMILIES = ["neutral","brand","brand-alt","critical","warning","positive","info","neutral-strong","neutral-inverse"]
+const ROWS = [{"name":"fg","css":"--fg","scopes":["TEXT_FILL"],"aliases":["neutral/pen-58","brand/primary/pen-58","brand/alt/pen-58","critical/pen-58","warning/pen-58","positive/pen-58","info/pen-58","neutral/pen-100","neutral/paper-0"],"description":"The register's fg row; the mode picks the family."},{"name":"fg-strong","css":"--fg-strong","scopes":["TEXT_FILL"],"aliases":["neutral/pen-70","brand/primary/pen-70","brand/alt/pen-70","critical/pen-70","warning/pen-70","positive/pen-70","info/pen-70","neutral/pen-100","neutral/paper-0"],"description":"The register's fg-strong row; the mode picks the family."},{"name":"fg-on-hint","css":"--fg-on-hint","scopes":["TEXT_FILL"],"aliases":["neutral/pencil-47","brand/primary/pencil-47","brand/alt/pencil-47","critical/pencil-47","warning/pencil-47","positive/pencil-47","info/pencil-47","neutral/pen-100","neutral/paper-0"],"description":"The register's fg-on-hint row; the mode picks the family."},{"name":"solid-bg-enabled","css":"--solid-bg-enabled","scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["neutral/stamp/fill","brand/primary/stamp/fill","brand/alt/stamp/fill","critical/stamp/fill","warning/stamp/fill","positive/stamp/fill","info/stamp/fill","neutral/pen-100","neutral/paper-0"],"description":"The register's solid-bg-enabled row; the mode picks the family."},{"name":"solid-bg-hover","css":"--solid-bg-hover","scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["neutral/stamp/fill-hover","brand/primary/stamp/fill-hover","brand/alt/stamp/fill-hover","critical/stamp/fill-hover","warning/stamp/fill-hover","positive/stamp/fill-hover","info/stamp/fill-hover","neutral/pen-70","neutral/paper-3"],"description":"The register's solid-bg-hover row; the mode picks the family."},{"name":"solid-bg-pressed","css":"--solid-bg-pressed","scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["neutral/stamp/fill-pressed","brand/primary/stamp/fill-pressed","brand/alt/stamp/fill-pressed","critical/stamp/fill-pressed","warning/stamp/fill-pressed","positive/stamp/fill-pressed","info/stamp/fill-pressed","neutral/pen-58","neutral/paper-5"],"description":"The register's solid-bg-pressed row; the mode picks the family."},{"name":"solid-border","css":"--solid-border","scopes":["STROKE_COLOR"],"aliases":["neutral/stamp/edge","brand/primary/stamp/edge","brand/alt/stamp/edge","critical/stamp/edge","warning/stamp/edge","positive/stamp/edge","info/stamp/edge","system/alpha/transparent","system/alpha/transparent"],"description":"The register's solid-border row; the mode picks the family."},{"name":"solid-fg","css":"--solid-fg","scopes":["TEXT_FILL"],"aliases":["neutral/stamp/on","brand/primary/stamp/on","brand/alt/stamp/on","critical/stamp/on","warning/stamp/on","positive/stamp/on","info/stamp/on","neutral/paper-0","neutral/pen-100"],"description":"The register's solid-fg row; the mode picks the family."},{"name":"tint","css":null,"scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["neutral/highlighter-26","brand/primary/highlighter-26","brand/alt/highlighter-26","critical/highlighter-26","warning/highlighter-26","positive/highlighter-26","info/highlighter-26","neutral/pen-100","neutral/paper-0"],"description":"The family’s highlighter-26, or the pole for the pole families: the layer every subtle, hint and outline ground is made of, at a rung from the ladder."}]
+const LADDER = [{"name":"subtle/enabled","value":0.08},{"name":"subtle/hover","value":0.12},{"name":"subtle/pressed","value":0.16},{"name":"subtle/selected","value":0.24},{"name":"hint/enabled","value":0},{"name":"hint/hover","value":0.08},{"name":"hint/pressed","value":0.12},{"name":"hint/selected","value":0.16}]
+const BUTTON = [{"tier":"solid","state":"enabled","ground":{"row":"solid-bg-enabled","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":1},{"tier":"solid","state":"hover","ground":{"row":"solid-bg-hover","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":1},{"tier":"solid","state":"pressed","ground":{"row":"solid-bg-pressed","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":1},{"tier":"solid","state":"disabled","ground":{"row":"solid-bg-enabled","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":0.38},{"tier":"subtle","state":"enabled","ground":{"row":"tint","opacity":0.08},"text":"fg","stroke":null,"opacity":1},{"tier":"subtle","state":"hover","ground":{"row":"tint","opacity":0.12},"text":"fg","stroke":null,"opacity":1},{"tier":"subtle","state":"pressed","ground":{"row":"tint","opacity":0.16},"text":"fg","stroke":null,"opacity":1},{"tier":"subtle","state":"disabled","ground":{"row":"tint","opacity":0.08},"text":"fg","stroke":null,"opacity":0.38},{"tier":"hint","state":"enabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":null,"opacity":1},{"tier":"hint","state":"hover","ground":{"row":"tint","opacity":0.08},"text":"fg-on-hint","stroke":null,"opacity":1},{"tier":"hint","state":"pressed","ground":{"row":"tint","opacity":0.12},"text":"fg-on-hint","stroke":null,"opacity":1},{"tier":"hint","state":"disabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":null,"opacity":0.38},{"tier":"outline","state":"enabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":"tint","opacity":1},{"tier":"outline","state":"hover","ground":{"row":"tint","opacity":0.08},"text":"fg-on-hint","stroke":"tint","opacity":1},{"tier":"outline","state":"pressed","ground":{"row":"tint","opacity":0.12},"text":"fg-on-hint","stroke":"tint","opacity":1},{"tier":"outline","state":"disabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":"tint","opacity":0.38}]
+const INPUT = [{"state":"enabled","stroke":"neutral/highlighter-26"},{"state":"focus","stroke":"brand/primary/highlighter-26"},{"state":"invalid","stroke":"critical/highlighter-26"}]
+const PATHS = {"surfaceHigh":"system/surface/high","scrim":"system/alpha/abs-black-060","chalk":"neutral/chalk-11","text":"neutral/pen-70","placeholder":"neutral/pencil-47"}
 const summary = { created: [], updated: [], skipped: [], missing: [] }
 
 const collections = await figma.variables.getLocalVariableCollectionsAsync()
@@ -132,7 +16,7 @@ const byName = new Map()
 for (const v of vars) { const prev = byName.get(v.name); if (!prev || collById.get(v.variableCollectionId).name === 'theme') byName.set(v.name, v) }
 const isExpression = val => !!(val && typeof val === 'object' && val.type === 'VARIABLE_EXPRESSION')
 
-// ── 1. the register as the \`role\` collection, one mode per family ──────────
+// ── 1. the register as the `role` collection, one mode per family ──────────
 let role = collections.find(c => c.name === 'role')
 if (!role) { role = figma.variables.createVariableCollection('role'); role.renameMode(role.modes[0].modeId, FAMILIES[0]); summary.created.push('collection role') }
 const modeId = {}
@@ -225,7 +109,7 @@ else {
   }
   const set = figma.combineAsVariants(comps, page); set.name = 'Button'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  set.description = 'Family is the role collection\\'s mode on the instance. In code: theme="<family>_<tier>".'
+  set.description = 'Family is the role collection\'s mode on the instance. In code: theme="<family>_<tier>".'
   summary.created.push('Button set (' + comps.length + ' variants)')
 }
 
@@ -246,7 +130,7 @@ else {
   }
   const set = figma.combineAsVariants(comps, page); set.name = 'Input'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  set.description = 'In code: <Input> and <Input theme="critical"> for the invalid state; focus is the platform\\'s.'
+  set.description = 'In code: <Input> and <Input theme="critical"> for the invalid state; focus is the platform\'s.'
   summary.created.push('Input set (' + comps.length + ' variants)')
 }
 
@@ -266,14 +150,10 @@ else {
   c.appendChild(panel); panel.x = 120; panel.y = 120
   paragraph(panel, 'Delete this account?', 'Semi Bold', ink)
   paragraph(panel, 'The account and its mail are removed. This cannot be undone.', 'Regular', ink)
-  c.description = 'Overlay on the scrim, panel on surface-high with the chalk-11 edge; in code, Tamagui\\'s Dialog under the DialogOverlay and DialogContent themes.'
+  c.description = 'Overlay on the scrim, panel on surface-high with the chalk-11 edge; in code, Tamagui\'s Dialog under the DialogOverlay and DialogContent themes.'
   summary.created.push('Dialog component')
 }
 summary.missing = [...new Set(summary.missing)]
-`
 
-const out = mcp
-  ? `// GENERATED by scripts/figma/print.ts (MCP form). Paste into the Figma MCP server's script runner.\n${body}\nreturn summary\n`
-  : `// GENERATED by scripts/figma/print.ts (plugin form). Save as scripts/figma/plugin/code.js and load that folder as a development plugin.\n(async () => {${body}\nfigma.closePlugin(JSON.stringify(summary))\n})()\n`
-process.stdout.write(out)
-process.stderr.write(`print: ${rows.length} role rows, ${ladder.length} ladder rows, ${buttonVariants.length} Button variants, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
+figma.closePlugin(JSON.stringify(summary))
+})()

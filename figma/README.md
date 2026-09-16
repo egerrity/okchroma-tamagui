@@ -1,12 +1,11 @@
 # Code Connect
 
-One file per roster member, mapping the printed Figma set to the code that renders it. The
-URL in each file is the set's node on the print page; fill it in after the print, then:
+One snippet per roster member, for Code Connect's own UI in Dev Mode: select the printed
+set, choose "Connect to code", point it at the file named at the top of the snippet, and
+paste the snippet as the example. No command runs and no package is installed; the CLI is
+not used, because its current major dropped the framework parsers these examples would
+need, and a CLI run is a package run on the machine with the file.
 
-```
-npx figma connect publish --token <a token for the file's organization>
-```
-
-Family is not a variant property: an instance picks it through the `role` collection's
-mode, which Code Connect does not read, so the examples show `brand` and the description
-on the set says how the mode maps to the `theme` prop.
+Family is not a variant property on the printed sets: an instance picks it through the
+`role` collection's mode, which Code Connect cannot read, so the snippets show `brand` and
+the set's description says the mode is the first half of the `theme` prop.

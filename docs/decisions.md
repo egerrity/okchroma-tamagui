@@ -72,3 +72,19 @@ the rule it serves. Code cites a decision by number, never by date.
     exit called `getComputedStyle`). Metro picks `animations.native.ts` only for an
     extensionless import. The repository's other `.ts`-spelled imports have no platform
     twin and stay as they are.
+19. 2026-09-16. **Code Connect through its UI, not its CLI.** On the machine with the file,
+    every package run is a security question, and the CLI's current major dropped the
+    framework parsers the earlier `.figma.tsx` files relied on. The printed sets are
+    connected in Dev Mode's Code Connect UI by hand, with the snippets in `figma/` pasted as
+    the examples; the package is not installed.
+20. 2026-09-16. **The print's generated code is committed.** It binds variables by name and
+    carries no seed, so `scripts/figma/plugin/code.js` travels ready to import as a
+    development plugin; no Node run is needed on the machine with the file.
+21. 2026-09-16. **A rung is a ground layer's opacity, never a bound paint's.** The print was
+    dry-run on a scratch file against a stand-in of the extended plugin's `theme`
+    collection. A paint bound to a variable does not keep its opacity through the Plugin
+    API (it read back at 1 and rendered solid), while a layer's own opacity always renders.
+    So a translucent tier is a `ground` rectangle stretched behind the label, its fill
+    bound to the family's tint at full strength and the rung as the layer's opacity; the
+    solid tier fills the frame directly. Verified in Light and Dark, and family-by-mode on
+    instances.

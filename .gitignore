@@ -4,5 +4,4 @@ node_modules/
 apps/web/dist/
 *.log
 .env*.local
-scripts/figma/plugin/code.js
 apps/web/.tamagui/
