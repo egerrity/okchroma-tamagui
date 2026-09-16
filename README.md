@@ -4,7 +4,8 @@ A proof of concept: one okchroma seed in, a light and dark system out on web and
 native, on Tamagui's own components, with the contrast requirements solved by the engine
 during generation. The theme is the product; no component is wrapped.
 
-Start with `docs/plan.md`. The agent's rules are in `.github/copilot-instructions.md`.
+Start with `docs/plan.md`. The agent's rules are in `.github/copilot-instructions.md`; the
+path a new component takes is `docs/adding-a-component.md`.
 
 ```
 npm install

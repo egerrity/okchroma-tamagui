@@ -3,7 +3,9 @@
 // highlighter-26, the pole for the two pole families); build.ts expands both per family.
 // The kit reads `borderColor` on every Button at rest (parts.tsx), so only the tiers that
 // draw an edge name one: the stamp's gated edge and the outline's tint. `transparent` is
-// the one keyword the map may hold: it names the absence of a paint.
+// the one keyword the map may hold: it names the absence of a paint. `backgroundSelected`
+// is the register's selected rung, the ground a filter chip keeps while it is on; the
+// solid tier is already filled, so it stays on its resting stamp.
 import { type KeyMap, same, BORDER_KEYS, COLOR_KEYS } from './keys.ts'
 
 /** `<family>`: edges only. The focus ring stays the base's neutral highlighter everywhere. */
@@ -16,6 +18,7 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundHover: '<family>-solid-bg-hover',
     backgroundPress: '<family>-solid-bg-pressed',
     backgroundFocus: '<family>-solid-bg-enabled',
+    backgroundSelected: '<family>-solid-bg-enabled',
     ...same(COLOR_KEYS, '<family>-solid-fg'),
     ...same(BORDER_KEYS, '<family>-solid-border'),
   },
@@ -24,6 +27,7 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundHover: '<family>-subtle-bg-hover',
     backgroundPress: '<family>-subtle-bg-pressed',
     backgroundFocus: '<family>-subtle-bg-enabled',
+    backgroundSelected: '<family>-subtle-bg-selected',
     ...same(COLOR_KEYS, '<family>-fg'),
     ...same(BORDER_KEYS, 'transparent'),
   },
@@ -32,6 +36,7 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundHover: '<family>-hint-bg-hover',
     backgroundPress: '<family>-hint-bg-pressed',
     backgroundFocus: '<family>-hint-bg-enabled',
+    backgroundSelected: '<family>-hint-bg-selected',
     ...same(COLOR_KEYS, '<family>-fg-on-hint'),
     ...same(BORDER_KEYS, 'transparent'),
   },
@@ -40,6 +45,7 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundHover: '<family>-hint-bg-hover',
     backgroundPress: '<family>-hint-bg-pressed',
     backgroundFocus: '<family>-hint-bg-enabled',
+    backgroundSelected: '<family>-hint-bg-selected',
     ...same(COLOR_KEYS, '<family>-fg-on-hint'),
     ...same(BORDER_KEYS, '<tint>'),
   },

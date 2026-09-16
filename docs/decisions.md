@@ -114,3 +114,15 @@ the rule it serves. Code cites a decision by number, never by date.
     the generator, the check and the print keep one import. `docs/map.md` carries the same
     sections. A new component's rows go in its group; a rule shared by a group is edited
     once and every member follows.
+25. 2026-09-16. **The chips, the first components the kit does not ship.** Two, from the
+    design files: the interactive chip (a filter or an action) and the indicator chip (a
+    label that takes no press). Each is a styled frame with a name so the map's sub-themes
+    find it, and its text, in `packages/theme/src/parts/chip.tsx`. The interactive chip is
+    the kit's Button under a pill at the `xs` size, so press, hover, focus and the keyboard
+    are the kit's; it takes a tier like a Button and a `selected` prop that holds the
+    register's selected rung, which is what a filter chip keeps while it is on, so every
+    tier now declares `backgroundSelected`. The indicator chip takes a family and reads
+    the new `display` group: the subtle ground, the family's `fg`, the family's chalk as a
+    faint edge; it exists for the seven color families, since the pole families have no
+    chalk. A small size, `xxs`, joins the foundations for it. Both print as sets; the
+    interactive chip's family is the role collection's mode, the indicator's too.

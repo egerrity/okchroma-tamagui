@@ -8,7 +8,7 @@
 //      declares the same theme names and keys.
 //   B. App and screen code writes no color literal in a style prop, and every `$` reference
 //      is a theme key or a stock token name.
-//   C. A theme prop on a Button ends in a tier: solid, subtle, hint or outline.
+//   C. A theme prop on a Button or a Chip ends in a tier: solid, subtle, hint or outline.
 //   D. Nothing imports the theme builder.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -64,6 +64,7 @@ for (const brand of BRAND_NAMES) {
   for (const f of INTERACTION_FAMILIES) {
     if (!families.includes(f)) fail(`A: the register family ${f} is missing from dist/brands.ts`)
     for (const suffix of ['', '_solid', '_subtle', '_hint', '_outline']) if (!themes[`light_${f}${suffix}`]) fail(`A: ${brand}: light_${f}${suffix} is missing`)
+    if (f !== 'neutral-strong' && f !== 'neutral-inverse' && !themes[`light_${f}_IndicatorChip`]) fail(`A: ${brand}: light_${f}_IndicatorChip is missing`)
   }
   // every brand declares the same theme names and keys, so one brand's type stands for all
   const ks = Object.entries(themes).map(([n, keys]) => n + ':' + Object.keys(keys).sort().join(',')).sort().join('|')
@@ -84,7 +85,7 @@ const walk = (dir) => {
 }
 for (const d of ['apps', 'packages']) walk(join(root, d))
 const themeKeys = new Set(Object.keys(themes.light))
-const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xs|sm|md|lg|full|icon|content)$/
+const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xxs|xs|sm|md|lg|full|icon|content)$/
 
 for (const p of files) {
   const rel = relative(root, p)
@@ -98,9 +99,9 @@ for (const p of files) {
     const ref = `$${m[1]}`
     if (!tokenRef.test(ref) && !themeKeys.has(m[1])) fail(`B: ${rel} reads ${ref}, which no theme declares`)
   }
-  for (const m of code.matchAll(/<Button\b[^>]*?\btheme=(?:"([^"]*)"|\{`([^`]*)`\})/gs)) {
-    const value = m[1] ?? m[2]
-    if (!/_(solid|subtle|hint|outline)$|_\$\{tier\}$/.test(value)) fail(`C: ${rel} gives a Button theme="${value}", which names no tier`)
+  for (const m of code.matchAll(/<(Button|Chip)\b[^>]*?\btheme=(?:"([^"]*)"|\{`([^`]*)`\})/gs)) {
+    const value = m[2] ?? m[3]
+    if (!/_(solid|subtle|hint|outline)$|_\$\{tier\}$/.test(value)) fail(`C: ${rel} gives a ${m[1]} theme="${value}", which names no tier`)
   }
   if (/@tamagui\/theme-builder|\bcreateThemes\b/.test(code)) fail(`D: ${rel} reaches for the theme builder`)
 }

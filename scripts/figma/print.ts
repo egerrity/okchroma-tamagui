@@ -75,6 +75,19 @@ for (const row of INTERACTION_ROWS) {
     description: `The register's ${row} row; the mode picks the family.`,
   })
 }
+// the family's chalk-11, the faint edge a display chip draws; the pole families have none
+rows.push({
+  name: 'chalk-11',
+  css: null,
+  scopes: ['STROKE_COLOR'],
+  aliases: FAMILIES.map(f => {
+    if (f === 'neutral-strong' || f === 'neutral-inverse') return 'system/alpha/transparent'
+    const p = figmaPath(`${f}-chalk-11`)
+    if (!p) throw new Error(`no plugin path for ${f}-chalk-11`)
+    return p
+  }),
+  description: 'The family\u2019s chalk-11, the faint edge of a display chip; the pole families have none.',
+})
 rows.push({
   name: 'tint',
   css: null,
@@ -108,6 +121,18 @@ const buttonVariants = TIERS.flatMap(tier =>
     return { tier, state, ground, text, stroke, opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
   }),
 )
+// the interactive chip: Tier x State on the register, family by mode; the indicator chip: Size,
+// on the family's subtle ground with the chalk edge, family by mode of the theme collection
+const CHIP_STATES = ['enabled', 'hover', 'pressed', 'selected', 'disabled'] as const
+const chipVariants = (['solid', 'outline'] as const).flatMap(tier =>
+  CHIP_STATES.map(state => {
+    const s = state === 'disabled' ? 'enabled' : state
+    const rung = (st: string) => ladder.find(l => l.name === `hint/${st}`)!.value
+    const ground = tier === 'solid' ? { row: `solid-bg-${s === 'selected' ? 'enabled' : s}`, opacity: 1 } : { row: 'tint', opacity: rung(s) }
+    return { tier, state, ground, text: tier === 'solid' ? 'solid-fg' : 'fg-on-hint', stroke: tier === 'solid' ? 'solid-border' : 'tint', opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
+  }),
+)
+const indicatorSizes = [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }]
 const inputVariants = [
   { state: 'enabled', stroke: figmaPath('neutral-highlighter-26') },
   { state: 'focus', stroke: figmaPath('brand-highlighter-26') },
@@ -123,6 +148,8 @@ const paths = {
 
 const body = `
 const PAGE = 'okchroma-tamagui print'
+const CHIP = ${JSON.stringify(chipVariants)}
+const INDICATOR = ${JSON.stringify(indicatorSizes)}
 const FAMILIES = ${JSON.stringify(FAMILIES)}
 const ROWS = ${JSON.stringify(rows)}
 const LADDER = ${JSON.stringify(ladder)}
@@ -256,6 +283,51 @@ else {
   summary.created.push('Input set (' + comps.length + ' variants)')
 }
 
+// Chip: Tier x State, a pill, family by the role collection's mode; selected = the hint tier's selected rung
+if (existingSet('Chip')) summary.skipped.push('Chip set exists; left as is')
+else {
+  const comps = []
+  for (const v of CHIP) {
+    const c = figma.createComponent(); c.name = 'Tier=' + v.tier + ', State=' + v.state
+    const f = frame('chip', 80, 32, 8); f.cornerRadius = 10000; f.paddingTop = f.paddingBottom = 6
+    f.fills = []
+    f.strokes = [solid(roleVar[v.stroke])]
+    f.appendChild(text(v.state === 'selected' ? '\u2713 Label' : 'Label', 'Medium', roleVar[v.text])); f.children[f.children.length - 1].fontSize = 12
+    if (v.ground.opacity === 1) f.fills = [solid(roleVar[v.ground.row])]
+    else if (v.ground.opacity > 0) ground(f, roleVar[v.ground.row], v.ground.opacity)
+    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
+    c.fills = []; c.opacity = v.opacity
+    comps.push(c)
+  }
+  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
+  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  set.description = 'The interactive chip. Family is the role collection\\'s mode on the instance. In code: <Chip theme="<family>_solid|outline" selected>.'
+  summary.created.push('Chip set (' + comps.length + ' variants)')
+}
+
+// IndicatorChip: Size, on the family's subtle ground with the chalk edge; family by the role collection's mode
+if (existingSet('IndicatorChip')) summary.skipped.push('IndicatorChip set exists; left as is')
+else {
+  const comps = []
+  const subtle = roleVar['tint'], fg = roleVar['fg'], chalk = roleVar['chalk-11']
+  for (const v of INDICATOR) {
+    const c = figma.createComponent(); c.name = 'Size=' + v.size
+    const f = frame('indicator', 80, v.height, 8); f.cornerRadius = 10000; f.paddingTop = f.paddingBottom = v.size === 'sm' ? 2 : 6
+    f.fills = []
+    // the ground is the family's tint at the subtle resting rung; the edge and text ride the role rows
+    ground(f, subtle, LADDER.find(l => l.name === 'subtle/enabled').value)
+    f.strokes = [solid(chalk)]
+    f.appendChild(text('Label', 'Medium', fg)); f.children[f.children.length - 1].fontSize = 12
+    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
+    c.fills = []
+    comps.push(c)
+  }
+  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'
+  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  set.description = 'The indicator chip, a label that takes no press. Family is the role collection\\'s mode. In code: <IndicatorChip theme="<family>">.'
+  summary.created.push('IndicatorChip set (' + comps.length + ' variants)')
+}
+
 // Dialog: overlay and panel
 if (page.children.some(n => n.type === 'COMPONENT' && n.name === 'Dialog')) summary.skipped.push('Dialog exists; left as is')
 else {
@@ -282,4 +354,4 @@ const out = mcp
   ? `// GENERATED by scripts/figma/print.ts (MCP form). Paste into the Figma MCP server's script runner.\n${body}\nreturn summary\n`
   : `// GENERATED by scripts/figma/print.ts (plugin form). Save as scripts/figma/plugin/code.js and load that folder as a development plugin.\n(async () => {${body}\nfigma.closePlugin(JSON.stringify(summary))\n})()\n`
 process.stdout.write(out)
-process.stderr.write(`print: ${rows.length} role rows, ${ladder.length} ladder rows, ${buttonVariants.length} Button variants, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
+process.stderr.write(`print: ${rows.length} role rows, ${ladder.length} ladder rows, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorSizes.length} IndicatorChip, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)

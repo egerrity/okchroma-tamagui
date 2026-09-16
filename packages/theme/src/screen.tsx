@@ -3,7 +3,7 @@
 // nothing is tuned here.
 import { useRef, useState } from 'react'
 import { Card, Dialog, H2, Label, Paragraph, XStack, YStack, type TamaguiElement } from 'tamagui'
-import { Button, Input } from './parts.tsx'
+import { Button, Chip, IndicatorChip, Input } from './parts.tsx'
 
 export function Screen() {
   // The dialog is controlled and opened by a real Button, so keyboard activation is the
@@ -12,6 +12,9 @@ export function Screen() {
   // so the close handler returns focus to the button itself (decision 17).
   const [open, setOpen] = useState(false)
   const opener = useRef<TamaguiElement>(null)
+  // a single-select filter group of interactive chips
+  const [filter, setFilter] = useState<'all' | 'unread' | 'flagged'>('all')
+  const filters = [['all', 'All'], ['unread', 'Unread'], ['flagged', 'Flagged']] as const
   return (
     <YStack gap="$4" padding="$4" maxWidth={720} width="100%">
       <H2>Account</H2>
@@ -19,6 +22,22 @@ export function Screen() {
         Update the name on this account and the address that receives its mail. Changes
         apply the next time you sign in.
       </Paragraph>
+
+      <XStack gap="$2" flexWrap="wrap" alignItems="center">
+        {filters.map(([key, label]) => (
+          <Chip key={key} theme="brand_outline" selected={filter === key} aria-pressed={filter === key} onPress={() => setFilter(key)}>
+            {filter === key ? `\u2713 ${label}` : label}
+          </Chip>
+        ))}
+      </XStack>
+
+      <XStack gap="$2" flexWrap="wrap" alignItems="center">
+        <IndicatorChip theme="positive"><IndicatorChip.Text>Paid</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="warning"><IndicatorChip.Text>Pending</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="critical"><IndicatorChip.Text>Failed</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="brand"><IndicatorChip.Text>New</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="neutral" size="xxs"><IndicatorChip.Text>Draft</IndicatorChip.Text></IndicatorChip>
+      </XStack>
 
       <Card padding="$4" gap="$4" backgroundColor="$surface-mid" borderWidth={1} borderColor="$neutral-chalk-11" borderRadius="$md">
         <YStack gap="$2">

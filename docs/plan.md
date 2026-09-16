@@ -30,17 +30,18 @@ day one; WCAG; the non-color foundations owned as data (decision 23).
 .github/copilot-instructions.md      the rules and commands
 .github/instructions/theme.instructions.md   the theme package's rule
 AGENTS.md                            pointers to the external contracts
-docs/                                plan, map, exhibit, decisions, checklist, shots/
+docs/                                plan, map, exhibit, decisions, checklist, adding-a-component, shots/
 reference/kitchenui/                 copied reference, not maintained
 packages/theme/
   src/brands.ts                      one object per client: the elections (decision 22)
-  src/map/foundations.ts             the non-color tokens as data (decision 23)
-  src/map.ts                         docs/map.md as data
+  src/map/                           docs/map.md as data: containers, actions, inputs, display, foundations
+  src/map.ts                         re-exports the groups
   src/build.ts                       the map through the engine, once per brand
   dist/theme.<brand>.ts, dist/brands.ts   GENERATED; committed so a clone runs before regenerating
   src/config.ts                      createConfig(brand): the brand's themes on the owner's foundations
   src/stock.ts                       the baseline: @tamagui/config/v5 as is
-  src/parts.tsx                      the two one-line extensions (decision 15)
+  src/parts.tsx                      the two one-line extensions (decision 15) and the parts index
+  src/parts/chip.tsx                 the chips the kit does not ship (decision 25)
   src/screen.tsx, src/roster.tsx     the exhibit, shared by both apps
 apps/web                             Vite + @tamagui/vite-plugin, port 8350
 apps/native                          Expo, run in Expo Go, port 8081

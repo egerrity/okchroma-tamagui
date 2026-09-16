@@ -14,7 +14,10 @@ import {
   interactionTintName,
 } from 'okchroma'
 import { BRANDS, BRAND_NAMES, DEFAULT_BRAND, PROFILE, type Election } from './brands.ts'
-import { BASE, FAMILY_EDGE, TIERS, INPUT, DIALOG, type KeyMap } from './map.ts'
+import { BASE, FAMILY_EDGE, TIERS, INPUT, DIALOG, INDICATOR_CHIP, type KeyMap } from './map.ts'
+
+/** the seven color families: the pole families carry no chalk and no display chip */
+const COLOR_FAMILIES = INTERACTION_FAMILIES.filter(f => f !== 'neutral-strong' && f !== 'neutral-inverse')
 
 type Mode = 'light' | 'dark'
 const MODES: readonly Mode[] = ['light', 'dark']
@@ -73,6 +76,7 @@ export function sourcesFor(colorNames: string[]): Record<string, KeyMap> {
       sources[`${mode}_${family}`] = expand(FAMILY_EDGE, family)
       for (const tier of TIER_NAMES) sources[`${mode}_${family}_${tier}`] = expand(TIERS[tier], family)
     }
+    for (const family of COLOR_FAMILIES) sources[`${mode}_${family}_IndicatorChip`] = expand(INDICATOR_CHIP, family)
     for (const [name, map] of Object.entries({ ...INPUT, ...DIALOG })) sources[`${mode}_${name}`] = map
   }
   return sources

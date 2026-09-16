@@ -10,6 +10,7 @@ export const BASE: KeyMap = {
   backgroundHover: 'neutral-hint-bg-hover',
   backgroundPress: 'neutral-hint-bg-pressed',
   backgroundFocus: 'neutral-hint-bg-enabled',
+  backgroundSelected: 'neutral-hint-bg-selected',
   ...same(COLOR_KEYS, 'neutral-pen-70'),
   placeholderColor: 'neutral-pencil-47',
   ...same(BORDER_KEYS, 'neutral-chalk-11'),

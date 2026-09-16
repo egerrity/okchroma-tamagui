@@ -2,7 +2,7 @@
 // row by row. Each Button's text sits over its own ground, so the row reads as the demo's
 // token cards do.
 import { H4, Paragraph, XStack, YStack } from 'tamagui'
-import { Button } from './parts.tsx'
+import { Button, Chip, IndicatorChip } from './parts.tsx'
 import { families } from '../dist/brands.ts'
 
 const TIERS = ['solid', 'subtle', 'hint', 'outline'] as const
@@ -31,6 +31,15 @@ export function Roster() {
             <Button theme={`${family}_solid`} disabled>
               disabled
             </Button>
+          </XStack>
+          <XStack gap="$2" flexWrap="wrap" alignItems="center">
+            <Chip theme={`${family}_solid`}>solid</Chip>
+            <Chip theme={`${family}_outline`}>outline</Chip>
+            <Chip theme={`${family}_outline`} selected>{'\u2713 selected'}</Chip>
+            <Chip theme={`${family}_outline`} disabled>disabled</Chip>
+            {!family.startsWith('neutral-') && (
+              <IndicatorChip theme={family}><IndicatorChip.Text>indicator</IndicatorChip.Text></IndicatorChip>
+            )}
           </XStack>
         </YStack>
       ))}

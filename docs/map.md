@@ -25,6 +25,7 @@ Keys the kit reads on anything not given a sub-theme.
 | `backgroundHover` | `neutral-hint-bg-hover` | a state on a paper is the highlighter at a rung |
 | `backgroundPress` | `neutral-hint-bg-pressed` | the next rung |
 | `backgroundFocus` | `neutral-hint-bg-enabled` | transparent; focus is the ring, not a ground |
+| `backgroundSelected` | `neutral-hint-bg-selected` | the ground a control keeps while it is on |
 | `color` | `neutral-pen-70` | body text |
 | `colorHover`, `colorPress`, `colorFocus` | `neutral-pen-70` | text does not move on the base |
 | `placeholderColor` | `neutral-pencil-47` | the lowest text stop |
@@ -82,6 +83,7 @@ one keyword the map may hold: it names the absence of a paint, not a color.
 | `backgroundHover` | `<family>-solid-bg-hover` | `<family>-subtle-bg-hover` | `<family>-hint-bg-hover` | `<family>-hint-bg-hover` |
 | `backgroundPress` | `<family>-solid-bg-pressed` | `<family>-subtle-bg-pressed` | `<family>-hint-bg-pressed` | `<family>-hint-bg-pressed` |
 | `backgroundFocus` | `<family>-solid-bg-enabled` | `<family>-subtle-bg-enabled` | `<family>-hint-bg-enabled` | `<family>-hint-bg-enabled` |
+| `backgroundSelected` | `<family>-solid-bg-enabled` | `<family>-subtle-bg-selected` | `<family>-hint-bg-selected` | `<family>-hint-bg-selected` |
 | `color`, `colorHover`, `colorPress`, `colorFocus` | `<family>-solid-fg` | `<family>-fg` | `<family>-fg-on-hint` | `<family>-fg-on-hint` |
 | `borderColor` and its hover, press, focus | `<family>-solid-border` | `transparent` | `transparent` | the family's tint |
 | `outlineColor` | inherited | inherited | inherited | inherited |
@@ -111,6 +113,24 @@ rows differ.
 A form control's resting edge is a highlighter because it is a required border; the focus
 edge is the brand's highlighter; invalid moves the edge rows to critical and nothing else.
 
+## Display
+
+Things that show a state and take no press. `packages/theme/src/map/display.ts`.
+
+### Indicator chip, `<family>_IndicatorChip`
+
+For the seven color families; the pole families have no chalk. `<IndicatorChip
+theme="positive">` picks the family's rows through the component's name.
+
+| Tamagui key | okchroma name |
+|---|---|
+| `background` | `<family>-subtle-bg-enabled` |
+| `color` | `<family>-fg` |
+| `borderColor` | `<family>-chalk-11` |
+
+The interactive chip has no rows of its own: it is a Button under a pill and reads the
+tiers, with `selected` on the register's selected rung (decision 25).
+
 ## Shape rules a theme cannot hold
 
 The stamp edge always renders (the kit gives every Button a border width of 1 but rests
@@ -128,14 +148,14 @@ resolves in every group at once.
 | Group | Keys | Values |
 |---|---|---|
 | Type ladder | `1` to `10` | 12, 14, 15, 18, 20, 26, 32, 40, 48, 72 |
-| Type, control keys | `xs sm md lg true` | 12, 14, 15, 18, 15 |
+| Type, control keys | `xxs xs sm md lg true` | 12, 12, 14, 15, 18, 15 |
 | Leading | display (20 and up), text | 1.25, 1.5 |
 | Roles | body, heading, button | body 400 (500 at 12), heading 500 (600 from 40), button 500 |
 | Space | `0 1 2 3 4 6 10 12 16` | 0, 4, 8, 12, 16, 24, 40, 48, 64 |
-| Space, control padding | `xs sm md lg true` | 8, 12, 16, 24, 16 |
-| Size, control height | `xs sm md lg true` | 32, 40, 48, 56, 48 |
+| Space, control padding | `xxs xs sm md lg true` | 8, 8, 12, 16, 24, 16 |
+| Size, control height | `xxs xs sm md lg true` | 24, 32, 40, 48, 56, 48 |
 | Size, other | `icon content` | 24, 720 |
-| Radius | `0 1 2 3`, `xs sm md lg true`, `full` | 0, 4, 8, 12; 8 everywhere; 10000 |
+| Radius | `0 1 2 3`, `xxs xs sm md lg true`, `full` | 0, 4, 8, 12; 8 everywhere; 10000 |
 
 The kit's headings read the numeric ladder from `$10` down to `$5`; a Paragraph reads
 `$true`. A change here is a change to every component at once; a component whose shape
