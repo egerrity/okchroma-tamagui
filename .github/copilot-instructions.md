@@ -15,7 +15,9 @@ component is wrapped. Read `docs/plan.md` first, then `docs/map.md`.
    `packages/theme/src/brands.ts`. A theme value
    that is not in the map is added to the map first, as an engine name, then generated.
    Tamagui's theme builder (`createThemes`, `@tamagui/theme-builder`) is never used: it
-   derives colors, and the engine already solved them.
+   derives colors, and the engine already solved them. The non-color tokens have the same
+   rule: `packages/theme/src/map/foundations.ts` is their only source, and `shared.ts`
+   builds Tamagui's tokens and fonts from it.
 3. One grammar for the `theme` prop. `<family>` sets edges only; `<family>_solid`,
    `<family>_subtle`, `<family>_hint` and `<family>_outline` set grounds, text and edge. A
    Button always takes a tier and never the kit's `variant="outlined"`; outline is a tier.

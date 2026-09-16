@@ -84,7 +84,7 @@ const walk = (dir) => {
 }
 for (const d of ['apps', 'packages']) walk(join(root, d))
 const themeKeys = new Set(Object.keys(themes.light))
-const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading)$/
+const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xs|sm|md|lg|full|icon|content)$/
 
 for (const p of files) {
   const rel = relative(root, p)

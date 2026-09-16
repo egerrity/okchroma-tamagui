@@ -13,14 +13,14 @@ export function Screen() {
   const [open, setOpen] = useState(false)
   const opener = useRef<TamaguiElement>(null)
   return (
-    <YStack gap="$4" padding="$4" maxWidth={560} width="100%">
+    <YStack gap="$4" padding="$4" maxWidth={720} width="100%">
       <H2>Account</H2>
       <Paragraph>
         Update the name on this account and the address that receives its mail. Changes
         apply the next time you sign in.
       </Paragraph>
 
-      <Card padding="$4" gap="$4" backgroundColor="$surface-mid" borderWidth={1} borderColor="$neutral-chalk-11" borderRadius="$4">
+      <Card padding="$4" gap="$4" backgroundColor="$surface-mid" borderWidth={1} borderColor="$neutral-chalk-11" borderRadius="$md">
         <YStack gap="$2">
           <Label htmlFor="name">Name</Label>
           <Input id="name" placeholder="Your name" />
@@ -28,7 +28,7 @@ export function Screen() {
         <YStack gap="$2">
           <Label htmlFor="email">Email</Label>
           <Input id="email" theme="critical" defaultValue="not an address" aria-invalid />
-          <Paragraph theme="critical_hint" size="$3">Enter an email address.</Paragraph>
+          <Paragraph theme="critical_hint" size="$sm">Enter an email address.</Paragraph>
         </YStack>
       </Card>
 
@@ -59,7 +59,7 @@ export function Screen() {
               opener.current?.focus?.()
             }}
           >
-            <Dialog.Title size="$7">Delete this account?</Dialog.Title>
+            <Dialog.Title size="$5">Delete this account?</Dialog.Title>
             <Dialog.Description>
               The account and its mail are removed. This cannot be undone.
             </Dialog.Description>

@@ -22,7 +22,7 @@ DOM without react-native-web; Material UI on web only if the accessibility check
 inside a Tamagui component; the claim is the mechanics; its own repository; the map is
 hand-written and agreed before code; theme only, no wrappers; Button, Input, Dialog; the
 Figma print from generated Plugin API code; kitchenUI as copied reference; five rules on
-day one; WCAG; non-color tokens unowned.
+day one; WCAG; the non-color foundations owned as data (decision 23).
 
 ## The repository
 
@@ -34,10 +34,11 @@ docs/                                plan, map, exhibit, decisions, checklist, s
 reference/kitchenui/                 copied reference, not maintained
 packages/theme/
   src/brands.ts                      one object per client: the elections (decision 22)
+  src/map/foundations.ts             the non-color tokens as data (decision 23)
   src/map.ts                         docs/map.md as data
   src/build.ts                       the map through the engine, once per brand
   dist/theme.<brand>.ts, dist/brands.ts   GENERATED; committed so a clone runs before regenerating
-  src/config.ts                      createConfig(brand): the brand's themes, stock v5 tokens
+  src/config.ts                      createConfig(brand): the brand's themes on the owner's foundations
   src/stock.ts                       the baseline: @tamagui/config/v5 as is
   src/parts.tsx                      the two one-line extensions (decision 15)
   src/screen.tsx, src/roster.tsx     the exhibit, shared by both apps

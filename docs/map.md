@@ -103,3 +103,25 @@ its color on transparent), disabled is the engine's `disabled-opacity` on the co
 and the placeholder is colored only through a prop. The config's `defaultProps` do not
 reach past the kit's variant styles; `packages/theme/src/parts.tsx` holds the two one-line
 `styled()` extensions that do (decision 15). No other component is extended.
+
+## Foundations (non-color)
+
+`packages/theme/src/map/foundations.ts`, the only source of the non-color tokens
+(decision 23). Values in px unless noted. The named keys are what a control's `size` prop
+resolves in every group at once.
+
+| Group | Keys | Values |
+|---|---|---|
+| Type ladder | `1` to `10` | 12, 14, 15, 18, 20, 26, 32, 40, 48, 72 |
+| Type, control keys | `xs sm md lg true` | 12, 14, 15, 18, 15 |
+| Leading | display (20 and up), text | 1.25, 1.5 |
+| Roles | body, heading, button | body 400 (500 at 12), heading 500 (600 from 40), button 500 |
+| Space | `0 1 2 3 4 6 10 12 16` | 0, 4, 8, 12, 16, 24, 40, 48, 64 |
+| Space, control padding | `xs sm md lg true` | 8, 12, 16, 24, 16 |
+| Size, control height | `xs sm md lg true` | 32, 40, 48, 56, 48 |
+| Size, other | `icon content` | 24, 720 |
+| Radius | `0 1 2 3`, `xs sm md lg true`, `full` | 0, 4, 8, 12; 8 everywhere; 10000 |
+
+The kit's headings read the numeric ladder from `$10` down to `$5`; a Paragraph reads
+`$true`. A change here is a change to every component at once; a component whose shape
+the documentation draws differently from the kit's default gets a part, never a token.

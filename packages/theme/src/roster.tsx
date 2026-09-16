@@ -18,10 +18,10 @@ export function Roster() {
           key={family}
           gap="$2"
           padding={family === 'neutral-inverse' ? '$3' : 0}
-          borderRadius="$4"
+          borderRadius="$md"
           backgroundColor={family === 'neutral-inverse' ? '$neutral-strong-solid-bg-enabled' : 'transparent'}
         >
-          <Paragraph size="$2" theme={family === 'neutral-inverse' ? 'neutral-inverse_hint' : undefined}>{family}</Paragraph>
+          <Paragraph size="$xs" theme={family === 'neutral-inverse' ? 'neutral-inverse_hint' : undefined}>{family}</Paragraph>
           <XStack gap="$2" flexWrap="wrap">
             {TIERS.map(tier => (
               <Button key={tier} theme={`${family}_${tier}`}>

@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { ScrollView, useColorScheme } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
+import { useFonts, NotoSans_400Regular, NotoSans_500Medium, NotoSans_600SemiBold } from '@expo-google-fonts/noto-sans'
 import { TamaguiProvider, Theme, XStack, YStack } from 'tamagui'
 import { Button } from '@poc/theme/parts'
 import { Screen } from '@poc/theme/screen'
@@ -17,9 +18,12 @@ const config =
     : (() => { const m = require('@poc/theme/config'); const b = process.env.EXPO_PUBLIC_BRAND; return m.createConfig(m.isBrand(b) ? b : undefined) })()
 
 export function App() {
+  // the faces the fonts' `face` map names; until they load the system font stands in
+  const [fontsLoaded] = useFonts({ NotoSans_400Regular, NotoSans_500Medium, NotoSans_600SemiBold })
   const system = useColorScheme()
   const [mode, setMode] = useState<'light' | 'dark'>(system === 'dark' ? 'dark' : 'light')
   const [page, setPage] = useState<'screen' | 'roster'>('screen')
+  if (!fontsLoaded) return null
   return (
     <SafeAreaProvider>
       <TamaguiProvider config={config} defaultTheme={mode}>
@@ -28,10 +32,10 @@ export function App() {
             <SafeAreaView style={{ flex: 1 }}>
               <StatusBar style={mode === 'dark' ? 'light' : 'dark'} />
               <XStack gap="$2" padding="$4" paddingBottom={0}>
-                <Button size="$3" theme="neutral_subtle" onPress={() => setMode(mode === 'dark' ? 'light' : 'dark')}>
+                <Button size="$sm" theme="neutral_subtle" onPress={() => setMode(mode === 'dark' ? 'light' : 'dark')}>
                   {mode === 'dark' ? 'Light' : 'Dark'}
                 </Button>
-                <Button size="$3" theme="neutral_hint" onPress={() => setPage(page === 'screen' ? 'roster' : 'screen')}>
+                <Button size="$sm" theme="neutral_hint" onPress={() => setPage(page === 'screen' ? 'roster' : 'screen')}>
                   {page === 'screen' ? 'Roster' : 'Screen'}
                 </Button>
               </XStack>

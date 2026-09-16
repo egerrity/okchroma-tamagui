@@ -96,3 +96,14 @@ the rule it serves. Code cites a decision by number, never by date.
     same screen renders as that client. The check holds every brand against its own
     elections and holds all brands to one theme and key set, so one brand's type stands for
     all. The Figma print is unchanged: it binds by name.
+23. 2026-09-16. **The foundations are owned; decision 12 is retired.**
+    `packages/theme/src/map/foundations.ts` carries the owner's type ladder and roles, the
+    spacers, the control heights and the radii as data, read from the design
+    documentation; `shared.ts` builds Tamagui's tokens and fonts from it in place of the
+    stock set. The kit resolves a control's height, padding, corner and text from one key
+    across size, space, radius and font, so the named keys `xs sm md lg` live in all four
+    beside the numeric ladder. Three font roles: body (400), heading (500, 600 from 40 up),
+    button (500). The family is one constant, Noto Sans here in place of the product's own
+    face, loaded from Google Fonts on web and Expo's font package on native. The kit's
+    baseline (`stock.ts`) keeps its own tokens and fonts, so the toggle still compares
+    against Tamagui as shipped.
