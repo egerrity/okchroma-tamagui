@@ -3,7 +3,8 @@
 okchroma's names onto Tamagui's theme keys. This table is the only source of theme values.
 `packages/theme/src/map.ts` is the same table as data; `packages/theme/src/build.ts`
 resolves every name per mode through the engine's `themeTokens` and `interactionTokens`
-and writes `packages/theme/dist/theme.ts`. The same key holds the same name in light and
+and writes one `packages/theme/dist/theme.<brand>.ts` per brand in `brands.ts`. The same key
+holds the same name in light and
 in dark. A Tamagui key the kit turns out to read that is not here gets a row here first,
 as an engine name, never a literal in code.
 

@@ -88,3 +88,11 @@ the rule it serves. Code cites a decision by number, never by date.
     bound to the family's tint at full strength and the rung as the layer's opacity; the
     solid tier fills the frame directly. Verified in Light and Dark, and family-by-mode on
     instances.
+22. 2026-09-16. **Brands, not a seed.** `packages/theme/src/brands.ts` holds one object per
+    client with the elections the extended plugin's panel offers: the brand hex, an exact
+    second family or a derived one, the neutral level, the stamp escape, a link seed, the
+    stamp edge. The generator emits every brand's hundred themes to its own file and an
+    index; a build picks one brand (`?brand=` on web, `EXPO_PUBLIC_BRAND` on native) and the
+    same screen renders as that client. The check holds every brand against its own
+    elections and holds all brands to one theme and key set, so one brand's type stands for
+    all. The Figma print is unchanged: it binds by name.

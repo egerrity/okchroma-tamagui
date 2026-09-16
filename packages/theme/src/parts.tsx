@@ -1,7 +1,7 @@
 // The two exceptions under decision 6, each one line of style and no prop of its own
 // (decision 15). Every other component is Tamagui's, used as it comes.
 import { Button as KitButton, Input as KitInput, styled, withStaticProperties } from 'tamagui'
-import { disabledOpacity } from '../dist/theme.ts'
+import { disabledOpacity } from '../dist/brands.ts'
 
 // The kit rests a Button's border on transparent and reads the theme only on hover. The
 // stamp's edge is always rendered, so the resting border reads the theme too; and disabled

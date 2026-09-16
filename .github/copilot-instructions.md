@@ -11,7 +11,8 @@ component is wrapped. Read `docs/plan.md` first, then `docs/map.md`.
    runs it first.
 2. `docs/map.md` is the only source of theme values. `packages/theme/src/map.ts` is that
    table as data and `packages/theme/src/build.ts` projects it through okchroma's
-   `themeTokens` and `interactionTokens` into `packages/theme/dist/theme.ts`. A theme value
+   `themeTokens` and `interactionTokens` into `packages/theme/dist/`, once per brand in
+   `packages/theme/src/brands.ts`. A theme value
    that is not in the map is added to the map first, as an engine name, then generated.
    Tamagui's theme builder (`createThemes`, `@tamagui/theme-builder`) is never used: it
    derives colors, and the engine already solved them.
@@ -39,7 +40,7 @@ this repository.
 ## Commands
 
 ```
-npm run tokens      # regenerate packages/theme/dist/theme.ts from the map and the seed
+npm run tokens      # regenerate packages/theme/dist/ from the map and every brand in brands.ts
 npm run check       # the color law; exit 1 lists every violation
 npm run typecheck   # every workspace
 npm run web         # Vite, http://localhost:8350

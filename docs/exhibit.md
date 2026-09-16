@@ -35,7 +35,7 @@ is a question for the engine, recorded, not patched here.
 
 Screenshots in `docs/shots/`, named `<surface>-<platform>-<mode>.png`.
 
-**2026-09-15, seed `#E93D82`.** Web from Vite on 8350 through a headless browser at 640
+**2026-09-15, seed `#E93D82` (the brand named `poc` since decision 22).** Web from Vite on 8350 through a headless browser at 640
 wide: `screen-web-light`, `screen-web-dark`, `roster-web-light`, `roster-web-dark`, and
 the baseline `screen-web-stock-light`, `screen-web-stock-dark`. Native from Expo Go on an
 iPhone 17 Pro simulator: `screen-native-light`, `screen-native-dark`,

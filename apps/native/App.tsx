@@ -1,6 +1,7 @@
-// The native app: the exhibit under the theme, light and dark on a toggle. The config is
-// the map's unless EXPO_PUBLIC_THEME_SOURCE=stock, the baseline; only the chosen module
-// runs, since createTamagui registers globally.
+// The native app: the exhibit under the theme, light and dark on a toggle. The brand is
+// EXPO_PUBLIC_BRAND, else the first in brands.ts; the config is the map's unless
+// EXPO_PUBLIC_THEME_SOURCE=stock, the baseline. Only the chosen module runs, since
+// createTamagui registers globally.
 import { useState } from 'react'
 import { ScrollView, useColorScheme } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
@@ -10,8 +11,10 @@ import { Button } from '@poc/theme/parts'
 import { Screen } from '@poc/theme/screen'
 import { Roster } from '@poc/theme/roster'
 
-const { config } =
-  process.env.EXPO_PUBLIC_THEME_SOURCE === 'stock' ? require('@poc/theme/stock') : require('@poc/theme/config')
+const config =
+  process.env.EXPO_PUBLIC_THEME_SOURCE === 'stock'
+    ? require('@poc/theme/stock').config
+    : (() => { const m = require('@poc/theme/config'); const b = process.env.EXPO_PUBLIC_BRAND; return m.createConfig(m.isBrand(b) ? b : undefined) })()
 
 export function App() {
   const system = useColorScheme()

@@ -4,6 +4,6 @@ module.exports = function (api) {
   api.cache(true)
   return {
     presets: ['babel-preset-expo'],
-    plugins: [['transform-inline-environment-variables', { include: ['TAMAGUI_TARGET', 'EXPO_PUBLIC_THEME_SOURCE'] }]],
+    plugins: [['transform-inline-environment-variables', { include: ['TAMAGUI_TARGET', 'EXPO_PUBLIC_THEME_SOURCE', 'EXPO_PUBLIC_BRAND'] }]],
   }
 }

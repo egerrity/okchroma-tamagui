@@ -28,18 +28,24 @@ import {
   type InteractionRow,
 } from 'okchroma'
 import { figmaPath } from './lib.ts'
-import { SEED, BRAND, PROFILE } from '../../packages/theme/src/seed.ts'
+import { BRANDS, DEFAULT_BRAND, PROFILE } from '../../packages/theme/src/brands.ts'
 
 const mcp = process.argv.includes('--mcp')
 
-const theme = resolveTheme({ primaryHex: SEED, name: BRAND, deriveSecondary: true, contrastProfile: PROFILE })
+// The print binds by name, so any brand's emission gives the same script; the default's is read.
+const e = BRANDS[DEFAULT_BRAND]
+const theme = resolveTheme({ primaryHex: e.primaryHex, name: DEFAULT_BRAND, secondaryHex: e.secondaryHex ?? null, secondaryStyle: e.secondaryStyle, deriveSecondary: !e.secondaryHex, contrastProfile: PROFILE })
 const tokens = interactionTokens(
   themeTokens({
-    slug: BRAND,
-    displayName: 'PoC',
+    slug: DEFAULT_BRAND,
+    displayName: DEFAULT_BRAND,
     brand: theme.themed,
     secondary: theme.secondary?.scale ?? null,
-    secondaryStyle: theme.secondary?.style,
+    secondaryStyle: theme.secondary?.style ?? e.secondaryStyle,
+    neutralLevel: e.neutralLevel,
+    ctaEscape: e.ctaEscape,
+    linkHex: e.linkHex ?? null,
+    ctaBorder: e.ctaBorder,
     contrastProfile: PROFILE,
   }),
 )

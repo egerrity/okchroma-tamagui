@@ -6,12 +6,12 @@
   "description": "okchroma's map projected onto Tamagui themes; the config both apps mount.",
   "exports": {
     "./config": "./src/config.ts",
-    "./theme": "./dist/theme.ts",
-    "./seed": "./src/seed.ts",
     "./screen": "./src/screen.tsx",
     "./roster": "./src/roster.tsx",
     "./stock": "./src/stock.ts",
-    "./parts": "./src/parts.tsx"
+    "./parts": "./src/parts.tsx",
+    "./brands": "./src/brands.ts",
+    "./dist/brands": "./dist/brands.ts"
   },
   "scripts": {
     "build": "node --experimental-strip-types src/build.ts",

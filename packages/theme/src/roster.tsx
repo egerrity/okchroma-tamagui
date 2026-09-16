@@ -3,7 +3,7 @@
 // token cards do.
 import { H4, Paragraph, XStack, YStack } from 'tamagui'
 import { Button } from './parts.tsx'
-import { families } from '../dist/theme.ts'
+import { families } from '../dist/brands.ts'
 
 const TIERS = ['solid', 'subtle', 'hint', 'outline'] as const
 

@@ -33,11 +33,11 @@ AGENTS.md                            pointers to the external contracts
 docs/                                plan, map, exhibit, decisions, checklist, shots/
 reference/kitchenui/                 copied reference, not maintained
 packages/theme/
-  src/seed.ts                        SEED, BRAND, PROFILE: one place
+  src/brands.ts                      one object per client: the elections (decision 22)
   src/map.ts                         docs/map.md as data
-  src/build.ts                       the map through the engine -> dist/theme.ts
-  dist/theme.ts                      GENERATED; committed so a clone runs before regenerating
-  src/config.ts                      createTamagui: the generated themes, stock v5 tokens
+  src/build.ts                       the map through the engine, once per brand
+  dist/theme.<brand>.ts, dist/brands.ts   GENERATED; committed so a clone runs before regenerating
+  src/config.ts                      createConfig(brand): the brand's themes, stock v5 tokens
   src/stock.ts                       the baseline: @tamagui/config/v5 as is
   src/parts.tsx                      the two one-line extensions (decision 15)
   src/screen.tsx, src/roster.tsx     the exhibit, shared by both apps
@@ -50,19 +50,22 @@ scripts/figma/plugin/                the development-plugin wrapper for that cod
 figma/*.snippet.tsx                  Code Connect examples, pasted in the Dev Mode UI
 ```
 
-The stock baseline is one flag, `THEME_SOURCE=stock` (`VITE_THEME_SOURCE` on web,
-`EXPO_PUBLIC_THEME_SOURCE` on native), which makes the app import `stock.ts` instead of
-`config.ts`; only one of the two ever runs, since `createTamagui` registers globally. On
-web the same switch is `?theme=stock` in the address, and `?mode=light` or `?mode=dark`
-sets the opening mode, so a screenshot needs no click. Same screen, same code.
+A build is one brand: `VITE_BRAND` on web, `EXPO_PUBLIC_BRAND` on native, or `?brand=` in
+a web address, defaulting to the first entry in `brands.ts`; the web toolbar reloads into
+any brand. The stock baseline is one flag, `THEME_SOURCE=stock` (`VITE_THEME_SOURCE` on
+web, `EXPO_PUBLIC_THEME_SOURCE` on native), which makes the app import `stock.ts` instead
+of `config.ts`; only one config ever runs, since `createTamagui` registers globally. On
+web the same switch is `?theme=stock`, and `?mode=light` or `?mode=dark` sets the opening
+mode, so a screenshot needs no click. Same screen, same code, any client.
 
 ## The check
 
 `npm run check`, run first by `npm run build`:
 
-- A. `dist/theme.ts` is a projection of the map: every value resolves to the engine name
-  the transcription records; light and dark declare the same key set; every register
-  family has its edge theme and its three tier themes.
+- A. Every `dist/theme.<brand>.ts` is a projection of the map under that brand's
+  elections: every value resolves to the engine name the transcription records; light and
+  dark declare the same key set; every register family has its edge theme and its four
+  tier themes; every brand declares the same theme names and keys.
 - B. App and screen code: no hex, `rgb`, `hsl`, named-color or `color-mix` literal in a
   style prop; every `$` reference is a key the theme declares; no opacity on a color.
 - C. A `theme=` on a Button ends in `_solid`, `_subtle` or `_hint`.
@@ -109,7 +112,7 @@ UI is not installed and not planned.
 - Web, both modes, the stock toggle: every color on screen read back from the DOM as a
   theme variable; the checklist passed.
 - Native in Expo Go, both modes: screenshots of the screen and the roster.
-- `dist/theme.ts` holds no value that is not the engine's for the recorded name.
+- No `dist/theme.<brand>.ts` holds a value that is not the engine's for the recorded name.
 
 ## Traps
 
