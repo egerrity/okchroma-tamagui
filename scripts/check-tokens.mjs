@@ -88,7 +88,8 @@ const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xs|sm|md|lg|full|icon
 
 for (const p of files) {
   const rel = relative(root, p)
-  if (rel.endsWith('map.ts') || rel.endsWith('build.ts') || rel.endsWith('brands.ts')) continue
+  // the map and the generator are data and its projection, not styled code
+  if (rel.endsWith('map.ts') || rel.includes('/map/') || rel.endsWith('build.ts') || rel.endsWith('brands.ts')) continue
   const src = readFileSync(p, 'utf8')
   const code = src.replace(/\/\/.*$/gm, '').replace(/\/\*[\s\S]*?\*\//g, '')
   for (const m of code.matchAll(/(["'`])(#[0-9a-fA-F]{3,8}|rgba?\(|hsla?\(|color-mix\(|oklch\()/g))

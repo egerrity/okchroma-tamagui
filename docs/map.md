@@ -1,14 +1,21 @@
 # The map
 
-okchroma's names onto Tamagui's theme keys. This table is the only source of theme values.
-`packages/theme/src/map.ts` is the same table as data; `packages/theme/src/build.ts`
+okchroma's names onto Tamagui's theme keys, grouped the way the design files group things:
+containers, actions, inputs, then the non-color foundations (decision 24). This table is
+the only source of theme values. `packages/theme/src/map/` is the same table as data, one
+file per group; `packages/theme/src/build.ts`
 resolves every name per mode through the engine's `themeTokens` and `interactionTokens`
 and writes one `packages/theme/dist/theme.<brand>.ts` per brand in `brands.ts`. The same key
 holds the same name in light and
 in dark. A Tamagui key the kit turns out to read that is not here gets a row here first,
 as an engine name, never a literal in code.
 
-## Base theme, `light` and `dark`
+## Containers
+
+The page and its planes, body text, decorative edges, the focus ring, the shadow, and
+the dialog's parts. `packages/theme/src/map/containers.ts`.
+
+### Base theme, `light` and `dark`
 
 Keys the kit reads on anything not given a sub-theme.
 
@@ -29,7 +36,22 @@ The base theme also carries every color-valued engine name as a key under its ow
 (`brand-stamp-fill`, `surface-high`, `scrim`, `neutral-pen-58`, and the rest), so screen
 code can read `$surface-high` and the check can hold that every `$` reference exists.
 
-## Family edge themes, `<family>`
+### Dialog themes, `DialogOverlay` and `DialogContent`
+
+The kit's overlay and content are named parts that read `$background`, `$borderColor`
+and `$shadowColor`, so each gets a component sub-theme (decision 13).
+
+| Tamagui key | `DialogOverlay` | `DialogContent` |
+|---|---|---|
+| `background` | `scrim` | `surface-high` |
+| `borderColor` | inherited | `neutral-chalk-11` |
+| `shadowColor` | inherited | `shadow-08` |
+
+## Actions
+
+The family edge themes and the four tiers a control takes. `packages/theme/src/map/actions.ts`.
+
+### Family edge themes, `<family>`
 
 For the nine register families: `neutral`, `brand`, `brand-alt`, `critical`, `warning`,
 `positive`, `info`, `neutral-strong`, `neutral-inverse`. Edges only; everything else
@@ -44,7 +66,7 @@ The focus ring is not a family matter: `outlineColor` stays the base's `neutral-
 on every tier, one ring everywhere. The Input themes are the exception, where the ring
 mirrors the focused edge.
 
-## Tier themes, `<family>_solid`, `<family>_subtle`, `<family>_hint`, `<family>_outline`
+### Tier themes, `<family>_solid`, `<family>_subtle`, `<family>_hint`, `<family>_outline`
 
 One per family per tier. A Button always takes a tier. The rows are the interaction
 register's, per family. Every Button reads `borderColor` at rest (the config's
@@ -68,7 +90,11 @@ Hint and outline text read `fg-on-hint` because the register names it so; if the
 shows it under the bar on a hover rung, that is a finding for the engine's catalog, not a
 change here.
 
-## Input themes, `Input` and `critical_Input`
+## Inputs
+
+The field's edges, resting and focused, and the invalid family. `packages/theme/src/map/inputs.ts`.
+
+### Input themes, `Input` and `critical_Input`
 
 Tamagui looks up `<mode>_<theme>_Input` for a component named Input, so a plain `<Input>`
 reads the first and `<Input theme="critical">` reads the second. Same keys; only the edge
@@ -84,17 +110,6 @@ rows differ.
 
 A form control's resting edge is a highlighter because it is a required border; the focus
 edge is the brand's highlighter; invalid moves the edge rows to critical and nothing else.
-
-## Dialog themes, `DialogOverlay` and `DialogContent`
-
-The kit's overlay and content are named parts that read `$background`, `$borderColor`
-and `$shadowColor`, so each gets a component sub-theme (decision 13).
-
-| Tamagui key | `DialogOverlay` | `DialogContent` |
-|---|---|---|
-| `background` | `scrim` | `surface-high` |
-| `borderColor` | inherited | `neutral-chalk-11` |
-| `shadowColor` | inherited | `shadow-08` |
 
 ## Shape rules a theme cannot hold
 

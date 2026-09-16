@@ -107,3 +107,10 @@ the rule it serves. Code cites a decision by number, never by date.
     face, loaded from Google Fonts on web and Expo's font package on native. The kit's
     baseline (`stock.ts`) keeps its own tokens and fonts, so the toggle still compares
     against Tamagui as shipped.
+24. 2026-09-16. **The map is grouped the way the design files group.** `src/map/` holds
+    `containers.ts` (the page, its planes, text, edges, the focus ring, the shadow, the
+    dialog's parts), `actions.ts` (the family edges and the four tiers), `inputs.ts` (the
+    field's edges) and `foundations.ts` (the non-color tokens); `map.ts` re-exports them so
+    the generator, the check and the print keep one import. `docs/map.md` carries the same
+    sections. A new component's rows go in its group; a rule shared by a group is edited
+    once and every member follows.
