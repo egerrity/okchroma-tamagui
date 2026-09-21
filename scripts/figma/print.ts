@@ -279,6 +279,9 @@ const frame = (name, w, h, padding) => {
   return f
 }
 const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' && n.name === name)
+// the sets stack down the page in the order they are printed, below whatever is there
+let nextY = page.children.reduce((y, n) => Math.max(y, n.y + n.height), 0) + (page.children.length ? 80 : 0)
+const place = node => { node.x = 0; node.y = nextY; nextY += node.height + 80 }
 
 // Button: Kind x State (primary, outline, ghost, toggle shown on), family by the role collection's mode on the instance
 if (existingSet('Button')) summary.skipped.push('Button set exists; left as is')
@@ -297,7 +300,7 @@ else {
     c.fills = []; c.opacity = v.opacity
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Button'
+  const set = figma.combineAsVariants(comps, page); set.name = 'Button'; place(set)
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
   set.description = 'Family is the role collection\\'s mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.'
   summary.created.push('Button set (' + comps.length + ' variants)')
@@ -318,7 +321,7 @@ else {
     c.fills = []
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Input'
+  const set = figma.combineAsVariants(comps, page); set.name = 'Input'; place(set)
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
   set.description = 'In code: <Input> and <Input theme="critical"> for the invalid state; focus is the platform\\'s.'
   summary.created.push('Input set (' + comps.length + ' variants)')
@@ -339,7 +342,7 @@ else {
     c.fills = []; c.opacity = v.opacity
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
+  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'; place(set)
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
   set.description = 'The button chip: off on the neutral stamp, on on the family\\'s stamp, the family by the role collection\\'s mode. In code: <Chip theme="<family>_chip" selected>.'
   summary.created.push('Chip set (' + comps.length + ' variants)')
@@ -360,7 +363,7 @@ else {
     c.fills = []
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'
+  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'; place(set)
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
   set.description = 'The indicator chip, a label that takes no press. Family is the role collection\\'s mode. In code: <IndicatorChip theme="<family>_indicator-<level>">.'
   summary.created.push('IndicatorChip set (' + comps.length + ' variants)')
@@ -382,8 +385,23 @@ else {
   c.appendChild(panel); panel.x = 120; panel.y = 120
   paragraph(panel, 'Delete this account?', 'Semi Bold', ink)
   paragraph(panel, 'The account and its mail are removed. This cannot be undone.', 'Regular', ink)
-  c.description = 'Overlay on the scrim, panel on surface-high with the chalk-11 edge; in code, Tamagui\\'s Dialog under the DialogOverlay and DialogContent themes.'
+  // the actions: instances of the printed primary Button, the family picked by the role mode
+  const buttonSet = existingSet('Button')
+  const primary = buttonSet && buttonSet.children.find(n => n.name === 'Kind=primary, State=enabled')
+  if (primary) {
+    const actions = figma.createFrame(); actions.name = 'actions'; actions.layoutMode = 'HORIZONTAL'; actions.itemSpacing = 12
+    actions.primaryAxisAlignItems = 'MAX'; actions.counterAxisAlignItems = 'CENTER'; actions.fills = []
+    actions.primaryAxisSizingMode = 'FIXED'; actions.counterAxisSizingMode = 'AUTO'
+    panel.appendChild(actions); actions.layoutSizingHorizontal = 'FILL'
+    for (const [family, label] of [['neutral', 'Keep it'], ['critical', 'Delete']]) {
+      const inst = primary.createInstance(); actions.appendChild(inst)
+      inst.setExplicitVariableModeForCollection(role, modeId[family])
+      const t = inst.findOne(n => n.type === 'TEXT'); if (t) t.characters = label
+    }
+  } else summary.missing.push('Button set for the dialog\\'s actions')
+  c.description = 'Overlay on the scrim, panel on surface-high with the chalk-11 edge, the actions instances of the primary Button on the neutral and critical modes; in code, Tamagui\\'s Dialog under the DialogOverlay and DialogContent themes.'
   summary.created.push('Dialog component')
+  place(c)
 }
 summary.missing = [...new Set(summary.missing)]
 `
