@@ -96,7 +96,8 @@ const frame = (name, w, h, padding) => {
   return f
 }
 const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' && n.name === name)
-// the sets stack down the page in the order they are printed, below whatever is there
+// the sets stack down the page in the order they are printed, below whatever is there; a
+// set is placed after its layout is set, since its height is only known then
 let nextY = page.children.reduce((y, n) => Math.max(y, n.y + n.height), 0) + (page.children.length ? 80 : 0)
 const place = node => { node.x = 0; node.y = nextY; nextY += node.height + 80 }
 
@@ -117,8 +118,9 @@ else {
     c.fills = []; c.opacity = v.opacity
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Button'; place(set)
+  const set = figma.combineAsVariants(comps, page); set.name = 'Button'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  place(set)
   set.description = 'Family is the role collection\'s mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.'
   summary.created.push('Button set (' + comps.length + ' variants)')
 }
@@ -138,8 +140,9 @@ else {
     c.fills = []
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Input'; place(set)
+  const set = figma.combineAsVariants(comps, page); set.name = 'Input'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  place(set)
   set.description = 'In code: <Input> and <Input theme="critical"> for the invalid state; focus is the platform\'s.'
   summary.created.push('Input set (' + comps.length + ' variants)')
 }
@@ -159,8 +162,9 @@ else {
     c.fills = []; c.opacity = v.opacity
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'; place(set)
+  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  place(set)
   set.description = 'The button chip: off on the neutral stamp, on on the family\'s stamp, the family by the role collection\'s mode. In code: <Chip theme="<family>_chip" selected>.'
   summary.created.push('Chip set (' + comps.length + ' variants)')
 }
@@ -180,8 +184,9 @@ else {
     c.fills = []
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'; place(set)
+  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  place(set)
   set.description = 'The indicator chip, a label that takes no press. Family is the role collection\'s mode. In code: <IndicatorChip theme="<family>_indicator-<level>">.'
   summary.created.push('IndicatorChip set (' + comps.length + ' variants)')
 }
