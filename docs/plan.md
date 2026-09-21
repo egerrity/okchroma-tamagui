@@ -39,6 +39,7 @@ packages/theme/
   src/build.ts                       the map through the engine, once per brand
   dist/theme.<brand>.ts, dist/brands.ts   GENERATED; committed so a clone runs before regenerating
   src/config.ts                      createConfig(brand): the brand's themes on the owner's foundations
+  src/compiler.ts                    the default export Tamagui's compiler bundles; nothing at runtime imports it
   src/stock.ts                       the baseline: @tamagui/config/v5 as is
   src/parts.tsx                      the two one-line extensions (decision 15) and the parts index
   src/parts/chip.tsx                 the chips the kit does not ship (decision 25)
@@ -141,6 +142,12 @@ UI is not installed and not planned.
   content's `onCloseAutoFocus`, since the kit only focuses a `Dialog.Trigger` (decision 17).
 - The kit's Input passes `placeholderTextColor` through to the DOM and React warns about
   it in development. The warning is the kit's; the color is right.
+- Tamagui's compiler bundles the module the Vite plugin's `config` option names and reads
+  its default export. `config.ts` has none by design, since only one config may run, so
+  the plugin is pointed at `compiler.ts`, a default export nothing at runtime imports, and
+  extraction is off. Pointed at `config.ts` it fails on every file with "Cannot convert
+  undefined or null to object" and "Must provide components"; the app still renders,
+  because the theme is applied at runtime, but the log is all noise.
 - Comments say why the code is as it is, in the present tense, with no date.
 
 ## Not in scope
