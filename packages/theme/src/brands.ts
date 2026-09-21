@@ -29,8 +29,6 @@ export const BRANDS: Record<string, Election> = {
   mint: { primaryHex: '#B3FFEE' },
   // sits on the critical signal
   red: { primaryHex: '#C72011' },
-  // the same red with the neutral escape and a blue link seed
-  'red-escape': { primaryHex: '#C72011', ctaEscape: true, linkHex: '#0000EE' },
   // an orange on the warning signal, with an exact pale-yellow second family
   amber: { primaryHex: '#F78F1F', secondaryHex: '#F5CA5D', secondaryStyle: 'exact' },
   // sits on the positive signal

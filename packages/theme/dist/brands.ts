@@ -4,12 +4,11 @@ import * as brand_poc from './theme.poc.ts'
 import * as brand_bright_blue from './theme.bright-blue.ts'
 import * as brand_mint from './theme.mint.ts'
 import * as brand_red from './theme.red.ts'
-import * as brand_red_escape from './theme.red-escape.ts'
 import * as brand_amber from './theme.amber.ts'
 import * as brand_green from './theme.green.ts'
 import * as brand_violet from './theme.violet.ts'
-export const byBrand = { "eggplant": brand_eggplant, "poc": brand_poc, "bright-blue": brand_bright_blue, "mint": brand_mint, "red": brand_red, "red-escape": brand_red_escape, "amber": brand_amber, "green": brand_green, "violet": brand_violet } as const
-export const brandNames = ["eggplant","poc","bright-blue","mint","red","red-escape","amber","green","violet"] as const
+export const byBrand = { "eggplant": brand_eggplant, "poc": brand_poc, "bright-blue": brand_bright_blue, "mint": brand_mint, "red": brand_red, "amber": brand_amber, "green": brand_green, "violet": brand_violet } as const
+export const brandNames = ["eggplant","poc","bright-blue","mint","red","amber","green","violet"] as const
 export const defaultBrand = "eggplant" as const
 export const families = ["neutral","brand","brand-alt","critical","warning","positive","info","neutral-strong","neutral-inverse"] as const
 export const disabledOpacity = 0.38
