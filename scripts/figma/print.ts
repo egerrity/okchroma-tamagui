@@ -27,9 +27,20 @@ import {
   resolveTheme,
   themeTokens,
   interactionTokens,
+  OPACITY_RUNGS,
   type InteractionRow,
 } from 'okchroma'
+import { readFileSync } from 'node:fs'
 import { figmaPath } from './lib.ts'
+
+// Every path the print binds is held against the extended plugin's own output, dumped for
+// one brand into plugin-paths.json; a path the plugin does not write stops the generation.
+const KNOWN = new Set<string>(JSON.parse(readFileSync(new URL('./plugin-paths.json', import.meta.url), 'utf8')))
+const plugin = (engineName: string): string => {
+  const p = figmaPath(engineName)
+  if (!p || !KNOWN.has(p)) throw new Error(`the extended plugin writes no variable for ${engineName}${p ? ` (${p})` : ''}`)
+  return p
+}
 import { BRANDS, DEFAULT_BRAND, PROFILE } from '../../packages/theme/src/brands.ts'
 
 const mcp = process.argv.includes('--mcp')
@@ -59,9 +70,7 @@ const aliasTarget = (family: string, row: InteractionRow): string => {
   const pair = interactionRows(family, 'light', tokens).find(([r]) => r === row)
   const m = pair && /^var\(--([^)]+)\)$/.exec(pair[1])
   if (!m) throw new Error(`${family}-${row} is not an alias row`)
-  const path = figmaPath(m[1])
-  if (!path) throw new Error(`no plugin path for ${m[1]}`)
-  return path
+  return plugin(m[1])
 }
 
 type Row = { name: string; css: string | null; scopes: string[]; aliases: string[]; description: string }
@@ -92,10 +101,8 @@ for (const r of STOP_ROWS) {
     css: null,
     scopes: r.scopes,
     aliases: FAMILIES.map(f => {
-      if (f === 'neutral-strong' || f === 'neutral-inverse') return 'system/alpha/transparent'
-      const p = figmaPath(`${f}-${r.name}`)
-      if (!p) throw new Error(`no plugin path for ${f}-${r.name}`)
-      return p
+      if (f === 'neutral-strong' || f === 'neutral-inverse') return plugin('alpha-transparent')
+      return plugin(`${f}-${r.name}`)
     }),
     description: r.description + ' The pole families have none.',
   })
@@ -105,9 +112,7 @@ rows.push({
   css: null,
   scopes: ['FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR'],
   aliases: FAMILIES.map(f => {
-    const p = figmaPath(interactionTintName(f))
-    if (!p) throw new Error(`no plugin path for the tint of ${f}`)
-    return p
+    return plugin(interactionTintName(f))
   }),
   description: 'The family’s highlighter-26, or the pole for the pole families: the layer every subtle, hint and outline ground is made of, at a rung from the ladder.',
 })
@@ -147,9 +152,9 @@ const chipVariants = [false, true].flatMap(on =>
     state,
     ground: on
       ? { row: state === 'hover' ? 'solid-bg-hover' : state === 'pressed' ? 'solid-bg-pressed' : 'solid-bg-enabled' }
-      : { path: figmaPath(state === 'hover' ? 'neutral-stamp-fill-hover' : state === 'pressed' ? 'neutral-stamp-fill-pressed' : 'neutral-stamp-fill') },
-    text: on ? { row: 'solid-fg' } : { path: figmaPath('neutral-stamp-on') },
-    stroke: on ? { row: 'solid-border' } : { path: figmaPath('neutral-stamp-edge') },
+      : { path: plugin(state === 'hover' ? 'neutral-stamp-fill-hover' : state === 'pressed' ? 'neutral-stamp-fill-pressed' : 'neutral-stamp-fill') },
+    text: on ? { row: 'solid-fg' } : { path: plugin('neutral-stamp-on') },
+    stroke: on ? { row: 'solid-border' } : { path: plugin('neutral-stamp-edge') },
     opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1,
   })),
 )
@@ -164,17 +169,19 @@ const indicatorVariants = LEVEL_NAMES.flatMap(level =>
   [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }].map(s => ({ level, ...s, ground: LEVELS[level].fill, text: LEVELS[level].text, stroke: LEVELS[level].stroke })),
 )
 const inputVariants = [
-  { state: 'enabled', stroke: figmaPath('neutral-highlighter-26') },
-  { state: 'focus', stroke: figmaPath('brand-highlighter-26') },
-  { state: 'invalid', stroke: figmaPath('critical-highlighter-26') },
+  { state: 'enabled', stroke: plugin('neutral-highlighter-26') },
+  { state: 'focus', stroke: plugin('brand-highlighter-26') },
+  { state: 'invalid', stroke: plugin('critical-highlighter-26') },
 ]
 const paths = {
-  surfaceHigh: figmaPath('surface-high'),
-  scrim: figmaPath('scrim'),
-  chalk: figmaPath('neutral-chalk-11'),
-  text: figmaPath('neutral-pen-70'),
-  placeholder: figmaPath('neutral-pencil-47'),
+  surfaceHigh: plugin('surface-high'),
+  // the scrim is composed: the absolute black at the ladder's top rung, as the layer's opacity (decision 21)
+  black: plugin('abs-black'),
+  chalk: plugin('neutral-chalk-11'),
+  text: plugin('neutral-pen-70'),
+  placeholder: plugin('neutral-pencil-47'),
 }
+const scrimOpacity = OPACITY_RUNGS[64]
 
 const body = `
 const PAGE = 'okchroma-tamagui print'
@@ -186,6 +193,7 @@ const LADDER = ${JSON.stringify(ladder)}
 const BUTTON = ${JSON.stringify(buttonVariants)}
 const INPUT = ${JSON.stringify(inputVariants)}
 const PATHS = ${JSON.stringify(paths)}
+const SCRIM_OPACITY = ${scrimOpacity}
 
 const collections = await figma.variables.getLocalVariableCollectionsAsync()
 const vars = await figma.variables.getLocalVariablesAsync()
@@ -363,7 +371,7 @@ if (page.children.some(n => n.type === 'COMPONENT' && n.name === 'Dialog')) summ
 else {
   const c = figma.createComponent(); c.name = 'Dialog'; c.resize(600, 400)
   const overlay = figma.createRectangle(); overlay.name = 'overlay'; overlay.resize(600, 400)
-  const scrim = themeVar(PATHS.scrim); if (scrim) overlay.fills = [solid(scrim)]
+  const black = themeVar(PATHS.black); if (black) overlay.fills = [solid(black)]; overlay.opacity = SCRIM_OPACITY
   c.appendChild(overlay)
   const panel = frame('panel', 360, 160, 24); panel.layoutMode = 'VERTICAL'; panel.primaryAxisAlignItems = 'MIN'; panel.counterAxisAlignItems = 'MIN'
   panel.primaryAxisSizingMode = 'AUTO'; panel.counterAxisSizingMode = 'FIXED'; panel.resize(360, 160); panel.cornerRadius = 12; panel.itemSpacing = 12

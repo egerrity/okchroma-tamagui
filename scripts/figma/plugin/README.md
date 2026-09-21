@@ -19,3 +19,8 @@ In the Figma desktop app: Plugins, Development, Import plugin from manifest, and
 `scripts/figma/plugin/manifest.json`. Run it in the file where okchroma's extended plugin
 has written the variables. The plugin closes with a summary of what it created, updated,
 skipped and could not find.
+
+`plugin-paths.json`, one directory up, is a dump of every variable path the extended plugin
+writes for one brand, its payload builders' output plus the four surface planes. The
+generator holds every path it binds against that list and stops on one the plugin does not
+write, so a renamed or zoned path is caught here and never as a run that binds nothing.
