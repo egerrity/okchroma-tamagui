@@ -64,7 +64,10 @@ for (const brand of BRAND_NAMES) {
   for (const f of INTERACTION_FAMILIES) {
     if (!families.includes(f)) fail(`A: the register family ${f} is missing from dist/brands.ts`)
     for (const suffix of ['', '_solid', '_subtle', '_hint', '_outline']) if (!themes[`light_${f}${suffix}`]) fail(`A: ${brand}: light_${f}${suffix} is missing`)
-    if (f !== 'neutral-strong' && f !== 'neutral-inverse' && !themes[`light_${f}_IndicatorChip`]) fail(`A: ${brand}: light_${f}_IndicatorChip is missing`)
+    if (f !== 'neutral-strong' && f !== 'neutral-inverse') {
+      if (!themes[`light_${f}_chip`]) fail(`A: ${brand}: light_${f}_chip is missing`)
+      for (const level of ['stamp', 'strong', 'default']) if (!themes[`light_${f}_indicator-${level}`]) fail(`A: ${brand}: light_${f}_indicator-${level} is missing`)
+    }
   }
   // every brand declares the same theme names and keys, so one brand's type stands for all
   const ks = Object.entries(themes).map(([n, keys]) => n + ':' + Object.keys(keys).sort().join(',')).sort().join('|')
@@ -85,7 +88,7 @@ const walk = (dir) => {
 }
 for (const d of ['apps', 'packages']) walk(join(root, d))
 const themeKeys = new Set(Object.keys(themes.light))
-const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xxs|xs|sm|md|lg|full|icon|content)$/
+const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xxs|xs|sm|md|lg|chip|full|icon|content)$/
 
 for (const p of files) {
   const rel = relative(root, p)
@@ -101,7 +104,8 @@ for (const p of files) {
   }
   for (const m of code.matchAll(/<(Button|Chip)\b[^>]*?\btheme=(?:"([^"]*)"|\{`([^`]*)`\})/gs)) {
     const value = m[2] ?? m[3]
-    if (!/_(solid|subtle|hint|outline)$|_\$\{tier\}$/.test(value)) fail(`C: ${rel} gives a ${m[1]} theme="${value}", which names no tier`)
+    const named = m[1] === 'Chip' ? /_chip$/ : /_(solid|subtle|hint|outline)$|_\$\{tier\}$/
+    if (!named.test(value)) fail(`C: ${rel} gives a ${m[1]} theme="${value}", which names no ${m[1] === 'Chip' ? 'family chip' : 'tier'}`)
   }
   if (/@tamagui\/theme-builder|\bcreateThemes\b/.test(code)) fail(`D: ${rel} reaches for the theme builder`)
 }

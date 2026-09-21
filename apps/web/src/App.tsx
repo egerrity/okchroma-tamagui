@@ -1,7 +1,8 @@
 // The exhibit under the theme: light and dark on one toggle, the stock baseline behind a
 // reload with `?theme=stock`, the roster on `#roster`, the brand behind a reload with
-// `?brand=<name>`. `?mode=dark` or `?mode=light` sets the opening mode so a shot can be
-// taken without a click.
+// `?brand=<name>`. The mode is top-level state: `?mode=dark` or `?mode=light` sets it (so a
+// shot needs no click), the toggle writes it back to the address and to the browser's
+// storage, and the brand and baseline reloads carry the address, so the mode survives them.
 import { useState } from 'react'
 import { TamaguiProvider, Theme, XStack, YStack, type TamaguiInternalConfig } from 'tamagui'
 import { Button } from '@poc/theme/parts'
@@ -10,11 +11,19 @@ import { Roster } from '@poc/theme/roster'
 import { brandNames, defaultBrand } from '@poc/theme/dist/brands'
 
 const prefersDark = () => matchMedia('(prefers-color-scheme: dark)').matches
+type Mode = 'light' | 'dark'
+const isMode = (m: unknown): m is Mode => m === 'dark' || m === 'light'
+const storedMode = (): Mode | null => { try { const m = localStorage.getItem('mode'); return isMode(m) ? m : null } catch { return null } }
+const rememberMode = (m: Mode) => {
+  try { localStorage.setItem('mode', m) } catch {}
+  const u = new URL(location.href); u.searchParams.set('mode', m); history.replaceState(null, '', u.toString())
+}
 const reloadWith = (edit: (p: URLSearchParams) => void) => { const u = new URL(location.href); edit(u.searchParams); location.href = u.toString() }
 
 export function App({ config, stock, brand }: { config: TamaguiInternalConfig; stock: boolean; brand?: string }) {
   const asked = new URL(location.href).searchParams.get('mode')
-  const [mode, setMode] = useState<'light' | 'dark'>(asked === 'dark' || asked === 'light' ? asked : prefersDark() ? 'dark' : 'light')
+  const [mode, setModeState] = useState<Mode>(isMode(asked) ? asked : storedMode() ?? (prefersDark() ? 'dark' : 'light'))
+  const setMode = (m: Mode) => { setModeState(m); rememberMode(m) }
   const [page, setPage] = useState<'screen' | 'roster'>(location.hash === '#roster' ? 'roster' : 'screen')
   const current = brand ?? defaultBrand
   return (

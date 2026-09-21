@@ -16,7 +16,7 @@ Decide which group the component belongs to the way the design files group it:
   this case.
 - If it reads something of its own, it gets a component sub-theme in its group's file: a
   small object of Tamagui keys to engine names, expanded per family by the generator
-  when it says `<family>`. The indicator chip is this case (`map/display.ts`). Add the
+  when it says `<family>`. The tag chip's levels are this case (`map/display.ts`). Add the
   same rows to `docs/map.md` under the group.
 - If it needs a key no theme declares yet, add the key to the base theme in
   `map/containers.ts` too, so the check can see it (the chip's `backgroundSelected`).
@@ -29,7 +29,7 @@ A file under `packages/theme/src/parts/`, exported from `parts.tsx`. A part is a
 frame with a `name` (that is how the sub-theme finds it) and, if it has text, a styled
 text. Build it on the closest kit component when one exists, so press, hover, focus and
 the keyboard are the kit's: the interactive chip is the kit's Button under a pill. Shape
-comes from the foundations' keys (`$xs`, `$full`), color only from theme keys
+comes from the foundations' keys (`$xs`, `$chip`), color only from theme keys
 (`$background`, `$color`, `$borderColor`). A prop that changes color maps to a theme key
 (`selected` to `$backgroundSelected`); it never names a color.
 

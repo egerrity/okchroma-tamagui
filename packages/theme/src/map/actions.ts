@@ -4,8 +4,9 @@
 // The kit reads `borderColor` on every Button at rest (parts.tsx), so only the tiers that
 // draw an edge name one: the stamp's gated edge and the outline's tint. `transparent` is
 // the one keyword the map may hold: it names the absence of a paint. `backgroundSelected`
-// is the register's selected rung, the ground a filter chip keeps while it is on; the
-// solid tier is already filled, so it stays on its resting stamp.
+// is the ground a toggle keeps while it is on: a toggle is hint off and subtle on, so the
+// hint and outline tiers take the subtle tier's resting ground; the subtle tier takes its
+// own selected rung; the solid tier is already filled, so it stays on its resting stamp.
 import { type KeyMap, same, BORDER_KEYS, COLOR_KEYS } from './keys.ts'
 
 /** `<family>`: edges only. The focus ring stays the base's neutral highlighter everywhere. */
@@ -36,7 +37,7 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundHover: '<family>-hint-bg-hover',
     backgroundPress: '<family>-hint-bg-pressed',
     backgroundFocus: '<family>-hint-bg-enabled',
-    backgroundSelected: '<family>-hint-bg-selected',
+    backgroundSelected: '<family>-subtle-bg-enabled',
     ...same(COLOR_KEYS, '<family>-fg-on-hint'),
     ...same(BORDER_KEYS, 'transparent'),
   },
@@ -45,7 +46,7 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundHover: '<family>-hint-bg-hover',
     backgroundPress: '<family>-hint-bg-pressed',
     backgroundFocus: '<family>-hint-bg-enabled',
-    backgroundSelected: '<family>-hint-bg-selected',
+    backgroundSelected: '<family>-subtle-bg-enabled',
     ...same(COLOR_KEYS, '<family>-fg-on-hint'),
     ...same(BORDER_KEYS, '<tint>'),
   },

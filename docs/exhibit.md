@@ -12,11 +12,15 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
 ## Surface
 
 - **The screen.** One account form: a heading, body text, a card on `surface-mid`, an Input
-  with an invalid state beside a valid one, a row of Buttons (`brand_solid`,
-  `brand-alt_solid`, `neutral_subtle`, `brand_hint` outlined), and a Dialog trigger. The
+  with an invalid state beside a valid one, a row of Buttons, the solid hierarchy by
+  family (`brand_solid` Save, `brand-alt_solid` Preview, `neutral_solid` Go back,
+  `critical_solid` Cancel) then an outline on hint (`brand_outline`) and a disabled solid,
+  and a Dialog trigger. The
   same file renders on web and on native.
-- **The roster page.** Every register family by tier, the Button in each state where the
-  platform can show it, `Aa` text over each ground. For judging the map row by row.
+- **The roster page.** Per family, three things apart: the register's interaction levels
+  as grounds through their rungs with `Aa` on each, the button hierarchy as buttons with
+  the same four disabled, the button chip off and on, and the tag chip's levels. For judging
+  the map row by row.
 - Web: Vite on port 8350. Native: Expo Go on an iPhone simulator.
 
 ## Ground and grouping

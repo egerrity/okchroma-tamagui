@@ -115,21 +115,40 @@ edge is the brand's highlighter; invalid moves the edge rows to critical and not
 
 ## Display
 
-Things that show a state and take no press. `packages/theme/src/map/display.ts`.
+The chips, on their levels. `packages/theme/src/map/display.ts`.
 
-### Indicator chip, `<family>_IndicatorChip`
+### The button chip, `<family>_chip`
 
-For the seven color families; the pole families have no chalk. `<IndicatorChip
-theme="positive">` picks the family's rows through the component's name.
+For the seven color families; the pole families have no chalk. The button chip has no
+hierarchy. Off, it wears the neutral tag's default look; on, it is the family's stamp, with
+the stamp's own hover and pressed fills. Opacity is for interaction; a real fill has no
+interaction rung in the register, so the off chip rests on its fill (decision 28).
+`<Chip theme="brand_chip" selected>`.
 
 | Tamagui key | okchroma name |
 |---|---|
-| `background` | `<family>-subtle-bg-enabled` |
-| `color` | `<family>-fg` |
-| `borderColor` | `<family>-chalk-11` |
+| `background`, `backgroundHover`, `backgroundPress`, `backgroundFocus` | `neutral-paper-3` |
+| `color`, `colorHover`, `colorPress`, `colorFocus` | `neutral-pencil-47` |
+| `borderColor`, `borderColorHover`, `borderColorPress`, `borderColorFocus` | `neutral-chalk-15` |
+| `backgroundSelected` | `<family>-stamp-fill` |
+| `backgroundSelectedHover` | `<family>-stamp-fill-hover` |
+| `backgroundSelectedPress` | `<family>-stamp-fill-pressed` |
+| `colorSelected` | `<family>-stamp-on` |
+| `borderColorSelected` | `<family>-stamp-edge` |
 
-The interactive chip has no rows of its own: it is a Button under a pill and reads the
-tiers, with `selected` on the register's selected rung (decision 25).
+### The tag chip, `<family>_indicator-stamp`, `<family>_indicator-strong`, `<family>_indicator-default`
+
+The tag chip's level is its hierarchy, and hierarchy is real color: the family's scale
+stops, the same stop in both modes. `<IndicatorChip theme="positive_indicator-strong">`.
+
+| Tamagui key | `_indicator-stamp` | `_indicator-strong` | `_indicator-default` |
+|---|---|---|---|
+| `background` | `<family>-stamp-fill` | `<family>-chalk-11` | `<family>-paper-3` |
+| `color` | `<family>-stamp-on` | `<family>-pen-58` | `<family>-pencil-47` |
+| `borderColor` | `<family>-stamp-edge` | `<family>-chalk-20` | `<family>-chalk-15` |
+
+Both chips are shapes over their rows: the button chip is a Button under the chip corner
+(decision 25), the tag chip a stack that takes no press.
 
 ## Shape rules a theme cannot hold
 
@@ -148,14 +167,14 @@ resolves in every group at once.
 | Group | Keys | Values |
 |---|---|---|
 | Type ladder | `1` to `10` | 12, 14, 15, 18, 20, 26, 32, 40, 48, 72 |
-| Type, control keys | `xxs xs sm md lg true` | 12, 12, 14, 15, 18, 15 |
+| Type, control keys | `xxs xs sm md lg true` | 14, 14, 14, 15, 18, 15 |
 | Leading | display (20 and up), text | 1.25, 1.5 |
 | Roles | body, heading, button | body 400 (500 at 12), heading 500 (600 from 40), button 500 |
 | Space | `0 1 2 3 4 6 10 12 16` | 0, 4, 8, 12, 16, 24, 40, 48, 64 |
-| Space, control padding | `xxs xs sm md lg true` | 8, 8, 12, 16, 24, 16 |
+| Space, control padding | `xxs xs sm md lg true` | 8, 12, 12, 16, 24, 16 |
 | Size, control height | `xxs xs sm md lg true` | 24, 32, 40, 48, 56, 48 |
 | Size, other | `icon content` | 24, 720 |
-| Radius | `0 1 2 3`, `xxs xs sm md lg true`, `full` | 0, 4, 8, 12; 8 everywhere; 10000 |
+| Radius | `0 1 2 3`, `xxs xs sm md lg true`, `chip`, `full` | 0, 4, 8, 12; 8 everywhere; 6; 10000 |
 
 The kit's headings read the numeric ladder from `$10` down to `$5`; a Paragraph reads
 `$true`. A change here is a change to every component at once; a component whose shape

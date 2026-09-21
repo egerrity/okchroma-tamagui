@@ -56,3 +56,12 @@ A hand run on another machine the same day reported Space, the tab trap and Esca
 failing; the order of presses there compounded (a Space pressed while the dialog was
 already open moves focus), so it is re-run in this order from a fresh reload: Tab to the
 button, Space, Escape, Enter, Tab three times, Escape. Browser name recorded with it.
+
+**2026-09-21, dark, Vite dev server, DOM read.** Disabled buttons were interactive: the
+kit's `disabled` variant sets pointer events to none, but that rule never reaches the web
+element in this setup, and the web hover style is CSS, which the kit's runtime gate does
+not stop. The Button and Chip parts now set pointer events to none themselves when
+disabled, so a disabled control takes no hover, press or click. Still open, and inside the
+kit: a disabled button keeps a tab stop, because the core marks the element `disabled`
+only when it recognizes the element as a button, which it does not here. The checklist's
+"not focusable by Tab" line fails on that point; it is announced as disabled.

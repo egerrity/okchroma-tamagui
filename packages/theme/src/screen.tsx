@@ -12,8 +12,9 @@ export function Screen() {
   // so the close handler returns focus to the button itself (decision 17).
   const [open, setOpen] = useState(false)
   const opener = useRef<TamaguiElement>(null)
-  // a single-select filter group of interactive chips
-  const [filter, setFilter] = useState<'all' | 'unread' | 'flagged'>('all')
+  // a multi-filter group of button chips: each one toggles on its own
+  const [active, setActive] = useState<Set<string>>(() => new Set(['all']))
+  const toggle = (key: string) => setActive(f => { const n = new Set(f); n.has(key) ? n.delete(key) : n.add(key); return n })
   const filters = [['all', 'All'], ['unread', 'Unread'], ['flagged', 'Flagged']] as const
   return (
     <YStack gap="$4" padding="$4" maxWidth={720} width="100%">
@@ -25,27 +26,27 @@ export function Screen() {
 
       <XStack gap="$2" flexWrap="wrap" alignItems="center">
         {filters.map(([key, label]) => (
-          <Chip key={key} theme="brand_outline" selected={filter === key} aria-pressed={filter === key} onPress={() => setFilter(key)}>
-            {filter === key ? `\u2713 ${label}` : label}
+          <Chip key={key} theme="brand_chip" selected={active.has(key)} aria-pressed={active.has(key)} onPress={() => toggle(key)}>
+            {active.has(key) ? `\u2713 ${label}` : label}
           </Chip>
         ))}
       </XStack>
 
       <XStack gap="$2" flexWrap="wrap" alignItems="center">
-        <IndicatorChip theme="positive"><IndicatorChip.Text>Paid</IndicatorChip.Text></IndicatorChip>
-        <IndicatorChip theme="warning"><IndicatorChip.Text>Pending</IndicatorChip.Text></IndicatorChip>
-        <IndicatorChip theme="critical"><IndicatorChip.Text>Failed</IndicatorChip.Text></IndicatorChip>
-        <IndicatorChip theme="brand"><IndicatorChip.Text>New</IndicatorChip.Text></IndicatorChip>
-        <IndicatorChip theme="neutral" size="xxs"><IndicatorChip.Text>Draft</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="positive_indicator-strong"><IndicatorChip.Text>Paid</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="warning_indicator-strong"><IndicatorChip.Text>Pending</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="critical_indicator-strong"><IndicatorChip.Text>Failed</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="brand_indicator-strong" size="xxs"><IndicatorChip.Text>New</IndicatorChip.Text></IndicatorChip>
+        <IndicatorChip theme="neutral_indicator-default" size="xxs"><IndicatorChip.Text>Draft</IndicatorChip.Text></IndicatorChip>
       </XStack>
 
       <Card padding="$4" gap="$4" backgroundColor="$surface-mid" borderWidth={1} borderColor="$neutral-chalk-11" borderRadius="$md">
         <YStack gap="$2">
-          <Label htmlFor="name">Name</Label>
+          <Label htmlFor="name" size="$sm" lineHeight="$sm">Name</Label>
           <Input id="name" placeholder="Your name" />
         </YStack>
         <YStack gap="$2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" size="$sm" lineHeight="$sm">Email</Label>
           <Input id="email" theme="critical" defaultValue="not an address" aria-invalid />
           <Paragraph theme="critical_hint" size="$sm">Enter an email address.</Paragraph>
         </YStack>
@@ -54,7 +55,8 @@ export function Screen() {
       <XStack gap="$3" flexWrap="wrap">
         <Button theme="brand_solid">Save</Button>
         <Button theme="brand-alt_solid">Preview</Button>
-        <Button theme="neutral_subtle">Cancel</Button>
+        <Button theme="neutral_solid">Go back</Button>
+        <Button theme="critical_solid">Cancel</Button>
         <Button theme="brand_outline">Learn more</Button>
         <Button theme="brand_solid" disabled>Saved</Button>
       </XStack>
@@ -84,7 +86,7 @@ export function Screen() {
             </Dialog.Description>
             <XStack gap="$3" justifyContent="flex-end">
               <Dialog.Close asChild>
-                <Button theme="neutral_subtle">Keep it</Button>
+                <Button theme="neutral_solid">Keep it</Button>
               </Dialog.Close>
               <Dialog.Close asChild>
                 <Button theme="critical_solid">Delete</Button>

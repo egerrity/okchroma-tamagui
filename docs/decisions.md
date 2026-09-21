@@ -126,3 +126,42 @@ the rule it serves. Code cites a decision by number, never by date.
     faint edge; it exists for the seven color families, since the pole families have no
     chalk. A small size, `xxs`, joins the foundations for it. Both print as sets; the
     interactive chip's family is the role collection's mode, the indicator's too.
+26. 2026-09-21. **Tiers, hierarchy and shape are three things; the shapes come from the
+    core library.** The register's tiers are solid, subtle and hint. A button's hierarchy is
+    its family inside the solid tier: brand, then brand-alt, then neutral, with critical for
+    a destructive action. Outline and ghost are shapes on the hint tier, so decision 14's
+    word "tier" for the outline is superseded; the map's `outline` entry stays as it is,
+    the hint rows plus an edge. Subtle is the ground a selected or active thing keeps,
+    never a resting button; the screen's neutral buttons moved to `neutral_solid`. The
+    shapes were read from the core library's button and chips pages: a button is a pill, a
+    chip is a soft square on its own corner (`chip` in the radius ladder), and a control at
+    the `xs` height carries the same label size and padding as the chips, which the type
+    and space ladders now hold at that key. The chips' two heights are the library's two
+    chip sizes, `xs` the larger and `xxs` the smaller. The print follows.
+27. 2026-09-21. **The roster un-mixes the register, the hierarchy and the chips; a chip's
+    level is real color.** Per family the roster shows three things apart: the register's
+    interaction levels as grounds, solid, subtle and hint through their four rungs with the
+    tier's own text on each; the button hierarchy as buttons, primary on solid, outline and
+    ghost on hint, and the toggle shown on, which is the subtle tier; and the same four
+    disabled. Subtle is no longer offered as a button on its own. The chips take a level in
+    place of a tier, and a level is the family's scale stops, the same stop in both modes:
+    stamp is the stamp's fill, edge and on-text; strong is chalk-11 under pen-58 with a
+    chalk-20 edge; default is paper-3 under pencil-47 with a chalk-15 edge, the owner's
+    numbers. Opacity is for interaction: the stamp level takes the stamp's hover and pressed
+    fills, and a selected chip on any level takes the subtle tier's resting ground. The
+    strong and default levels rest on their fill under hover and press, because a real fill
+    has no interaction rung in the register; that is an engine question and stays open
+    here. The indicator chip reads the same levels, so its component sub-theme is gone. The
+    print follows: the role collection gains the stops as rows, family by mode, and the
+    chip sets are Level by State and Level by Size.
+28. 2026-09-21. **Two chips, two rules; the toggle is the outline shape.** The button chip
+    has no hierarchy: off, it wears the neutral tag's default look, paper-3 under pencil-47
+    with a chalk-15 edge; on, it is the family's stamp, fill, edge and on-text, with the
+    stamp's own hover and pressed fills. `<Chip theme="brand_chip" selected>`. The tag chip,
+    the indicator, carries decision 27's hierarchy, stamp, strong and default, as
+    `<family>_indicator-<level>`, and decision 27's `_chip-<level>` names are gone. A toggle
+    button is the outline shape, the family's highlighter-26 as its edge, and on it keeps
+    the subtle tier's resting ground: the hint and outline tiers' `backgroundSelected` rows
+    moved there, and the Button part gained `selected`. The roster's toggle and button chip
+    flip on press. The print's Chip set is Selected by State, its off side bound to the
+    neutral roster directly.

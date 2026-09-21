@@ -8,7 +8,9 @@
 //      write a compose-color expression. A `ladder` collection carries the rungs as numbers.
 //   2. Component sets on a page of their own: Button (Tier x State, bound to `role` rows so
 //      an instance picks its family by the collection's mode, the way the theme prop does in
-//      code), Input (State, bound to the roster), and Dialog (overlay and panel).
+//      code), Chip (Selected x State: off bound to the neutral roster, on to the stamp rows)
+//      and IndicatorChip (Level x Size on the scale stops the levels read), Input (State,
+//      bound to the roster), and Dialog (overlay and panel).
 //
 //   node scripts/figma/print.ts          plugin form: ends with figma.closePlugin(summary)
 //   node scripts/figma/print.ts --mcp    MCP form: ends with `return summary`
@@ -75,19 +77,29 @@ for (const row of INTERACTION_ROWS) {
     description: `The register's ${row} row; the mode picks the family.`,
   })
 }
-// the family's chalk-11, the faint edge a display chip draws; the pole families have none
-rows.push({
-  name: 'chalk-11',
-  css: null,
-  scopes: ['STROKE_COLOR'],
-  aliases: FAMILIES.map(f => {
-    if (f === 'neutral-strong' || f === 'neutral-inverse') return 'system/alpha/transparent'
-    const p = figmaPath(`${f}-chalk-11`)
-    if (!p) throw new Error(`no plugin path for ${f}-chalk-11`)
-    return p
-  }),
-  description: 'The family\u2019s chalk-11, the faint edge of a display chip; the pole families have none.',
-})
+// the scale stops the chip levels read, family by mode; the pole families have none
+const STOP_ROWS = [
+  { name: 'paper-3', scopes: ['FRAME_FILL', 'SHAPE_FILL'], description: 'The family\u2019s paper-3, the default chip\u2019s ground.' },
+  { name: 'chalk-11', scopes: ['FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR'], description: 'The family\u2019s chalk-11, the strong chip\u2019s ground.' },
+  { name: 'chalk-15', scopes: ['STROKE_COLOR'], description: 'The family\u2019s chalk-15, the default chip\u2019s edge.' },
+  { name: 'chalk-20', scopes: ['STROKE_COLOR'], description: 'The family\u2019s chalk-20, the strong chip\u2019s edge.' },
+  { name: 'pencil-47', scopes: ['TEXT_FILL'], description: 'The family\u2019s pencil-47, the default chip\u2019s text.' },
+  { name: 'pen-58', scopes: ['TEXT_FILL'], description: 'The family\u2019s pen-58, the strong chip\u2019s text.' },
+]
+for (const r of STOP_ROWS) {
+  rows.push({
+    name: r.name,
+    css: null,
+    scopes: r.scopes,
+    aliases: FAMILIES.map(f => {
+      if (f === 'neutral-strong' || f === 'neutral-inverse') return 'system/alpha/transparent'
+      const p = figmaPath(`${f}-${r.name}`)
+      if (!p) throw new Error(`no plugin path for ${f}-${r.name}`)
+      return p
+    }),
+    description: r.description + ' The pole families have none.',
+  })
+}
 rows.push({
   name: 'tint',
   css: null,
@@ -121,18 +133,30 @@ const buttonVariants = TIERS.flatMap(tier =>
     return { tier, state, ground, text, stroke, opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
   }),
 )
-// the interactive chip: Tier x State on the register, family by mode; the indicator chip: Size,
-// on the family's subtle ground with the chalk edge, family by mode of the theme collection
-const CHIP_STATES = ['enabled', 'hover', 'pressed', 'selected', 'disabled'] as const
-const chipVariants = (['solid', 'outline'] as const).flatMap(tier =>
-  CHIP_STATES.map(state => {
-    const s = state === 'disabled' ? 'enabled' : state
-    const rung = (st: string) => ladder.find(l => l.name === `hint/${st}`)!.value
-    const ground = tier === 'solid' ? { row: `solid-bg-${s === 'selected' ? 'enabled' : s}`, opacity: 1 } : { row: 'tint', opacity: rung(s) }
-    return { tier, state, ground, text: tier === 'solid' ? 'solid-fg' : 'fg-on-hint', stroke: tier === 'solid' ? 'solid-border' : 'tint', opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
-  }),
+// the button chip: Selected x State. Off is the neutral tag's default look, bound to the
+// roster directly; on is the family's stamp through the role rows, with the stamp's own
+// hover and pressed fills (opacity is for interaction; the off chip rests on its fill).
+const CHIP_STATES = ['enabled', 'hover', 'pressed', 'disabled'] as const
+const chipVariants = [false, true].flatMap(on =>
+  CHIP_STATES.map(state => ({
+    on,
+    state,
+    ground: on ? { row: state === 'hover' ? 'solid-bg-hover' : state === 'pressed' ? 'solid-bg-pressed' : 'solid-bg-enabled' } : { path: figmaPath('neutral-paper-3') },
+    text: on ? { row: 'solid-fg' } : { path: figmaPath('neutral-pencil-47') },
+    stroke: on ? { row: 'solid-border' } : { path: figmaPath('neutral-chalk-15') },
+    opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1,
+  })),
 )
-const indicatorSizes = [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }]
+// the tag chip: Level x Size on the stops the display group names (mirrored here as role rows)
+const LEVELS = {
+  stamp: { fill: 'solid-bg-enabled', text: 'solid-fg', stroke: 'solid-border' },
+  strong: { fill: 'chalk-11', text: 'pen-58', stroke: 'chalk-20' },
+  default: { fill: 'paper-3', text: 'pencil-47', stroke: 'chalk-15' },
+} as const
+const LEVEL_NAMES = Object.keys(LEVELS) as (keyof typeof LEVELS)[]
+const indicatorVariants = LEVEL_NAMES.flatMap(level =>
+  [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }].map(s => ({ level, ...s, ground: LEVELS[level].fill, text: LEVELS[level].text, stroke: LEVELS[level].stroke })),
+)
 const inputVariants = [
   { state: 'enabled', stroke: figmaPath('neutral-highlighter-26') },
   { state: 'focus', stroke: figmaPath('brand-highlighter-26') },
@@ -149,7 +173,7 @@ const paths = {
 const body = `
 const PAGE = 'okchroma-tamagui print'
 const CHIP = ${JSON.stringify(chipVariants)}
-const INDICATOR = ${JSON.stringify(indicatorSizes)}
+const INDICATOR = ${JSON.stringify(indicatorVariants)}
 const FAMILIES = ${JSON.stringify(FAMILIES)}
 const ROWS = ${JSON.stringify(rows)}
 const LADDER = ${JSON.stringify(ladder)}
@@ -245,7 +269,7 @@ else {
   const comps = []
   for (const v of BUTTON) {
     const c = figma.createComponent(); c.name = 'Tier=' + v.tier + ', State=' + v.state
-    const f = frame('button', 100, 40, 16)
+    const f = frame('button', 100, 40, 16); f.cornerRadius = 10000
     f.fills = []
     if (v.stroke) f.strokes = [solid(roleVar[v.stroke])]
     f.appendChild(text('Label', 'Medium', roleVar[v.text]))
@@ -283,48 +307,45 @@ else {
   summary.created.push('Input set (' + comps.length + ' variants)')
 }
 
-// Chip: Tier x State, a pill, family by the role collection's mode; selected = the hint tier's selected rung
+// Chip: the button chip, Selected x State, a soft square on the chip corner; off is the neutral tag's default look, on the family's stamp by the role collection's mode
 if (existingSet('Chip')) summary.skipped.push('Chip set exists; left as is')
 else {
   const comps = []
+  const paint = ref => ref.row ? roleVar[ref.row] : themeVar(ref.path)
   for (const v of CHIP) {
-    const c = figma.createComponent(); c.name = 'Tier=' + v.tier + ', State=' + v.state
-    const f = frame('chip', 80, 32, 8); f.cornerRadius = 10000; f.paddingTop = f.paddingBottom = 6
-    f.fills = []
-    f.strokes = [solid(roleVar[v.stroke])]
-    f.appendChild(text(v.state === 'selected' ? '\u2713 Label' : 'Label', 'Medium', roleVar[v.text])); f.children[f.children.length - 1].fontSize = 12
-    if (v.ground.opacity === 1) f.fills = [solid(roleVar[v.ground.row])]
-    else if (v.ground.opacity > 0) ground(f, roleVar[v.ground.row], v.ground.opacity)
+    const c = figma.createComponent(); c.name = 'Selected=' + (v.on ? 'on' : 'off') + ', State=' + v.state
+    const f = frame('chip', 80, 32, 12); f.cornerRadius = 6; f.paddingTop = f.paddingBottom = 4
+    f.fills = [solid(paint(v.ground))]
+    f.strokes = [solid(paint(v.stroke))]
+    f.appendChild(text(v.on ? '✓ Label' : 'Label', 'Medium', paint(v.text))); f.children[f.children.length - 1].fontSize = 14
     c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
     c.fills = []; c.opacity = v.opacity
     comps.push(c)
   }
   const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  set.description = 'The interactive chip. Family is the role collection\\'s mode on the instance. In code: <Chip theme="<family>_solid|outline" selected>.'
+  set.description = 'The button chip: off on the neutral tag\\'s default look, on on the family\\'s stamp, the family by the role collection\\'s mode. In code: <Chip theme="<family>_chip" selected>.'
   summary.created.push('Chip set (' + comps.length + ' variants)')
 }
 
-// IndicatorChip: Size, on the family's subtle ground with the chalk edge; family by the role collection's mode
+// IndicatorChip: the tag chip, Level x Size, on the level's stops; family by the role collection's mode
 if (existingSet('IndicatorChip')) summary.skipped.push('IndicatorChip set exists; left as is')
 else {
   const comps = []
-  const subtle = roleVar['tint'], fg = roleVar['fg'], chalk = roleVar['chalk-11']
   for (const v of INDICATOR) {
-    const c = figma.createComponent(); c.name = 'Size=' + v.size
-    const f = frame('indicator', 80, v.height, 8); f.cornerRadius = 10000; f.paddingTop = f.paddingBottom = v.size === 'sm' ? 2 : 6
+    const c = figma.createComponent(); c.name = 'Level=' + v.level + ', Size=' + v.size
+    const f = frame('indicator', 80, v.height, v.size === 'sm' ? 8 : 12); f.cornerRadius = 6; f.paddingTop = f.paddingBottom = 4
     f.fills = []
-    // the ground is the family's tint at the subtle resting rung; the edge and text ride the role rows
-    ground(f, subtle, LADDER.find(l => l.name === 'subtle/enabled').value)
-    f.strokes = [solid(chalk)]
-    f.appendChild(text('Label', 'Medium', fg)); f.children[f.children.length - 1].fontSize = 12
+    f.fills = [solid(roleVar[v.ground])]
+    f.strokes = [solid(roleVar[v.stroke])]
+    f.appendChild(text('Label', 'Medium', roleVar[v.text])); f.children[f.children.length - 1].fontSize = 14
     c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
     c.fills = []
     comps.push(c)
   }
   const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  set.description = 'The indicator chip, a label that takes no press. Family is the role collection\\'s mode. In code: <IndicatorChip theme="<family>">.'
+  set.description = 'The indicator chip, a label that takes no press. Family is the role collection\\'s mode. In code: <IndicatorChip theme="<family>_indicator-<level>">.'
   summary.created.push('IndicatorChip set (' + comps.length + ' variants)')
 }
 
@@ -354,4 +375,4 @@ const out = mcp
   ? `// GENERATED by scripts/figma/print.ts (MCP form). Paste into the Figma MCP server's script runner.\n${body}\nreturn summary\n`
   : `// GENERATED by scripts/figma/print.ts (plugin form). Save as scripts/figma/plugin/code.js and load that folder as a development plugin.\n(async () => {${body}\nfigma.closePlugin(JSON.stringify(summary))\n})()\n`
 process.stdout.write(out)
-process.stderr.write(`print: ${rows.length} role rows, ${ladder.length} ladder rows, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorSizes.length} IndicatorChip, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
+process.stderr.write(`print: ${rows.length} role rows, ${ladder.length} ladder rows, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorVariants.length} IndicatorChip, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
