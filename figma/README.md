@@ -7,5 +7,5 @@ not used, because its current major dropped the framework parsers these examples
 need, and a CLI run is a package run on the machine with the file.
 
 Family is not a variant property on the printed sets: an instance picks it through the
-`role` collection's mode, which Code Connect cannot read, so the snippets show `brand` and
-the set's description says the mode is the first half of the `theme` prop.
+`color family` collection's mode, which Code Connect cannot read, so the snippets show
+`brand` and the set's description says the mode is the first half of the `theme` prop.

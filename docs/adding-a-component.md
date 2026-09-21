@@ -41,10 +41,10 @@ look, on web and on native.
 
 ## 4. Its set in the print
 
-In `scripts/figma/print.ts`, a block like the Chip's: one component per variant, each
-part a frame or text whose fill, stroke or text fill binds a `role` row (family by mode)
-or a roster variable by its plugin path; a translucent ground is a `ground` layer with the
-rung as its opacity. Regenerate both forms (`README.md` in `scripts/figma/plugin/`) and
+In `scripts/figma/print.ts`, a block like the Chip's: one component per variant, a host
+frame whose edge and text bind `color family` rows (family by mode) and that carries one
+stretched state-layer instance for its ground; a component that takes no press binds its
+fill directly. Regenerate both forms (`README.md` in `scripts/figma/plugin/`) and
 commit them. Run the print in the file; it skips sets that already exist, so a changed set
 is removed by hand first.
 

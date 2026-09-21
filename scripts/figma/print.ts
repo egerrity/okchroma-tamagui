@@ -1,16 +1,17 @@
 // Prints the Plugin API script that puts the roster into a Figma file whose variables
-// okchroma's extended plugin has already written. Two things are printed:
+// okchroma's extended plugin has already written. It reproduces the owner's Figma model:
 //
-//   1. The interaction register as one collection, `role`, whose modes are the families and
-//      whose variables are the register's generic rows. Alias rows point at the plugin's
-//      variables; the rows the engine composes (a family's tint at an opacity rung) collapse
-//      to one row, `tint`, and the rung rides the paint's opacity, since the Plugin API cannot
-//      write a compose-color expression. A `ladder` collection carries the rungs as numbers.
-//   2. Component sets on a page of their own: Button (Kind x State, bound to `role` rows so
-//      an instance picks its family by the collection's mode, the way the theme prop does in
-//      code), Chip (Selected x State: off bound to the neutral roster, on to the stamp rows)
-//      and IndicatorChip (Level x Size on the scale stops the levels read), Input (State,
-//      bound to the roster), and Dialog (overlay and panel).
+//   1. The `color family` collection: the scale and the stamp group as they read under the
+//      neutral, one mode per color family, each row aliasing the plugin's variable for that
+//      family; the two poles alias the neutral's in every mode. The pole families have no
+//      scale and get no mode; a black or white control binds `pen-100` or `paper-0` itself.
+//   2. Three state-layer component sets, `state-layer/solid|subtle|hint`: solid is the stamp
+//      by state, subtle and hint are the family's highlighter-26 with the layer's opacity
+//      bound to the plugin's opacity ladder at the register's rung. A host places one
+//      instance stretched over its ground; the family is the `color family` mode on the host.
+//   3. The roster on a page of its own: Button (Kind x State), Chip (Selected x State),
+//      IndicatorChip (Level x Size), Input (State) and Dialog, every fill, edge and text bound
+//      to `color family` rows, light and dark on the file's mode toggle.
 //
 //   node scripts/figma/print.ts          plugin form: logs the summary and closes with one line of it
 //   node scripts/figma/print.ts --mcp    MCP form: ends with `return summary`
@@ -18,18 +19,7 @@
 // Nothing is destroyed: a set or collection that already exists is updated or left alone and
 // reported. Run through the Figma MCP server, or save the plugin form as
 // scripts/figma/plugin/code.js and load that folder as a development plugin.
-import {
-  INTERACTION_FAMILIES,
-  INTERACTION_LADDER,
-  INTERACTION_ROWS,
-  interactionRows,
-  interactionTintName,
-  resolveTheme,
-  themeTokens,
-  interactionTokens,
-  OPACITY_RUNGS,
-  type InteractionRow,
-} from 'okchroma'
+import { INTERACTION_FAMILIES, INTERACTION_LADDER, INTERACTION_POLE_FAMILY, resolveTheme, themeTokens, interactionTokens } from 'okchroma'
 import { readFileSync } from 'node:fs'
 import { figmaPath } from './lib.ts'
 
@@ -63,137 +53,113 @@ const tokens = interactionTokens(
   }),
 )
 
-const FAMILIES = [...INTERACTION_FAMILIES]
-const isRung = (row: InteractionRow) => /^(subtle|hint)-bg-/.test(row)
-const aliasTarget = (family: string, row: InteractionRow): string => {
-  // interactionRows gives the alias rows as var(--name); the name is what the plugin wrote
-  const pair = interactionRows(family, 'light', tokens).find(([r]) => r === row)
-  const m = pair && /^var\(--([^)]+)\)$/.exec(pair[1])
-  if (!m) throw new Error(`${family}-${row} is not an alias row`)
-  return plugin(m[1])
-}
+// The seven color families: the pole families are not families with a scale, so the collection
+// has no mode for them; a black or white control binds `pen-100` or `paper-0` on its host.
+const FAMILIES = [...INTERACTION_FAMILIES].filter(f => f !== INTERACTION_POLE_FAMILY.strong && f !== INTERACTION_POLE_FAMILY.inverse)
+const NEUTRAL = FAMILIES[0]
 
-type Row = { name: string; css: string | null; scopes: string[]; aliases: string[]; description: string }
-const rows: Row[] = []
-for (const row of INTERACTION_ROWS) {
-  if (isRung(row)) continue
-  const isText = /^(fg|solid-fg)/.test(row)
-  rows.push({
-    name: row,
-    css: `--${row}`,
-    scopes: isText ? ['TEXT_FILL'] : row === 'solid-border' ? ['STROKE_COLOR'] : ['FRAME_FILL', 'SHAPE_FILL'],
-    aliases: FAMILIES.map(f => aliasTarget(f, row)),
-    description: `The register's ${row} row; the mode picks the family.`,
-  })
-}
-// the scale stops the chip levels read, family by mode; the pole families have none
-const STOP_ROWS = [
-  { name: 'paper-3', scopes: ['FRAME_FILL', 'SHAPE_FILL'], description: 'The family\u2019s paper-3, the default chip\u2019s ground.' },
-  { name: 'chalk-11', scopes: ['FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR'], description: 'The family\u2019s chalk-11, the strong chip\u2019s ground.' },
-  { name: 'chalk-15', scopes: ['STROKE_COLOR'], description: 'The family\u2019s chalk-15, the default chip\u2019s edge.' },
-  { name: 'chalk-20', scopes: ['STROKE_COLOR'], description: 'The family\u2019s chalk-20, the strong chip\u2019s edge.' },
-  { name: 'pencil-47', scopes: ['TEXT_FILL'], description: 'The family\u2019s pencil-47, the default chip\u2019s text.' },
-  { name: 'pen-58', scopes: ['TEXT_FILL'], description: 'The family\u2019s pen-58, the strong chip\u2019s text.' },
+// The `color family` collection: the owner's 18 rows, the scale and the stamp group as they
+// read under the neutral, one mode per family, each row aliasing the plugin's variable for
+// that family. The two poles alias the neutral's in every mode.
+const FILL = ['FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR']
+const INK = ['TEXT_FILL', 'FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR']
+const LEAF_ROWS: Array<{ name: string; engine: string; scopes: string[]; pole?: boolean }> = [
+  { name: 'paper-0', engine: 'paper-0', scopes: FILL, pole: true },
+  { name: 'paper-1', engine: 'paper-1', scopes: FILL },
+  { name: 'paper-3', engine: 'paper-3', scopes: FILL },
+  { name: 'paper-5', engine: 'paper-5', scopes: FILL },
+  { name: 'chalk-8', engine: 'chalk-8', scopes: FILL },
+  { name: 'chalk-11', engine: 'chalk-11', scopes: FILL },
+  { name: 'chalk-15', engine: 'chalk-15', scopes: FILL },
+  { name: 'chalk-20', engine: 'chalk-20', scopes: FILL },
+  { name: 'highlighter-26', engine: 'highlighter-26', scopes: INK },
+  { name: 'pencil-47', engine: 'pencil-47', scopes: INK },
+  { name: 'pen-58', engine: 'pen-58', scopes: INK },
+  { name: 'pen-70', engine: 'pen-70', scopes: INK },
+  { name: 'pen-100', engine: 'pen-100', scopes: INK, pole: true },
+  { name: 'stamp/fill', engine: 'stamp-fill', scopes: FILL },
+  { name: 'stamp/fill-hover', engine: 'stamp-fill-hover', scopes: FILL },
+  { name: 'stamp/fill-pressed', engine: 'stamp-fill-pressed', scopes: FILL },
+  { name: 'stamp/edge', engine: 'stamp-edge', scopes: ['STROKE_COLOR'] },
+  { name: 'stamp/on', engine: 'stamp-on', scopes: ['TEXT_FILL'] },
 ]
-for (const r of STOP_ROWS) {
-  rows.push({
-    name: r.name,
-    css: null,
-    scopes: r.scopes,
-    aliases: FAMILIES.map(f => {
-      if (f === 'neutral-strong' || f === 'neutral-inverse') return plugin('alpha-transparent')
-      return plugin(`${f}-${r.name}`)
-    }),
-    description: r.description + ' The pole families have none.',
-  })
-}
-rows.push({
-  name: 'tint',
-  css: null,
-  scopes: ['FRAME_FILL', 'SHAPE_FILL', 'STROKE_COLOR'],
-  aliases: FAMILIES.map(f => {
-    return plugin(interactionTintName(f))
-  }),
-  description: 'The family’s highlighter-26, or the pole for the pole families: the layer every subtle, hint and outline ground is made of, at a rung from the ladder.',
-})
-const ladder = (['subtle', 'hint'] as const).flatMap(tier =>
-  (['enabled', 'hover', 'pressed', 'selected'] as const).map(state => ({
-    name: `${tier}/${state}`,
-    value: (INTERACTION_LADDER[tier][state] ?? 0) / 100,
-  })),
-)
+const rows = LEAF_ROWS.map(r => ({
+  name: r.name,
+  scopes: r.scopes,
+  aliases: FAMILIES.map(f => plugin(r.pole ? r.engine : `${f}-${r.engine}`)),
+  description: r.pole ? `The neutral's pole, the same in every family.` : `The family's ${r.name}; the mode picks the family.`,
+}))
 
-// what each Button variant binds: Kind x State. The hierarchy is the family inside the
-// solid tier; outline and ghost are shapes on the hint tier; the toggle is the outline shape
-// on the subtle tier's ladder while it is on (decision 26).
-const KINDS = { primary: 'solid', outline: 'outline', ghost: 'hint', toggle: 'outline' } as const
-const KIND_NAMES = Object.keys(KINDS) as (keyof typeof KINDS)[]
+// The state layers: the owner's three components. Solid is the stamp by state; subtle and
+// hint are the family's highlighter-26 with the layer's opacity bound to the plugin's
+// opacity ladder at the register's rung. Disabled rests at the resting rung; the host carries
+// the disabled opacity.
+const rungPath = (rung: number | null) => (rung === null ? null : plugin(`opacity-${String(rung).padStart(3, '0')}`))
+const LAYER_STATES = ['resting', 'hover', 'pressed', 'disabled'] as const
+const registerState = (s: string) => (s === 'resting' || s === 'disabled' ? 'enabled' : s) as 'enabled' | 'hover' | 'pressed' | 'selected'
+const solidLayer = LAYER_STATES.map(state => ({ state, fill: state === 'hover' ? 'stamp/fill-hover' : state === 'pressed' ? 'stamp/fill-pressed' : 'stamp/fill' }))
+const tintLayer = (tier: 'subtle' | 'hint') =>
+  ([false, true] as const).flatMap(selectable =>
+    [...LAYER_STATES, ...(selectable ? (['selected'] as const) : [])].map(state => ({
+      selectable,
+      state,
+      rung: rungPath(INTERACTION_LADDER[tier][registerState(state)]),
+    })),
+  )
+const LAYERS = { solid: solidLayer, subtle: tintLayer('subtle'), hint: tintLayer('hint') }
+
+// The hosts. A host frame draws its edge and text from `color family` rows and places one
+// state-layer instance stretched over its ground; the family is the mode on the host.
 const STATES = ['enabled', 'hover', 'pressed', 'disabled'] as const
-const buttonVariants = KIND_NAMES.flatMap(kind =>
-  STATES.map(state => {
-    const tier = KINDS[kind]
-    const s = state === 'disabled' ? 'enabled' : state
-    const ground =
-      tier === 'solid'
-        ? { row: `solid-bg-${s}`, opacity: 1 }
-        : { row: 'tint', opacity: ladder.find(l => l.name === `${kind === 'toggle' ? 'subtle' : 'hint'}/${s}`)!.value }
-    const text = tier === 'solid' ? 'solid-fg' : 'fg-on-hint'
-    const stroke = tier === 'solid' ? 'solid-border' : tier === 'outline' ? 'tint' : null
-    return { kind, state, ground, text, stroke, opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
-  }),
+const layerState = (s: string) => (s === 'enabled' ? 'resting' : s)
+// Kind x State: primary on the solid layer; outline and ghost on the hint layer; the toggle,
+// shown on, on the subtle layer (decision 26); the edge and text from the rows the map names.
+const KINDS = {
+  primary: { layer: 'solid', stroke: 'stamp/edge', text: 'stamp/on' },
+  outline: { layer: 'hint', stroke: 'highlighter-26', text: 'pencil-47' },
+  ghost: { layer: 'hint', stroke: null, text: 'pencil-47' },
+  toggle: { layer: 'subtle', stroke: 'highlighter-26', text: 'pencil-47' },
+} as const
+const buttonVariants = (Object.keys(KINDS) as (keyof typeof KINDS)[]).flatMap(kind =>
+  STATES.map(state => ({ kind, state, ...KINDS[kind], layerState: layerState(state), opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 })),
 )
-// the button chip: Selected x State. Off is the neutral stamp, bound to the roster directly;
-// on is the family's stamp through the role rows; each side takes its stamp's own hover and
-// pressed fills.
-const CHIP_STATES = ['enabled', 'hover', 'pressed', 'disabled'] as const
+// the button chip: off is the neutral stamp (the variant's mode is neutral), on is the family's stamp
 const chipVariants = [false, true].flatMap(on =>
-  CHIP_STATES.map(state => ({
-    on,
-    state,
-    ground: on
-      ? { row: state === 'hover' ? 'solid-bg-hover' : state === 'pressed' ? 'solid-bg-pressed' : 'solid-bg-enabled' }
-      : { path: plugin(state === 'hover' ? 'neutral-stamp-fill-hover' : state === 'pressed' ? 'neutral-stamp-fill-pressed' : 'neutral-stamp-fill') },
-    text: on ? { row: 'solid-fg' } : { path: plugin('neutral-stamp-on') },
-    stroke: on ? { row: 'solid-border' } : { path: plugin('neutral-stamp-edge') },
-    opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1,
-  })),
+  STATES.map(state => ({ on, state, layerState: layerState(state), opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 })),
 )
-// the tag chip: Level x Size on the stops the display group names (mirrored here as role rows)
+// the tag chip: Level x Size on the scale rows the display group names
 const LEVELS = {
-  stamp: { fill: 'solid-bg-enabled', text: 'solid-fg', stroke: 'solid-border' },
+  stamp: { fill: 'stamp/fill', text: 'stamp/on', stroke: 'stamp/edge' },
   strong: { fill: 'chalk-11', text: 'pen-58', stroke: 'chalk-20' },
   default: { fill: 'paper-3', text: 'pencil-47', stroke: 'chalk-15' },
 } as const
-const LEVEL_NAMES = Object.keys(LEVELS) as (keyof typeof LEVELS)[]
-const indicatorVariants = LEVEL_NAMES.flatMap(level =>
-  [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }].map(s => ({ level, ...s, ground: LEVELS[level].fill, text: LEVELS[level].text, stroke: LEVELS[level].stroke })),
+const indicatorVariants = (Object.keys(LEVELS) as (keyof typeof LEVELS)[]).flatMap(level =>
+  [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }].map(s => ({ level, ...s, ...LEVELS[level] })),
 )
+// the input: the edge is the family's highlighter-26, the family by the variant's mode
 const inputVariants = [
-  { state: 'enabled', stroke: plugin('neutral-highlighter-26') },
-  { state: 'focus', stroke: plugin('brand-highlighter-26') },
-  { state: 'invalid', stroke: plugin('critical-highlighter-26') },
+  { state: 'enabled', family: NEUTRAL },
+  { state: 'focus', family: 'brand' },
+  { state: 'invalid', family: 'critical' },
 ]
 const paths = {
   surfaceHigh: plugin('surface-high'),
-  // the scrim is composed: the absolute black at the ladder's top rung, as the layer's opacity (decision 21)
+  // the scrim is composed: the absolute black under the ladder's top rung, bound to the layer's opacity
   black: plugin('abs-black'),
-  chalk: plugin('neutral-chalk-11'),
-  text: plugin('neutral-pen-70'),
-  placeholder: plugin('neutral-pencil-47'),
+  scrim: plugin('opacity-064'),
 }
-const scrimOpacity = OPACITY_RUNGS[64]
 
 const body = `
 const PAGE = 'okchroma-tamagui print'
+const FAMILIES = ${JSON.stringify(FAMILIES)}
+const NEUTRAL = ${JSON.stringify(NEUTRAL)}
+const ROWS = ${JSON.stringify(rows)}
+const LAYERS = ${JSON.stringify(LAYERS)}
+const BUTTON = ${JSON.stringify(buttonVariants)}
 const CHIP = ${JSON.stringify(chipVariants)}
 const INDICATOR = ${JSON.stringify(indicatorVariants)}
-const FAMILIES = ${JSON.stringify(FAMILIES)}
-const ROWS = ${JSON.stringify(rows)}
-const LADDER = ${JSON.stringify(ladder)}
-const BUTTON = ${JSON.stringify(buttonVariants)}
 const INPUT = ${JSON.stringify(inputVariants)}
 const PATHS = ${JSON.stringify(paths)}
-const SCRIM_OPACITY = ${scrimOpacity}
 
 const collections = await figma.variables.getLocalVariableCollectionsAsync()
 const vars = await figma.variables.getLocalVariablesAsync()
@@ -201,39 +167,29 @@ const collById = new Map(collections.map(c => [c.id, c]))
 const byName = new Map()
 for (const v of vars) { const prev = byName.get(v.name); if (!prev || collById.get(v.variableCollectionId).name === 'theme') byName.set(v.name, v) }
 const isExpression = val => !!(val && typeof val === 'object' && val.type === 'VARIABLE_EXPRESSION')
+const themeVar = path => { const v = byName.get(path); if (!v) summary.missing.push(path); return v }
 
-// ── 1. the register as the \`role\` collection, one mode per family ──────────
-let role = collections.find(c => c.name === 'role')
-if (!role) { role = figma.variables.createVariableCollection('role'); role.renameMode(role.modes[0].modeId, FAMILIES[0]); summary.created.push('collection role') }
+// ── 1. the \`color family\` collection, one mode per family ──────────────────
+let cf = collections.find(c => c.name === 'color family')
+if (!cf) { cf = figma.variables.createVariableCollection('color family'); cf.renameMode(cf.modes[0].modeId, FAMILIES[0]); summary.created.push('collection color family') }
 const modeId = {}
-for (const f of FAMILIES) { const m = role.modes.find(x => x.name === f); modeId[f] = m ? m.modeId : role.addMode(f) }
-const mine = new Map((await figma.variables.getLocalVariablesAsync()).filter(v => v.variableCollectionId === role.id).map(v => [v.name, v]))
-const roleVar = {}
+for (const f of FAMILIES) { const m = cf.modes.find(x => x.name === f); modeId[f] = m ? m.modeId : cf.addMode(f) }
+const mine = new Map((await figma.variables.getLocalVariablesAsync()).filter(v => v.variableCollectionId === cf.id).map(v => [v.name, v]))
+const cfVar = {}
 for (const r of ROWS) {
   let v = mine.get(r.name)
-  if (v) summary.updated.push('role/' + r.name); else { v = figma.variables.createVariable(r.name, role, 'COLOR'); summary.created.push('role/' + r.name) }
-  roleVar[r.name] = v
+  if (v) summary.updated.push('color family/' + r.name); else { v = figma.variables.createVariable(r.name, cf, 'COLOR'); summary.created.push('color family/' + r.name) }
+  cfVar[r.name] = v
   FAMILIES.forEach((f, i) => {
-    const target = byName.get(r.aliases[i])
-    if (!target) { summary.missing.push(r.aliases[i]); return }
-    if (isExpression(v.valuesByMode[modeId[f]])) { summary.skipped.push('role/' + r.name + ' @ ' + f + ' (hand-authored)'); return }
+    const target = themeVar(r.aliases[i]); if (!target) return
+    if (isExpression(v.valuesByMode[modeId[f]])) { summary.skipped.push('color family/' + r.name + ' @ ' + f + ' (hand-authored)'); return }
     v.setValueForMode(modeId[f], figma.variables.createVariableAlias(target))
   })
   v.scopes = r.scopes
-  if (r.css) v.setVariableCodeSyntax('WEB', 'var(' + r.css + ')')
   v.description = r.description
 }
-let lad = collections.find(c => c.name === 'ladder')
-if (!lad) { lad = figma.variables.createVariableCollection('ladder'); lad.renameMode(lad.modes[0].modeId, 'Value'); summary.created.push('collection ladder') }
-const ladMine = new Map((await figma.variables.getLocalVariablesAsync()).filter(v => v.variableCollectionId === lad.id).map(v => [v.name, v]))
-for (const r of LADDER) {
-  const v = ladMine.get(r.name) || figma.variables.createVariable(r.name, lad, 'FLOAT')
-  v.setValueForMode(lad.modes[0].modeId, r.value)
-  v.scopes = ['OPACITY']
-  v.description = 'The rung this tier takes in this state, as the opacity of a tint layer.'
-}
 
-// ── 2. the component sets on their own page ─────────────────────────────────
+// ── 2. the page, the fonts, the helpers ─────────────────────────────────────
 let page = figma.root.children.find(p => p.name === PAGE)
 if (!page) { page = figma.createPage(); page.name = PAGE; summary.created.push('page ' + PAGE) }
 await figma.setCurrentPageAsync(page)
@@ -241,30 +197,18 @@ await figma.loadFontAsync({ family: 'Inter', style: 'Medium' })
 await figma.loadFontAsync({ family: 'Inter', style: 'Regular' })
 await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' })
 
-// A plain paint with the binding written in. Opacity is never put on a bound paint: the
-// Plugin API does not keep it reliably. A rung rides a ground layer's own opacity instead
-// (see ground below), which the renderer always honors.
-// A missing variable is reported in the summary by whoever looked it up; the paint it would
-// have bound stays an unbound black so the print finishes and the summary can be read.
+// A plain paint with the binding written in. A missing variable is reported by whoever
+// looked it up; the paint stays an unbound black so the print finishes and the summary reads.
 const solid = variable => variable
   ? { type: 'SOLID', color: { r: 0, g: 0, b: 0 }, boundVariables: { color: { type: 'VARIABLE_ALIAS', id: variable.id } } }
   : { type: 'SOLID', color: { r: 0, g: 0, b: 0 } }
-// a translucent ground: a rectangle stretched behind the frame's content, the tint bound at
-// full strength and the rung as the layer's opacity
-const ground = (parent, variable, opacity) => {
-  const r = figma.createRectangle(); r.name = 'ground'; parent.insertChild(0, r)
-  r.layoutPositioning = 'ABSOLUTE'; r.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' }
-  r.x = 0; r.y = 0; r.resize(parent.width, parent.height); r.cornerRadius = parent.cornerRadius
-  r.fills = [solid(variable)]; r.opacity = opacity
-  return r
-}
-const themeVar = path => { const v = byName.get(path); if (!v) summary.missing.push(path); return v }
+const bindOpacity = (node, path) => { const v = themeVar(path); if (v) node.setBoundVariable('opacity', v) }
+const setMode = (node, family) => node.setExplicitVariableModeForCollection(cf, modeId[family])
 const text = (chars, style, variable) => {
   const t = figma.createText(); t.fontName = { family: 'Inter', style }; t.characters = chars; t.fontSize = 15
   if (variable) t.fills = [solid(variable)]
   return t
 }
-// text that fills its parent's width and wraps
 const paragraph = (parent, chars, style, variable) => {
   const t = text(chars, style, variable); parent.appendChild(t)
   t.layoutSizingHorizontal = 'FILL'; t.textAutoResize = 'HEIGHT'
@@ -275,8 +219,22 @@ const frame = (name, w, h, padding) => {
   f.layoutMode = 'HORIZONTAL'; f.primaryAxisAlignItems = 'CENTER'; f.counterAxisAlignItems = 'CENTER'
   f.paddingLeft = f.paddingRight = padding; f.paddingTop = f.paddingBottom = padding * 0.6
   f.primaryAxisSizingMode = 'AUTO'; f.counterAxisSizingMode = 'AUTO'; f.cornerRadius = 8; f.itemSpacing = 8
-  f.strokeWeight = 1; f.strokes = []
+  f.strokeWeight = 1; f.strokes = []; f.fills = []
   return f
+}
+const finishSet = (comps, name, description) => {
+  const set = figma.combineAsVariants(comps, page); set.name = name
+  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  set.description = description
+  place(set)
+  summary.created.push(name + ' set (' + comps.length + ' variants)')
+  return set
+}
+const component = (child, opacity) => {
+  const c = figma.createComponent(); c.appendChild(child)
+  c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'; c.fills = []
+  if (opacity !== undefined) c.opacity = opacity
+  return c
 }
 const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' && n.name === name)
 // the sets stack down the page in the order they are printed, below whatever is there; a
@@ -284,113 +242,113 @@ const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' &
 let nextY = page.children.reduce((y, n) => Math.max(y, n.y + n.height), 0) + (page.children.length ? 80 : 0)
 const place = node => { node.x = 0; node.y = nextY; nextY += node.height + 80 }
 
-// Button: Kind x State (primary, outline, ghost, toggle shown on), family by the role collection's mode on the instance
+// ── 3. the state layers ─────────────────────────────────────────────────────
+const layerSets = {}
+for (const tier of ['solid', 'subtle', 'hint']) {
+  const name = 'state-layer/' + tier
+  const existing = existingSet(name)
+  if (existing) { layerSets[tier] = existing; summary.skipped.push(name + ' exists; left as is'); continue }
+  const comps = []
+  for (const v of LAYERS[tier]) {
+    const c = figma.createComponent()
+    c.name = (tier === 'solid' ? '' : 'selectable=' + v.selectable + ', ') + 'state=' + v.state
+    c.resize(40, 40); c.cornerRadius = 8
+    if (tier === 'solid') c.fills = [solid(cfVar[v.fill])]
+    else if (v.rung) { c.fills = [solid(cfVar['highlighter-26'])]; bindOpacity(c, v.rung) }
+    else c.fills = []
+    comps.push(c)
+  }
+  layerSets[tier] = finishSet(comps, name, tier === 'solid'
+    ? 'The solid state layer: the stamp by state under a filled control; the host draws the stamp\\'s edge. A control places one instance stretched over its ground; the family is the mode on the host; the radius is overridden per host. Disabled rests; the host carries the disabled opacity.'
+    : 'The ' + tier + ' state layer: the family\\'s highlighter-26 with the layer\\'s opacity bound to the opacity ladder at the ' + tier + ' rung for the state. A control places one instance stretched over its ground; the family is the mode on the host; the radius is overridden per host. Disabled rests; the host carries the disabled opacity.')
+}
+const layerVariant = (tier, props) => {
+  const want = (tier === 'solid' ? '' : 'selectable=' + (props.selectable ?? false) + ', ') + 'state=' + props.state
+  return layerSets[tier].children.find(n => n.name === want)
+}
+// one state-layer instance stretched over the host's ground, under its content
+const layerInto = (host, tier, props) => {
+  const variant = layerVariant(tier, props)
+  if (!variant) { summary.missing.push('state-layer/' + tier + ' ' + JSON.stringify(props)); return }
+  const inst = variant.createInstance(); host.insertChild(0, inst)
+  inst.layoutPositioning = 'ABSOLUTE'; inst.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' }
+  inst.x = 0; inst.y = 0; inst.resize(host.width, host.height); inst.cornerRadius = host.cornerRadius
+  return inst
+}
+
+// ── 4. the roster ───────────────────────────────────────────────────────────
 if (existingSet('Button')) summary.skipped.push('Button set exists; left as is')
 else {
   const comps = []
   for (const v of BUTTON) {
-    const c = figma.createComponent(); c.name = 'Kind=' + v.kind + ', State=' + v.state
     const f = frame('button', 100, 40, 16); f.cornerRadius = 10000
-    f.fills = []
-    if (v.stroke) f.strokes = [solid(roleVar[v.stroke])]
-    f.appendChild(text('Label', 'Medium', roleVar[v.text]))
-    // the solid tier fills the frame itself; a translucent tier gets a ground layer at its rung
-    if (v.ground.opacity === 1) f.fills = [solid(roleVar[v.ground.row])]
-    else if (v.ground.opacity > 0) ground(f, roleVar[v.ground.row], v.ground.opacity)
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []; c.opacity = v.opacity
+    if (v.stroke) f.strokes = [solid(cfVar[v.stroke])]
+    f.appendChild(text('Label', 'Medium', cfVar[v.text]))
+    layerInto(f, v.layer, { state: v.layerState })
+    const c = component(f, v.opacity); c.name = 'Kind=' + v.kind + ', State=' + v.state
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Button'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'Family is the role collection\\'s mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.'
-  summary.created.push('Button set (' + comps.length + ' variants)')
+  finishSet(comps, 'Button', 'Family is the color family mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.')
 }
 
-// Input: State, bound to the roster
 if (existingSet('Input')) summary.skipped.push('Input set exists; left as is')
 else {
   const comps = []
   for (const v of INPUT) {
-    const c = figma.createComponent(); c.name = 'State=' + v.state
     const f = frame('input', 240, 40, 12); f.primaryAxisSizingMode = 'FIXED'; f.resize(240, 40); f.primaryAxisAlignItems = 'MIN'
     const bg = themeVar(PATHS.surfaceHigh); if (bg) f.fills = [solid(bg)]
-    const stroke = themeVar(v.stroke); if (stroke) { f.strokes = [solid(stroke)]; f.strokeWeight = v.state === 'enabled' ? 1 : 1.5 }
-    const ph = themeVar(v.state === 'invalid' ? PATHS.text : PATHS.placeholder)
-    f.appendChild(text(v.state === 'invalid' ? 'not an address' : 'Placeholder', 'Regular', ph))
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []
+    f.strokes = [solid(cfVar['highlighter-26'])]; f.strokeWeight = v.state === 'enabled' ? 1 : 1.5
+    setMode(f, v.family)
+    const t = text(v.state === 'invalid' ? 'not an address' : 'Placeholder', 'Regular', cfVar[v.state === 'invalid' ? 'pen-70' : 'pencil-47'])
+    f.appendChild(t); setMode(t, NEUTRAL)
+    const c = component(f); c.name = 'State=' + v.state
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Input'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'In code: <Input> and <Input theme="critical"> for the invalid state; focus is the platform\\'s.'
-  summary.created.push('Input set (' + comps.length + ' variants)')
+  finishSet(comps, 'Input', 'The edge is the family\\'s highlighter-26 by the variant\\'s mode: neutral at rest, brand in focus, critical when invalid. In code: <Input> and <Input theme="critical">.')
 }
 
-// Chip: the button chip, Selected x State, a soft square on the chip corner; off is the neutral stamp, on the family's stamp by the role collection's mode
 if (existingSet('Chip')) summary.skipped.push('Chip set exists; left as is')
 else {
   const comps = []
-  const paint = ref => ref.row ? roleVar[ref.row] : themeVar(ref.path)
   for (const v of CHIP) {
-    const c = figma.createComponent(); c.name = 'Selected=' + (v.on ? 'on' : 'off') + ', State=' + v.state
     const f = frame('chip', 80, 32, 12); f.cornerRadius = 6; f.paddingTop = f.paddingBottom = 4
-    f.fills = [solid(paint(v.ground))]
-    f.strokes = [solid(paint(v.stroke))]
-    f.appendChild(text(v.on ? '✓ Label' : 'Label', 'Medium', paint(v.text))); f.children[f.children.length - 1].fontSize = 14
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []; c.opacity = v.opacity
+    f.strokes = [solid(cfVar['stamp/edge'])]
+    f.appendChild(text(v.on ? '✓ Label' : 'Label', 'Medium', cfVar['stamp/on'])); f.children[f.children.length - 1].fontSize = 14
+    layerInto(f, 'solid', { state: v.layerState })
+    if (!v.on) setMode(f, NEUTRAL)
+    const c = component(f, v.opacity); c.name = 'Selected=' + (v.on ? 'on' : 'off') + ', State=' + v.state
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'The button chip: off on the neutral stamp, on on the family\\'s stamp, the family by the role collection\\'s mode. In code: <Chip theme="<family>_chip" selected>.'
-  summary.created.push('Chip set (' + comps.length + ' variants)')
+  finishSet(comps, 'Chip', 'The button chip: off is the neutral stamp (the variant\\'s mode is neutral), on is the family\\'s stamp by the color family mode on the instance. In code: <Chip theme="<family>_chip" selected>.')
 }
 
-// IndicatorChip: the tag chip, Level x Size, on the level's stops; family by the role collection's mode
 if (existingSet('IndicatorChip')) summary.skipped.push('IndicatorChip set exists; left as is')
 else {
   const comps = []
   for (const v of INDICATOR) {
-    const c = figma.createComponent(); c.name = 'Level=' + v.level + ', Size=' + v.size
     const f = frame('indicator', 80, v.height, v.size === 'sm' ? 8 : 12); f.cornerRadius = 6; f.paddingTop = f.paddingBottom = 4
-    f.fills = []
-    f.fills = [solid(roleVar[v.ground])]
-    f.strokes = [solid(roleVar[v.stroke])]
-    f.appendChild(text('Label', 'Medium', roleVar[v.text])); f.children[f.children.length - 1].fontSize = 14
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []
+    f.fills = [solid(cfVar[v.fill])]; f.strokes = [solid(cfVar[v.stroke])]
+    f.appendChild(text('Label', 'Medium', cfVar[v.text])); f.children[f.children.length - 1].fontSize = 14
+    const c = component(f); c.name = 'Level=' + v.level + ', Size=' + v.size
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'The indicator chip, a label that takes no press. Family is the role collection\\'s mode. In code: <IndicatorChip theme="<family>_indicator-<level>">.'
-  summary.created.push('IndicatorChip set (' + comps.length + ' variants)')
+  finishSet(comps, 'IndicatorChip', 'The tag chip, a label that takes no press, on the scale rows of its level. Family is the color family mode on the instance. In code: <IndicatorChip theme="<family>_indicator-<level>">.')
 }
 
-// Dialog: overlay and panel
 if (page.children.some(n => n.type === 'COMPONENT' && n.name === 'Dialog')) summary.skipped.push('Dialog exists; left as is')
 else {
-  const c = figma.createComponent(); c.name = 'Dialog'; c.resize(600, 400)
+  const c = figma.createComponent(); c.name = 'Dialog'; c.resize(600, 400); c.fills = []
   const overlay = figma.createRectangle(); overlay.name = 'overlay'; overlay.resize(600, 400)
-  const black = themeVar(PATHS.black); if (black) overlay.fills = [solid(black)]; overlay.opacity = SCRIM_OPACITY
+  const black = themeVar(PATHS.black); if (black) overlay.fills = [solid(black)]
+  bindOpacity(overlay, PATHS.scrim)
   c.appendChild(overlay)
   const panel = frame('panel', 360, 160, 24); panel.layoutMode = 'VERTICAL'; panel.primaryAxisAlignItems = 'MIN'; panel.counterAxisAlignItems = 'MIN'
   panel.primaryAxisSizingMode = 'AUTO'; panel.counterAxisSizingMode = 'FIXED'; panel.resize(360, 160); panel.cornerRadius = 12; panel.itemSpacing = 12
   const bg = themeVar(PATHS.surfaceHigh); if (bg) panel.fills = [solid(bg)]
-  const edge = themeVar(PATHS.chalk); if (edge) panel.strokes = [solid(edge)]
-  const ink = themeVar(PATHS.text)
-  c.fills = []
+  panel.strokes = [solid(cfVar['chalk-11'])]; setMode(panel, NEUTRAL)
   c.appendChild(panel); panel.x = 120; panel.y = 120
-  paragraph(panel, 'Delete this account?', 'Semi Bold', ink)
-  paragraph(panel, 'The account and its mail are removed. This cannot be undone.', 'Regular', ink)
-  // the actions: instances of the printed primary Button, the family picked by the role mode
+  paragraph(panel, 'Delete this account?', 'Semi Bold', cfVar['pen-70'])
+  paragraph(panel, 'The account and its mail are removed. This cannot be undone.', 'Regular', cfVar['pen-70'])
   const buttonSet = existingSet('Button')
   const primary = buttonSet && buttonSet.children.find(n => n.name === 'Kind=primary, State=enabled')
   if (primary) {
@@ -398,13 +356,13 @@ else {
     actions.primaryAxisAlignItems = 'MAX'; actions.counterAxisAlignItems = 'CENTER'; actions.fills = []
     actions.primaryAxisSizingMode = 'FIXED'; actions.counterAxisSizingMode = 'AUTO'
     panel.appendChild(actions); actions.layoutSizingHorizontal = 'FILL'
-    for (const [family, label] of [['neutral', 'Keep it'], ['critical', 'Delete']]) {
+    for (const [family, label] of [[NEUTRAL, 'Keep it'], ['critical', 'Delete']]) {
       const inst = primary.createInstance(); actions.appendChild(inst)
-      inst.setExplicitVariableModeForCollection(role, modeId[family])
+      setMode(inst, family)
       const t = inst.findOne(n => n.type === 'TEXT'); if (t) t.characters = label
     }
   } else summary.missing.push('Button set for the dialog\\'s actions')
-  c.description = 'Overlay on the scrim, panel on surface-high with the chalk-11 edge, the actions instances of the primary Button on the neutral and critical modes; in code, Tamagui\\'s Dialog under the DialogOverlay and DialogContent themes.'
+  c.description = 'Overlay on the absolute black at the ladder\\'s top rung, panel on surface-high with the neutral chalk-11 edge, the actions instances of the primary Button on the neutral and critical modes; in code, Tamagui\\'s Dialog under the DialogOverlay and DialogContent themes.'
   summary.created.push('Dialog component')
   place(c)
 }
@@ -419,4 +377,4 @@ const out = mcp
   ? `// GENERATED by scripts/figma/print.ts (MCP form). Paste into the Figma MCP server's script runner.\n${summaryDecl}\ntry {${body}\n} catch (e) { summary.error = String((e && e.stack) || e) }\nreturn summary\n`
   : `// GENERATED by scripts/figma/print.ts (plugin form). Save as scripts/figma/plugin/code.js and load that folder as a development plugin.\n(async () => {\n${summaryDecl}\ntry {${body}\n} catch (e) { summary.error = String((e && e.stack) || e) }\nconsole.log('okchroma-tamagui print', JSON.stringify(summary, null, 1))\nfigma.closePlugin(${summaryLine})\n})()\n`
 process.stdout.write(out)
-process.stderr.write(`print: ${rows.length} role rows, ${ladder.length} ladder rows, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorVariants.length} IndicatorChip, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
+process.stderr.write(`print: ${rows.length} color family rows, ${LAYERS.solid.length + LAYERS.subtle.length + LAYERS.hint.length} state-layer variants, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorVariants.length} IndicatorChip, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)

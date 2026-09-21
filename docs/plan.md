@@ -79,9 +79,12 @@ mode, so a screenshot needs no click. Same screen, same code, any client.
 1. Run okchroma's extended plugin in the file with the real seed on the WCAG lane; it
    writes the variables.
 2. `scripts/figma/plugin/code.js` is the print, generated and committed (decision 20), so
-   nothing runs on that machine. It writes, from the engine's structured emit and the map: the interaction register as a `role` collection with one mode per family, and
-   one component set per roster member with every color property bound to a variable by
-   name, light and dark on the file's mode toggle.
+   nothing runs on that machine. It writes the owner's Figma model (decision 30): the
+   `color family` collection, the scale and the stamp group by family mode; the three
+   state-layer sets, solid, subtle and hint, their opacity bound to the plugin's opacity
+   ladder; and one component set per roster member, each host carrying one stretched
+   state-layer instance with its edge and text bound to `color family` rows, light and
+   dark on the file's mode toggle.
 3. Run the code through the Figma MCP server where it is available; where it is not, load
    `scripts/figma/plugin` as a development plugin, which is the same code in a manifest.
 4. Connect each printed set in Dev Mode's Code Connect UI, pasting the matching snippet

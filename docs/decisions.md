@@ -174,3 +174,18 @@ the rule it serves. Code cites a decision by number, never by date.
     A selected Button hovers and presses on the selected ladder too, so the tiers declare
     `backgroundSelectedHover` and `backgroundSelectedPress`, and the printed Button set is
     Kind by State, primary, outline, ghost and toggle, in place of Tier by State.
+30. 2026-09-21. **The print reproduces the owner's Figma model.** The `role` collection,
+    the `ladder` collection and the `tint` row are gone. The print writes the `color
+    family` collection as the owner keeps it by hand: the scale and the stamp group as they
+    read under the neutral, one mode per color family, each row aliasing the plugin's
+    variable, the two poles aliasing the neutral's. The pole families have no scale and get
+    no mode; a black or white control binds `pen-100` or `paper-0` itself. Interaction is
+    the owner's three state-layer components, `state-layer/solid`, `subtle` and `hint`:
+    solid is the stamp by state, subtle and hint are the family's highlighter-26 with the
+    layer's opacity bound to the plugin's own `utility/opacity` ladder at the register's
+    rung, so a rung change in the engine flows through on the next print. A host places one
+    instance stretched over its ground and binds its edge and text to `color family` rows;
+    the family is the mode on the host, and the button chip's off variant sets neutral on
+    itself. Figma and code say the same names: the map's `<family>-<leaf>` is the
+    collection's `<leaf>` by mode; the register's family-agnostic names stay in CSS, where
+    the state layer is a scope rather than a component.

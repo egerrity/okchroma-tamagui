@@ -2,15 +2,15 @@
 const summary = { created: [], updated: [], skipped: [], missing: [], error: null }
 try {
 const PAGE = 'okchroma-tamagui print'
-const CHIP = [{"on":false,"state":"enabled","ground":{"path":"base/neutral/stamp/fill"},"text":{"path":"base/neutral/stamp/on"},"stroke":{"path":"base/neutral/stamp/edge"},"opacity":1},{"on":false,"state":"hover","ground":{"path":"base/neutral/stamp/fill-hover"},"text":{"path":"base/neutral/stamp/on"},"stroke":{"path":"base/neutral/stamp/edge"},"opacity":1},{"on":false,"state":"pressed","ground":{"path":"base/neutral/stamp/fill-pressed"},"text":{"path":"base/neutral/stamp/on"},"stroke":{"path":"base/neutral/stamp/edge"},"opacity":1},{"on":false,"state":"disabled","ground":{"path":"base/neutral/stamp/fill"},"text":{"path":"base/neutral/stamp/on"},"stroke":{"path":"base/neutral/stamp/edge"},"opacity":0.38},{"on":true,"state":"enabled","ground":{"row":"solid-bg-enabled"},"text":{"row":"solid-fg"},"stroke":{"row":"solid-border"},"opacity":1},{"on":true,"state":"hover","ground":{"row":"solid-bg-hover"},"text":{"row":"solid-fg"},"stroke":{"row":"solid-border"},"opacity":1},{"on":true,"state":"pressed","ground":{"row":"solid-bg-pressed"},"text":{"row":"solid-fg"},"stroke":{"row":"solid-border"},"opacity":1},{"on":true,"state":"disabled","ground":{"row":"solid-bg-enabled"},"text":{"row":"solid-fg"},"stroke":{"row":"solid-border"},"opacity":0.38}]
-const INDICATOR = [{"level":"stamp","size":"md","height":32,"ground":"solid-bg-enabled","text":"solid-fg","stroke":"solid-border"},{"level":"stamp","size":"sm","height":24,"ground":"solid-bg-enabled","text":"solid-fg","stroke":"solid-border"},{"level":"strong","size":"md","height":32,"ground":"chalk-11","text":"pen-58","stroke":"chalk-20"},{"level":"strong","size":"sm","height":24,"ground":"chalk-11","text":"pen-58","stroke":"chalk-20"},{"level":"default","size":"md","height":32,"ground":"paper-3","text":"pencil-47","stroke":"chalk-15"},{"level":"default","size":"sm","height":24,"ground":"paper-3","text":"pencil-47","stroke":"chalk-15"}]
-const FAMILIES = ["neutral","brand","brand-alt","critical","warning","positive","info","neutral-strong","neutral-inverse"]
-const ROWS = [{"name":"fg","css":"--fg","scopes":["TEXT_FILL"],"aliases":["base/neutral/pen-58","base/brand/pen-58","base/brand-alt/pen-58","base/critical/pen-58","base/warning/pen-58","base/positive/pen-58","base/info/pen-58","base/neutral/pen-100","base/neutral/paper-0"],"description":"The register's fg row; the mode picks the family."},{"name":"fg-strong","css":"--fg-strong","scopes":["TEXT_FILL"],"aliases":["base/neutral/pen-70","base/brand/pen-70","base/brand-alt/pen-70","base/critical/pen-70","base/warning/pen-70","base/positive/pen-70","base/info/pen-70","base/neutral/pen-100","base/neutral/paper-0"],"description":"The register's fg-strong row; the mode picks the family."},{"name":"fg-on-hint","css":"--fg-on-hint","scopes":["TEXT_FILL"],"aliases":["base/neutral/pencil-47","base/brand/pencil-47","base/brand-alt/pencil-47","base/critical/pencil-47","base/warning/pencil-47","base/positive/pencil-47","base/info/pencil-47","base/neutral/pen-100","base/neutral/paper-0"],"description":"The register's fg-on-hint row; the mode picks the family."},{"name":"solid-bg-enabled","css":"--solid-bg-enabled","scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["base/neutral/stamp/fill","base/brand/stamp/fill","base/brand-alt/stamp/fill","base/critical/stamp/fill","base/warning/stamp/fill","base/positive/stamp/fill","base/info/stamp/fill","base/neutral/pen-100","base/neutral/paper-0"],"description":"The register's solid-bg-enabled row; the mode picks the family."},{"name":"solid-bg-hover","css":"--solid-bg-hover","scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["base/neutral/stamp/fill-hover","base/brand/stamp/fill-hover","base/brand-alt/stamp/fill-hover","base/critical/stamp/fill-hover","base/warning/stamp/fill-hover","base/positive/stamp/fill-hover","base/info/stamp/fill-hover","base/neutral/pen-70","base/neutral/paper-3"],"description":"The register's solid-bg-hover row; the mode picks the family."},{"name":"solid-bg-pressed","css":"--solid-bg-pressed","scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["base/neutral/stamp/fill-pressed","base/brand/stamp/fill-pressed","base/brand-alt/stamp/fill-pressed","base/critical/stamp/fill-pressed","base/warning/stamp/fill-pressed","base/positive/stamp/fill-pressed","base/info/stamp/fill-pressed","base/neutral/pen-58","base/neutral/paper-5"],"description":"The register's solid-bg-pressed row; the mode picks the family."},{"name":"solid-border","css":"--solid-border","scopes":["STROKE_COLOR"],"aliases":["base/neutral/stamp/edge","base/brand/stamp/edge","base/brand-alt/stamp/edge","base/critical/stamp/edge","base/warning/stamp/edge","base/positive/stamp/edge","base/info/stamp/edge","base/alpha/transparent","base/alpha/transparent"],"description":"The register's solid-border row; the mode picks the family."},{"name":"solid-fg","css":"--solid-fg","scopes":["TEXT_FILL"],"aliases":["base/neutral/stamp/on","base/brand/stamp/on","base/brand-alt/stamp/on","base/critical/stamp/on","base/warning/stamp/on","base/positive/stamp/on","base/info/stamp/on","base/neutral/paper-0","base/neutral/pen-100"],"description":"The register's solid-fg row; the mode picks the family."},{"name":"paper-3","css":null,"scopes":["FRAME_FILL","SHAPE_FILL"],"aliases":["base/neutral/paper-3","base/brand/paper-3","base/brand-alt/paper-3","base/critical/paper-3","base/warning/paper-3","base/positive/paper-3","base/info/paper-3","base/alpha/transparent","base/alpha/transparent"],"description":"The family’s paper-3, the default chip’s ground. The pole families have none."},{"name":"chalk-11","css":null,"scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/chalk-11","base/brand/chalk-11","base/brand-alt/chalk-11","base/critical/chalk-11","base/warning/chalk-11","base/positive/chalk-11","base/info/chalk-11","base/alpha/transparent","base/alpha/transparent"],"description":"The family’s chalk-11, the strong chip’s ground. The pole families have none."},{"name":"chalk-15","css":null,"scopes":["STROKE_COLOR"],"aliases":["base/neutral/chalk-15","base/brand/chalk-15","base/brand-alt/chalk-15","base/critical/chalk-15","base/warning/chalk-15","base/positive/chalk-15","base/info/chalk-15","base/alpha/transparent","base/alpha/transparent"],"description":"The family’s chalk-15, the default chip’s edge. The pole families have none."},{"name":"chalk-20","css":null,"scopes":["STROKE_COLOR"],"aliases":["base/neutral/chalk-20","base/brand/chalk-20","base/brand-alt/chalk-20","base/critical/chalk-20","base/warning/chalk-20","base/positive/chalk-20","base/info/chalk-20","base/alpha/transparent","base/alpha/transparent"],"description":"The family’s chalk-20, the strong chip’s edge. The pole families have none."},{"name":"pencil-47","css":null,"scopes":["TEXT_FILL"],"aliases":["base/neutral/pencil-47","base/brand/pencil-47","base/brand-alt/pencil-47","base/critical/pencil-47","base/warning/pencil-47","base/positive/pencil-47","base/info/pencil-47","base/alpha/transparent","base/alpha/transparent"],"description":"The family’s pencil-47, the default chip’s text. The pole families have none."},{"name":"pen-58","css":null,"scopes":["TEXT_FILL"],"aliases":["base/neutral/pen-58","base/brand/pen-58","base/brand-alt/pen-58","base/critical/pen-58","base/warning/pen-58","base/positive/pen-58","base/info/pen-58","base/alpha/transparent","base/alpha/transparent"],"description":"The family’s pen-58, the strong chip’s text. The pole families have none."},{"name":"tint","css":null,"scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/highlighter-26","base/brand/highlighter-26","base/brand-alt/highlighter-26","base/critical/highlighter-26","base/warning/highlighter-26","base/positive/highlighter-26","base/info/highlighter-26","base/neutral/pen-100","base/neutral/paper-0"],"description":"The family’s highlighter-26, or the pole for the pole families: the layer every subtle, hint and outline ground is made of, at a rung from the ladder."}]
-const LADDER = [{"name":"subtle/enabled","value":0.12},{"name":"subtle/hover","value":0.16},{"name":"subtle/pressed","value":0.24},{"name":"subtle/selected","value":0.32},{"name":"hint/enabled","value":0},{"name":"hint/hover","value":0.08},{"name":"hint/pressed","value":0.12},{"name":"hint/selected","value":0.16}]
-const BUTTON = [{"kind":"primary","state":"enabled","ground":{"row":"solid-bg-enabled","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":1},{"kind":"primary","state":"hover","ground":{"row":"solid-bg-hover","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":1},{"kind":"primary","state":"pressed","ground":{"row":"solid-bg-pressed","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":1},{"kind":"primary","state":"disabled","ground":{"row":"solid-bg-enabled","opacity":1},"text":"solid-fg","stroke":"solid-border","opacity":0.38},{"kind":"outline","state":"enabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":"tint","opacity":1},{"kind":"outline","state":"hover","ground":{"row":"tint","opacity":0.08},"text":"fg-on-hint","stroke":"tint","opacity":1},{"kind":"outline","state":"pressed","ground":{"row":"tint","opacity":0.12},"text":"fg-on-hint","stroke":"tint","opacity":1},{"kind":"outline","state":"disabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":"tint","opacity":0.38},{"kind":"ghost","state":"enabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":null,"opacity":1},{"kind":"ghost","state":"hover","ground":{"row":"tint","opacity":0.08},"text":"fg-on-hint","stroke":null,"opacity":1},{"kind":"ghost","state":"pressed","ground":{"row":"tint","opacity":0.12},"text":"fg-on-hint","stroke":null,"opacity":1},{"kind":"ghost","state":"disabled","ground":{"row":"tint","opacity":0},"text":"fg-on-hint","stroke":null,"opacity":0.38},{"kind":"toggle","state":"enabled","ground":{"row":"tint","opacity":0.12},"text":"fg-on-hint","stroke":"tint","opacity":1},{"kind":"toggle","state":"hover","ground":{"row":"tint","opacity":0.16},"text":"fg-on-hint","stroke":"tint","opacity":1},{"kind":"toggle","state":"pressed","ground":{"row":"tint","opacity":0.24},"text":"fg-on-hint","stroke":"tint","opacity":1},{"kind":"toggle","state":"disabled","ground":{"row":"tint","opacity":0.12},"text":"fg-on-hint","stroke":"tint","opacity":0.38}]
-const INPUT = [{"state":"enabled","stroke":"base/neutral/highlighter-26"},{"state":"focus","stroke":"base/brand/highlighter-26"},{"state":"invalid","stroke":"base/critical/highlighter-26"}]
-const PATHS = {"surfaceHigh":"utility/surface/high","black":"base/absolute/black","chalk":"base/neutral/chalk-11","text":"base/neutral/pen-70","placeholder":"base/neutral/pencil-47"}
-const SCRIM_OPACITY = 0.64
+const FAMILIES = ["neutral","brand","brand-alt","critical","warning","positive","info"]
+const NEUTRAL = "neutral"
+const ROWS = [{"name":"paper-0","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/paper-0","base/neutral/paper-0","base/neutral/paper-0","base/neutral/paper-0","base/neutral/paper-0","base/neutral/paper-0","base/neutral/paper-0"],"description":"The neutral's pole, the same in every family."},{"name":"paper-1","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/paper-1","base/brand/paper-1","base/brand-alt/paper-1","base/critical/paper-1","base/warning/paper-1","base/positive/paper-1","base/info/paper-1"],"description":"The family's paper-1; the mode picks the family."},{"name":"paper-3","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/paper-3","base/brand/paper-3","base/brand-alt/paper-3","base/critical/paper-3","base/warning/paper-3","base/positive/paper-3","base/info/paper-3"],"description":"The family's paper-3; the mode picks the family."},{"name":"paper-5","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/paper-5","base/brand/paper-5","base/brand-alt/paper-5","base/critical/paper-5","base/warning/paper-5","base/positive/paper-5","base/info/paper-5"],"description":"The family's paper-5; the mode picks the family."},{"name":"chalk-8","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/chalk-8","base/brand/chalk-8","base/brand-alt/chalk-8","base/critical/chalk-8","base/warning/chalk-8","base/positive/chalk-8","base/info/chalk-8"],"description":"The family's chalk-8; the mode picks the family."},{"name":"chalk-11","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/chalk-11","base/brand/chalk-11","base/brand-alt/chalk-11","base/critical/chalk-11","base/warning/chalk-11","base/positive/chalk-11","base/info/chalk-11"],"description":"The family's chalk-11; the mode picks the family."},{"name":"chalk-15","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/chalk-15","base/brand/chalk-15","base/brand-alt/chalk-15","base/critical/chalk-15","base/warning/chalk-15","base/positive/chalk-15","base/info/chalk-15"],"description":"The family's chalk-15; the mode picks the family."},{"name":"chalk-20","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/chalk-20","base/brand/chalk-20","base/brand-alt/chalk-20","base/critical/chalk-20","base/warning/chalk-20","base/positive/chalk-20","base/info/chalk-20"],"description":"The family's chalk-20; the mode picks the family."},{"name":"highlighter-26","scopes":["TEXT_FILL","FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/highlighter-26","base/brand/highlighter-26","base/brand-alt/highlighter-26","base/critical/highlighter-26","base/warning/highlighter-26","base/positive/highlighter-26","base/info/highlighter-26"],"description":"The family's highlighter-26; the mode picks the family."},{"name":"pencil-47","scopes":["TEXT_FILL","FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/pencil-47","base/brand/pencil-47","base/brand-alt/pencil-47","base/critical/pencil-47","base/warning/pencil-47","base/positive/pencil-47","base/info/pencil-47"],"description":"The family's pencil-47; the mode picks the family."},{"name":"pen-58","scopes":["TEXT_FILL","FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/pen-58","base/brand/pen-58","base/brand-alt/pen-58","base/critical/pen-58","base/warning/pen-58","base/positive/pen-58","base/info/pen-58"],"description":"The family's pen-58; the mode picks the family."},{"name":"pen-70","scopes":["TEXT_FILL","FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/pen-70","base/brand/pen-70","base/brand-alt/pen-70","base/critical/pen-70","base/warning/pen-70","base/positive/pen-70","base/info/pen-70"],"description":"The family's pen-70; the mode picks the family."},{"name":"pen-100","scopes":["TEXT_FILL","FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/pen-100","base/neutral/pen-100","base/neutral/pen-100","base/neutral/pen-100","base/neutral/pen-100","base/neutral/pen-100","base/neutral/pen-100"],"description":"The neutral's pole, the same in every family."},{"name":"stamp/fill","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/stamp/fill","base/brand/stamp/fill","base/brand-alt/stamp/fill","base/critical/stamp/fill","base/warning/stamp/fill","base/positive/stamp/fill","base/info/stamp/fill"],"description":"The family's stamp/fill; the mode picks the family."},{"name":"stamp/fill-hover","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/stamp/fill-hover","base/brand/stamp/fill-hover","base/brand-alt/stamp/fill-hover","base/critical/stamp/fill-hover","base/warning/stamp/fill-hover","base/positive/stamp/fill-hover","base/info/stamp/fill-hover"],"description":"The family's stamp/fill-hover; the mode picks the family."},{"name":"stamp/fill-pressed","scopes":["FRAME_FILL","SHAPE_FILL","STROKE_COLOR"],"aliases":["base/neutral/stamp/fill-pressed","base/brand/stamp/fill-pressed","base/brand-alt/stamp/fill-pressed","base/critical/stamp/fill-pressed","base/warning/stamp/fill-pressed","base/positive/stamp/fill-pressed","base/info/stamp/fill-pressed"],"description":"The family's stamp/fill-pressed; the mode picks the family."},{"name":"stamp/edge","scopes":["STROKE_COLOR"],"aliases":["base/neutral/stamp/edge","base/brand/stamp/edge","base/brand-alt/stamp/edge","base/critical/stamp/edge","base/warning/stamp/edge","base/positive/stamp/edge","base/info/stamp/edge"],"description":"The family's stamp/edge; the mode picks the family."},{"name":"stamp/on","scopes":["TEXT_FILL"],"aliases":["base/neutral/stamp/on","base/brand/stamp/on","base/brand-alt/stamp/on","base/critical/stamp/on","base/warning/stamp/on","base/positive/stamp/on","base/info/stamp/on"],"description":"The family's stamp/on; the mode picks the family."}]
+const LAYERS = {"solid":[{"state":"resting","fill":"stamp/fill"},{"state":"hover","fill":"stamp/fill-hover"},{"state":"pressed","fill":"stamp/fill-pressed"},{"state":"disabled","fill":"stamp/fill"}],"subtle":[{"selectable":false,"state":"resting","rung":"utility/opacity/012"},{"selectable":false,"state":"hover","rung":"utility/opacity/016"},{"selectable":false,"state":"pressed","rung":"utility/opacity/024"},{"selectable":false,"state":"disabled","rung":"utility/opacity/012"},{"selectable":true,"state":"resting","rung":"utility/opacity/012"},{"selectable":true,"state":"hover","rung":"utility/opacity/016"},{"selectable":true,"state":"pressed","rung":"utility/opacity/024"},{"selectable":true,"state":"disabled","rung":"utility/opacity/012"},{"selectable":true,"state":"selected","rung":"utility/opacity/032"}],"hint":[{"selectable":false,"state":"resting","rung":null},{"selectable":false,"state":"hover","rung":"utility/opacity/008"},{"selectable":false,"state":"pressed","rung":"utility/opacity/012"},{"selectable":false,"state":"disabled","rung":null},{"selectable":true,"state":"resting","rung":null},{"selectable":true,"state":"hover","rung":"utility/opacity/008"},{"selectable":true,"state":"pressed","rung":"utility/opacity/012"},{"selectable":true,"state":"disabled","rung":null},{"selectable":true,"state":"selected","rung":"utility/opacity/016"}]}
+const BUTTON = [{"kind":"primary","state":"enabled","layer":"solid","stroke":"stamp/edge","text":"stamp/on","layerState":"resting","opacity":1},{"kind":"primary","state":"hover","layer":"solid","stroke":"stamp/edge","text":"stamp/on","layerState":"hover","opacity":1},{"kind":"primary","state":"pressed","layer":"solid","stroke":"stamp/edge","text":"stamp/on","layerState":"pressed","opacity":1},{"kind":"primary","state":"disabled","layer":"solid","stroke":"stamp/edge","text":"stamp/on","layerState":"disabled","opacity":0.38},{"kind":"outline","state":"enabled","layer":"hint","stroke":"highlighter-26","text":"pencil-47","layerState":"resting","opacity":1},{"kind":"outline","state":"hover","layer":"hint","stroke":"highlighter-26","text":"pencil-47","layerState":"hover","opacity":1},{"kind":"outline","state":"pressed","layer":"hint","stroke":"highlighter-26","text":"pencil-47","layerState":"pressed","opacity":1},{"kind":"outline","state":"disabled","layer":"hint","stroke":"highlighter-26","text":"pencil-47","layerState":"disabled","opacity":0.38},{"kind":"ghost","state":"enabled","layer":"hint","stroke":null,"text":"pencil-47","layerState":"resting","opacity":1},{"kind":"ghost","state":"hover","layer":"hint","stroke":null,"text":"pencil-47","layerState":"hover","opacity":1},{"kind":"ghost","state":"pressed","layer":"hint","stroke":null,"text":"pencil-47","layerState":"pressed","opacity":1},{"kind":"ghost","state":"disabled","layer":"hint","stroke":null,"text":"pencil-47","layerState":"disabled","opacity":0.38},{"kind":"toggle","state":"enabled","layer":"subtle","stroke":"highlighter-26","text":"pencil-47","layerState":"resting","opacity":1},{"kind":"toggle","state":"hover","layer":"subtle","stroke":"highlighter-26","text":"pencil-47","layerState":"hover","opacity":1},{"kind":"toggle","state":"pressed","layer":"subtle","stroke":"highlighter-26","text":"pencil-47","layerState":"pressed","opacity":1},{"kind":"toggle","state":"disabled","layer":"subtle","stroke":"highlighter-26","text":"pencil-47","layerState":"disabled","opacity":0.38}]
+const CHIP = [{"on":false,"state":"enabled","layerState":"resting","opacity":1},{"on":false,"state":"hover","layerState":"hover","opacity":1},{"on":false,"state":"pressed","layerState":"pressed","opacity":1},{"on":false,"state":"disabled","layerState":"disabled","opacity":0.38},{"on":true,"state":"enabled","layerState":"resting","opacity":1},{"on":true,"state":"hover","layerState":"hover","opacity":1},{"on":true,"state":"pressed","layerState":"pressed","opacity":1},{"on":true,"state":"disabled","layerState":"disabled","opacity":0.38}]
+const INDICATOR = [{"level":"stamp","size":"md","height":32,"fill":"stamp/fill","text":"stamp/on","stroke":"stamp/edge"},{"level":"stamp","size":"sm","height":24,"fill":"stamp/fill","text":"stamp/on","stroke":"stamp/edge"},{"level":"strong","size":"md","height":32,"fill":"chalk-11","text":"pen-58","stroke":"chalk-20"},{"level":"strong","size":"sm","height":24,"fill":"chalk-11","text":"pen-58","stroke":"chalk-20"},{"level":"default","size":"md","height":32,"fill":"paper-3","text":"pencil-47","stroke":"chalk-15"},{"level":"default","size":"sm","height":24,"fill":"paper-3","text":"pencil-47","stroke":"chalk-15"}]
+const INPUT = [{"state":"enabled","family":"neutral"},{"state":"focus","family":"brand"},{"state":"invalid","family":"critical"}]
+const PATHS = {"surfaceHigh":"utility/surface/high","black":"base/absolute/black","scrim":"utility/opacity/064"}
 
 const collections = await figma.variables.getLocalVariableCollectionsAsync()
 const vars = await figma.variables.getLocalVariablesAsync()
@@ -18,39 +18,29 @@ const collById = new Map(collections.map(c => [c.id, c]))
 const byName = new Map()
 for (const v of vars) { const prev = byName.get(v.name); if (!prev || collById.get(v.variableCollectionId).name === 'theme') byName.set(v.name, v) }
 const isExpression = val => !!(val && typeof val === 'object' && val.type === 'VARIABLE_EXPRESSION')
+const themeVar = path => { const v = byName.get(path); if (!v) summary.missing.push(path); return v }
 
-// ── 1. the register as the `role` collection, one mode per family ──────────
-let role = collections.find(c => c.name === 'role')
-if (!role) { role = figma.variables.createVariableCollection('role'); role.renameMode(role.modes[0].modeId, FAMILIES[0]); summary.created.push('collection role') }
+// ── 1. the `color family` collection, one mode per family ──────────────────
+let cf = collections.find(c => c.name === 'color family')
+if (!cf) { cf = figma.variables.createVariableCollection('color family'); cf.renameMode(cf.modes[0].modeId, FAMILIES[0]); summary.created.push('collection color family') }
 const modeId = {}
-for (const f of FAMILIES) { const m = role.modes.find(x => x.name === f); modeId[f] = m ? m.modeId : role.addMode(f) }
-const mine = new Map((await figma.variables.getLocalVariablesAsync()).filter(v => v.variableCollectionId === role.id).map(v => [v.name, v]))
-const roleVar = {}
+for (const f of FAMILIES) { const m = cf.modes.find(x => x.name === f); modeId[f] = m ? m.modeId : cf.addMode(f) }
+const mine = new Map((await figma.variables.getLocalVariablesAsync()).filter(v => v.variableCollectionId === cf.id).map(v => [v.name, v]))
+const cfVar = {}
 for (const r of ROWS) {
   let v = mine.get(r.name)
-  if (v) summary.updated.push('role/' + r.name); else { v = figma.variables.createVariable(r.name, role, 'COLOR'); summary.created.push('role/' + r.name) }
-  roleVar[r.name] = v
+  if (v) summary.updated.push('color family/' + r.name); else { v = figma.variables.createVariable(r.name, cf, 'COLOR'); summary.created.push('color family/' + r.name) }
+  cfVar[r.name] = v
   FAMILIES.forEach((f, i) => {
-    const target = byName.get(r.aliases[i])
-    if (!target) { summary.missing.push(r.aliases[i]); return }
-    if (isExpression(v.valuesByMode[modeId[f]])) { summary.skipped.push('role/' + r.name + ' @ ' + f + ' (hand-authored)'); return }
+    const target = themeVar(r.aliases[i]); if (!target) return
+    if (isExpression(v.valuesByMode[modeId[f]])) { summary.skipped.push('color family/' + r.name + ' @ ' + f + ' (hand-authored)'); return }
     v.setValueForMode(modeId[f], figma.variables.createVariableAlias(target))
   })
   v.scopes = r.scopes
-  if (r.css) v.setVariableCodeSyntax('WEB', 'var(' + r.css + ')')
   v.description = r.description
 }
-let lad = collections.find(c => c.name === 'ladder')
-if (!lad) { lad = figma.variables.createVariableCollection('ladder'); lad.renameMode(lad.modes[0].modeId, 'Value'); summary.created.push('collection ladder') }
-const ladMine = new Map((await figma.variables.getLocalVariablesAsync()).filter(v => v.variableCollectionId === lad.id).map(v => [v.name, v]))
-for (const r of LADDER) {
-  const v = ladMine.get(r.name) || figma.variables.createVariable(r.name, lad, 'FLOAT')
-  v.setValueForMode(lad.modes[0].modeId, r.value)
-  v.scopes = ['OPACITY']
-  v.description = 'The rung this tier takes in this state, as the opacity of a tint layer.'
-}
 
-// ── 2. the component sets on their own page ─────────────────────────────────
+// ── 2. the page, the fonts, the helpers ─────────────────────────────────────
 let page = figma.root.children.find(p => p.name === PAGE)
 if (!page) { page = figma.createPage(); page.name = PAGE; summary.created.push('page ' + PAGE) }
 await figma.setCurrentPageAsync(page)
@@ -58,30 +48,18 @@ await figma.loadFontAsync({ family: 'Inter', style: 'Medium' })
 await figma.loadFontAsync({ family: 'Inter', style: 'Regular' })
 await figma.loadFontAsync({ family: 'Inter', style: 'Semi Bold' })
 
-// A plain paint with the binding written in. Opacity is never put on a bound paint: the
-// Plugin API does not keep it reliably. A rung rides a ground layer's own opacity instead
-// (see ground below), which the renderer always honors.
-// A missing variable is reported in the summary by whoever looked it up; the paint it would
-// have bound stays an unbound black so the print finishes and the summary can be read.
+// A plain paint with the binding written in. A missing variable is reported by whoever
+// looked it up; the paint stays an unbound black so the print finishes and the summary reads.
 const solid = variable => variable
   ? { type: 'SOLID', color: { r: 0, g: 0, b: 0 }, boundVariables: { color: { type: 'VARIABLE_ALIAS', id: variable.id } } }
   : { type: 'SOLID', color: { r: 0, g: 0, b: 0 } }
-// a translucent ground: a rectangle stretched behind the frame's content, the tint bound at
-// full strength and the rung as the layer's opacity
-const ground = (parent, variable, opacity) => {
-  const r = figma.createRectangle(); r.name = 'ground'; parent.insertChild(0, r)
-  r.layoutPositioning = 'ABSOLUTE'; r.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' }
-  r.x = 0; r.y = 0; r.resize(parent.width, parent.height); r.cornerRadius = parent.cornerRadius
-  r.fills = [solid(variable)]; r.opacity = opacity
-  return r
-}
-const themeVar = path => { const v = byName.get(path); if (!v) summary.missing.push(path); return v }
+const bindOpacity = (node, path) => { const v = themeVar(path); if (v) node.setBoundVariable('opacity', v) }
+const setMode = (node, family) => node.setExplicitVariableModeForCollection(cf, modeId[family])
 const text = (chars, style, variable) => {
   const t = figma.createText(); t.fontName = { family: 'Inter', style }; t.characters = chars; t.fontSize = 15
   if (variable) t.fills = [solid(variable)]
   return t
 }
-// text that fills its parent's width and wraps
 const paragraph = (parent, chars, style, variable) => {
   const t = text(chars, style, variable); parent.appendChild(t)
   t.layoutSizingHorizontal = 'FILL'; t.textAutoResize = 'HEIGHT'
@@ -92,8 +70,22 @@ const frame = (name, w, h, padding) => {
   f.layoutMode = 'HORIZONTAL'; f.primaryAxisAlignItems = 'CENTER'; f.counterAxisAlignItems = 'CENTER'
   f.paddingLeft = f.paddingRight = padding; f.paddingTop = f.paddingBottom = padding * 0.6
   f.primaryAxisSizingMode = 'AUTO'; f.counterAxisSizingMode = 'AUTO'; f.cornerRadius = 8; f.itemSpacing = 8
-  f.strokeWeight = 1; f.strokes = []
+  f.strokeWeight = 1; f.strokes = []; f.fills = []
   return f
+}
+const finishSet = (comps, name, description) => {
+  const set = figma.combineAsVariants(comps, page); set.name = name
+  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
+  set.description = description
+  place(set)
+  summary.created.push(name + ' set (' + comps.length + ' variants)')
+  return set
+}
+const component = (child, opacity) => {
+  const c = figma.createComponent(); c.appendChild(child)
+  c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'; c.fills = []
+  if (opacity !== undefined) c.opacity = opacity
+  return c
 }
 const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' && n.name === name)
 // the sets stack down the page in the order they are printed, below whatever is there; a
@@ -101,113 +93,113 @@ const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' &
 let nextY = page.children.reduce((y, n) => Math.max(y, n.y + n.height), 0) + (page.children.length ? 80 : 0)
 const place = node => { node.x = 0; node.y = nextY; nextY += node.height + 80 }
 
-// Button: Kind x State (primary, outline, ghost, toggle shown on), family by the role collection's mode on the instance
+// ── 3. the state layers ─────────────────────────────────────────────────────
+const layerSets = {}
+for (const tier of ['solid', 'subtle', 'hint']) {
+  const name = 'state-layer/' + tier
+  const existing = existingSet(name)
+  if (existing) { layerSets[tier] = existing; summary.skipped.push(name + ' exists; left as is'); continue }
+  const comps = []
+  for (const v of LAYERS[tier]) {
+    const c = figma.createComponent()
+    c.name = (tier === 'solid' ? '' : 'selectable=' + v.selectable + ', ') + 'state=' + v.state
+    c.resize(40, 40); c.cornerRadius = 8
+    if (tier === 'solid') c.fills = [solid(cfVar[v.fill])]
+    else if (v.rung) { c.fills = [solid(cfVar['highlighter-26'])]; bindOpacity(c, v.rung) }
+    else c.fills = []
+    comps.push(c)
+  }
+  layerSets[tier] = finishSet(comps, name, tier === 'solid'
+    ? 'The solid state layer: the stamp by state under a filled control; the host draws the stamp\'s edge. A control places one instance stretched over its ground; the family is the mode on the host; the radius is overridden per host. Disabled rests; the host carries the disabled opacity.'
+    : 'The ' + tier + ' state layer: the family\'s highlighter-26 with the layer\'s opacity bound to the opacity ladder at the ' + tier + ' rung for the state. A control places one instance stretched over its ground; the family is the mode on the host; the radius is overridden per host. Disabled rests; the host carries the disabled opacity.')
+}
+const layerVariant = (tier, props) => {
+  const want = (tier === 'solid' ? '' : 'selectable=' + (props.selectable ?? false) + ', ') + 'state=' + props.state
+  return layerSets[tier].children.find(n => n.name === want)
+}
+// one state-layer instance stretched over the host's ground, under its content
+const layerInto = (host, tier, props) => {
+  const variant = layerVariant(tier, props)
+  if (!variant) { summary.missing.push('state-layer/' + tier + ' ' + JSON.stringify(props)); return }
+  const inst = variant.createInstance(); host.insertChild(0, inst)
+  inst.layoutPositioning = 'ABSOLUTE'; inst.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' }
+  inst.x = 0; inst.y = 0; inst.resize(host.width, host.height); inst.cornerRadius = host.cornerRadius
+  return inst
+}
+
+// ── 4. the roster ───────────────────────────────────────────────────────────
 if (existingSet('Button')) summary.skipped.push('Button set exists; left as is')
 else {
   const comps = []
   for (const v of BUTTON) {
-    const c = figma.createComponent(); c.name = 'Kind=' + v.kind + ', State=' + v.state
     const f = frame('button', 100, 40, 16); f.cornerRadius = 10000
-    f.fills = []
-    if (v.stroke) f.strokes = [solid(roleVar[v.stroke])]
-    f.appendChild(text('Label', 'Medium', roleVar[v.text]))
-    // the solid tier fills the frame itself; a translucent tier gets a ground layer at its rung
-    if (v.ground.opacity === 1) f.fills = [solid(roleVar[v.ground.row])]
-    else if (v.ground.opacity > 0) ground(f, roleVar[v.ground.row], v.ground.opacity)
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []; c.opacity = v.opacity
+    if (v.stroke) f.strokes = [solid(cfVar[v.stroke])]
+    f.appendChild(text('Label', 'Medium', cfVar[v.text]))
+    layerInto(f, v.layer, { state: v.layerState })
+    const c = component(f, v.opacity); c.name = 'Kind=' + v.kind + ', State=' + v.state
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Button'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'Family is the role collection\'s mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.'
-  summary.created.push('Button set (' + comps.length + ' variants)')
+  finishSet(comps, 'Button', 'Family is the color family mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.')
 }
 
-// Input: State, bound to the roster
 if (existingSet('Input')) summary.skipped.push('Input set exists; left as is')
 else {
   const comps = []
   for (const v of INPUT) {
-    const c = figma.createComponent(); c.name = 'State=' + v.state
     const f = frame('input', 240, 40, 12); f.primaryAxisSizingMode = 'FIXED'; f.resize(240, 40); f.primaryAxisAlignItems = 'MIN'
     const bg = themeVar(PATHS.surfaceHigh); if (bg) f.fills = [solid(bg)]
-    const stroke = themeVar(v.stroke); if (stroke) { f.strokes = [solid(stroke)]; f.strokeWeight = v.state === 'enabled' ? 1 : 1.5 }
-    const ph = themeVar(v.state === 'invalid' ? PATHS.text : PATHS.placeholder)
-    f.appendChild(text(v.state === 'invalid' ? 'not an address' : 'Placeholder', 'Regular', ph))
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []
+    f.strokes = [solid(cfVar['highlighter-26'])]; f.strokeWeight = v.state === 'enabled' ? 1 : 1.5
+    setMode(f, v.family)
+    const t = text(v.state === 'invalid' ? 'not an address' : 'Placeholder', 'Regular', cfVar[v.state === 'invalid' ? 'pen-70' : 'pencil-47'])
+    f.appendChild(t); setMode(t, NEUTRAL)
+    const c = component(f); c.name = 'State=' + v.state
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Input'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'In code: <Input> and <Input theme="critical"> for the invalid state; focus is the platform\'s.'
-  summary.created.push('Input set (' + comps.length + ' variants)')
+  finishSet(comps, 'Input', 'The edge is the family\'s highlighter-26 by the variant\'s mode: neutral at rest, brand in focus, critical when invalid. In code: <Input> and <Input theme="critical">.')
 }
 
-// Chip: the button chip, Selected x State, a soft square on the chip corner; off is the neutral stamp, on the family's stamp by the role collection's mode
 if (existingSet('Chip')) summary.skipped.push('Chip set exists; left as is')
 else {
   const comps = []
-  const paint = ref => ref.row ? roleVar[ref.row] : themeVar(ref.path)
   for (const v of CHIP) {
-    const c = figma.createComponent(); c.name = 'Selected=' + (v.on ? 'on' : 'off') + ', State=' + v.state
     const f = frame('chip', 80, 32, 12); f.cornerRadius = 6; f.paddingTop = f.paddingBottom = 4
-    f.fills = [solid(paint(v.ground))]
-    f.strokes = [solid(paint(v.stroke))]
-    f.appendChild(text(v.on ? '✓ Label' : 'Label', 'Medium', paint(v.text))); f.children[f.children.length - 1].fontSize = 14
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []; c.opacity = v.opacity
+    f.strokes = [solid(cfVar['stamp/edge'])]
+    f.appendChild(text(v.on ? '✓ Label' : 'Label', 'Medium', cfVar['stamp/on'])); f.children[f.children.length - 1].fontSize = 14
+    layerInto(f, 'solid', { state: v.layerState })
+    if (!v.on) setMode(f, NEUTRAL)
+    const c = component(f, v.opacity); c.name = 'Selected=' + (v.on ? 'on' : 'off') + ', State=' + v.state
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'The button chip: off on the neutral stamp, on on the family\'s stamp, the family by the role collection\'s mode. In code: <Chip theme="<family>_chip" selected>.'
-  summary.created.push('Chip set (' + comps.length + ' variants)')
+  finishSet(comps, 'Chip', 'The button chip: off is the neutral stamp (the variant\'s mode is neutral), on is the family\'s stamp by the color family mode on the instance. In code: <Chip theme="<family>_chip" selected>.')
 }
 
-// IndicatorChip: the tag chip, Level x Size, on the level's stops; family by the role collection's mode
 if (existingSet('IndicatorChip')) summary.skipped.push('IndicatorChip set exists; left as is')
 else {
   const comps = []
   for (const v of INDICATOR) {
-    const c = figma.createComponent(); c.name = 'Level=' + v.level + ', Size=' + v.size
     const f = frame('indicator', 80, v.height, v.size === 'sm' ? 8 : 12); f.cornerRadius = 6; f.paddingTop = f.paddingBottom = 4
-    f.fills = []
-    f.fills = [solid(roleVar[v.ground])]
-    f.strokes = [solid(roleVar[v.stroke])]
-    f.appendChild(text('Label', 'Medium', roleVar[v.text])); f.children[f.children.length - 1].fontSize = 14
-    c.appendChild(f); c.layoutMode = 'HORIZONTAL'; c.primaryAxisSizingMode = 'AUTO'; c.counterAxisSizingMode = 'AUTO'
-    c.fills = []
+    f.fills = [solid(cfVar[v.fill])]; f.strokes = [solid(cfVar[v.stroke])]
+    f.appendChild(text('Label', 'Medium', cfVar[v.text])); f.children[f.children.length - 1].fontSize = 14
+    const c = component(f); c.name = 'Level=' + v.level + ', Size=' + v.size
     comps.push(c)
   }
-  const set = figma.combineAsVariants(comps, page); set.name = 'IndicatorChip'
-  set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  place(set)
-  set.description = 'The indicator chip, a label that takes no press. Family is the role collection\'s mode. In code: <IndicatorChip theme="<family>_indicator-<level>">.'
-  summary.created.push('IndicatorChip set (' + comps.length + ' variants)')
+  finishSet(comps, 'IndicatorChip', 'The tag chip, a label that takes no press, on the scale rows of its level. Family is the color family mode on the instance. In code: <IndicatorChip theme="<family>_indicator-<level>">.')
 }
 
-// Dialog: overlay and panel
 if (page.children.some(n => n.type === 'COMPONENT' && n.name === 'Dialog')) summary.skipped.push('Dialog exists; left as is')
 else {
-  const c = figma.createComponent(); c.name = 'Dialog'; c.resize(600, 400)
+  const c = figma.createComponent(); c.name = 'Dialog'; c.resize(600, 400); c.fills = []
   const overlay = figma.createRectangle(); overlay.name = 'overlay'; overlay.resize(600, 400)
-  const black = themeVar(PATHS.black); if (black) overlay.fills = [solid(black)]; overlay.opacity = SCRIM_OPACITY
+  const black = themeVar(PATHS.black); if (black) overlay.fills = [solid(black)]
+  bindOpacity(overlay, PATHS.scrim)
   c.appendChild(overlay)
   const panel = frame('panel', 360, 160, 24); panel.layoutMode = 'VERTICAL'; panel.primaryAxisAlignItems = 'MIN'; panel.counterAxisAlignItems = 'MIN'
   panel.primaryAxisSizingMode = 'AUTO'; panel.counterAxisSizingMode = 'FIXED'; panel.resize(360, 160); panel.cornerRadius = 12; panel.itemSpacing = 12
   const bg = themeVar(PATHS.surfaceHigh); if (bg) panel.fills = [solid(bg)]
-  const edge = themeVar(PATHS.chalk); if (edge) panel.strokes = [solid(edge)]
-  const ink = themeVar(PATHS.text)
-  c.fills = []
+  panel.strokes = [solid(cfVar['chalk-11'])]; setMode(panel, NEUTRAL)
   c.appendChild(panel); panel.x = 120; panel.y = 120
-  paragraph(panel, 'Delete this account?', 'Semi Bold', ink)
-  paragraph(panel, 'The account and its mail are removed. This cannot be undone.', 'Regular', ink)
-  // the actions: instances of the printed primary Button, the family picked by the role mode
+  paragraph(panel, 'Delete this account?', 'Semi Bold', cfVar['pen-70'])
+  paragraph(panel, 'The account and its mail are removed. This cannot be undone.', 'Regular', cfVar['pen-70'])
   const buttonSet = existingSet('Button')
   const primary = buttonSet && buttonSet.children.find(n => n.name === 'Kind=primary, State=enabled')
   if (primary) {
@@ -215,13 +207,13 @@ else {
     actions.primaryAxisAlignItems = 'MAX'; actions.counterAxisAlignItems = 'CENTER'; actions.fills = []
     actions.primaryAxisSizingMode = 'FIXED'; actions.counterAxisSizingMode = 'AUTO'
     panel.appendChild(actions); actions.layoutSizingHorizontal = 'FILL'
-    for (const [family, label] of [['neutral', 'Keep it'], ['critical', 'Delete']]) {
+    for (const [family, label] of [[NEUTRAL, 'Keep it'], ['critical', 'Delete']]) {
       const inst = primary.createInstance(); actions.appendChild(inst)
-      inst.setExplicitVariableModeForCollection(role, modeId[family])
+      setMode(inst, family)
       const t = inst.findOne(n => n.type === 'TEXT'); if (t) t.characters = label
     }
   } else summary.missing.push('Button set for the dialog\'s actions')
-  c.description = 'Overlay on the scrim, panel on surface-high with the chalk-11 edge, the actions instances of the primary Button on the neutral and critical modes; in code, Tamagui\'s Dialog under the DialogOverlay and DialogContent themes.'
+  c.description = 'Overlay on the absolute black at the ladder\'s top rung, panel on surface-high with the neutral chalk-11 edge, the actions instances of the primary Button on the neutral and critical modes; in code, Tamagui\'s Dialog under the DialogOverlay and DialogContent themes.'
   summary.created.push('Dialog component')
   place(c)
 }
