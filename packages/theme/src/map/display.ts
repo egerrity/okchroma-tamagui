@@ -1,8 +1,7 @@
 // Display: the chips. The tag chip (IndicatorChip) has a hierarchy, and hierarchy is real
 // color: the family's scale stops, the same stop in both modes. The button chip (Chip) has
-// no hierarchy: off, it wears the neutral tag's default look; on, it is the family's stamp.
-// Opacity is for interaction: the stamp takes its own hover and pressed fills; a real fill's
-// interaction rung is an engine matter (decision 28), so the off chip rests on its fill.
+// no hierarchy: off, it is the neutral stamp; on, it is the family's stamp; each side takes
+// its stamp's own hover and pressed fills, so interaction stays the engine's (decision 29).
 // Seven color families; the pole families have no chalk.
 import { type KeyMap, same, BORDER_KEYS, COLOR_KEYS } from './keys.ts'
 
@@ -14,14 +13,14 @@ export const INDICATOR_LEVELS: Readonly<Record<'stamp' | 'strong' | 'default', K
 }
 export const LEVEL_NAMES = Object.keys(INDICATOR_LEVELS) as (keyof typeof INDICATOR_LEVELS)[]
 
-/** `<family>_chip`: the button chip, off on the neutral tag's default look, on on the family's stamp */
+/** `<family>_chip`: the button chip, off on the neutral stamp, on on the family's stamp */
 export const INTERACTIVE_CHIP: KeyMap = {
-  background: 'neutral-paper-3',
-  backgroundHover: 'neutral-paper-3',
-  backgroundPress: 'neutral-paper-3',
-  backgroundFocus: 'neutral-paper-3',
-  ...same(COLOR_KEYS, 'neutral-pencil-47'),
-  ...same(BORDER_KEYS, 'neutral-chalk-15'),
+  background: 'neutral-stamp-fill',
+  backgroundHover: 'neutral-stamp-fill-hover',
+  backgroundPress: 'neutral-stamp-fill-pressed',
+  backgroundFocus: 'neutral-stamp-fill',
+  ...same(COLOR_KEYS, 'neutral-stamp-on'),
+  ...same(BORDER_KEYS, 'neutral-stamp-edge'),
   backgroundSelected: '<family>-stamp-fill',
   backgroundSelectedHover: '<family>-stamp-fill-hover',
   backgroundSelectedPress: '<family>-stamp-fill-pressed',

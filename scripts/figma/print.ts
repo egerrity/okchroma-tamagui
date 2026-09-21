@@ -6,7 +6,7 @@
 //      variables; the rows the engine composes (a family's tint at an opacity rung) collapse
 //      to one row, `tint`, and the rung rides the paint's opacity, since the Plugin API cannot
 //      write a compose-color expression. A `ladder` collection carries the rungs as numbers.
-//   2. Component sets on a page of their own: Button (Tier x State, bound to `role` rows so
+//   2. Component sets on a page of their own: Button (Kind x State, bound to `role` rows so
 //      an instance picks its family by the collection's mode, the way the theme prop does in
 //      code), Chip (Selected x State: off bound to the neutral roster, on to the stamp rows)
 //      and IndicatorChip (Level x Size on the scale stops the levels read), Input (State,
@@ -118,32 +118,38 @@ const ladder = (['subtle', 'hint'] as const).flatMap(tier =>
   })),
 )
 
-// what each Button variant binds, per tier and state
-const TIERS = ['solid', 'subtle', 'hint', 'outline'] as const
+// what each Button variant binds: Kind x State. The hierarchy is the family inside the
+// solid tier; outline and ghost are shapes on the hint tier; the toggle is the outline shape
+// on the subtle tier's ladder while it is on (decision 26).
+const KINDS = { primary: 'solid', outline: 'outline', ghost: 'hint', toggle: 'outline' } as const
+const KIND_NAMES = Object.keys(KINDS) as (keyof typeof KINDS)[]
 const STATES = ['enabled', 'hover', 'pressed', 'disabled'] as const
-const buttonVariants = TIERS.flatMap(tier =>
+const buttonVariants = KIND_NAMES.flatMap(kind =>
   STATES.map(state => {
+    const tier = KINDS[kind]
     const s = state === 'disabled' ? 'enabled' : state
     const ground =
       tier === 'solid'
         ? { row: `solid-bg-${s}`, opacity: 1 }
-        : { row: 'tint', opacity: ladder.find(l => l.name === `${tier === 'outline' ? 'hint' : tier}/${s}`)!.value }
-    const text = tier === 'solid' ? 'solid-fg' : tier === 'subtle' ? 'fg' : 'fg-on-hint'
+        : { row: 'tint', opacity: ladder.find(l => l.name === `${kind === 'toggle' ? 'subtle' : 'hint'}/${s}`)!.value }
+    const text = tier === 'solid' ? 'solid-fg' : 'fg-on-hint'
     const stroke = tier === 'solid' ? 'solid-border' : tier === 'outline' ? 'tint' : null
-    return { tier, state, ground, text, stroke, opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
+    return { kind, state, ground, text, stroke, opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
   }),
 )
-// the button chip: Selected x State. Off is the neutral tag's default look, bound to the
-// roster directly; on is the family's stamp through the role rows, with the stamp's own
-// hover and pressed fills (opacity is for interaction; the off chip rests on its fill).
+// the button chip: Selected x State. Off is the neutral stamp, bound to the roster directly;
+// on is the family's stamp through the role rows; each side takes its stamp's own hover and
+// pressed fills.
 const CHIP_STATES = ['enabled', 'hover', 'pressed', 'disabled'] as const
 const chipVariants = [false, true].flatMap(on =>
   CHIP_STATES.map(state => ({
     on,
     state,
-    ground: on ? { row: state === 'hover' ? 'solid-bg-hover' : state === 'pressed' ? 'solid-bg-pressed' : 'solid-bg-enabled' } : { path: figmaPath('neutral-paper-3') },
-    text: on ? { row: 'solid-fg' } : { path: figmaPath('neutral-pencil-47') },
-    stroke: on ? { row: 'solid-border' } : { path: figmaPath('neutral-chalk-15') },
+    ground: on
+      ? { row: state === 'hover' ? 'solid-bg-hover' : state === 'pressed' ? 'solid-bg-pressed' : 'solid-bg-enabled' }
+      : { path: figmaPath(state === 'hover' ? 'neutral-stamp-fill-hover' : state === 'pressed' ? 'neutral-stamp-fill-pressed' : 'neutral-stamp-fill') },
+    text: on ? { row: 'solid-fg' } : { path: figmaPath('neutral-stamp-on') },
+    stroke: on ? { row: 'solid-border' } : { path: figmaPath('neutral-stamp-edge') },
     opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1,
   })),
 )
@@ -263,12 +269,12 @@ const frame = (name, w, h, padding) => {
 }
 const existingSet = name => page.children.find(n => n.type === 'COMPONENT_SET' && n.name === name)
 
-// Button: Tier x State, family by the role collection's mode on the instance
+// Button: Kind x State (primary, outline, ghost, toggle shown on), family by the role collection's mode on the instance
 if (existingSet('Button')) summary.skipped.push('Button set exists; left as is')
 else {
   const comps = []
   for (const v of BUTTON) {
-    const c = figma.createComponent(); c.name = 'Tier=' + v.tier + ', State=' + v.state
+    const c = figma.createComponent(); c.name = 'Kind=' + v.kind + ', State=' + v.state
     const f = frame('button', 100, 40, 16); f.cornerRadius = 10000
     f.fills = []
     if (v.stroke) f.strokes = [solid(roleVar[v.stroke])]
@@ -282,7 +288,7 @@ else {
   }
   const set = figma.combineAsVariants(comps, page); set.name = 'Button'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  set.description = 'Family is the role collection\\'s mode on the instance. In code: theme="<family>_<tier>".'
+  set.description = 'Family is the role collection\\'s mode on the instance. In code: primary theme="<family>_solid", outline "<family>_outline", ghost "<family>_hint", toggle "<family>_outline" with selected while on.'
   summary.created.push('Button set (' + comps.length + ' variants)')
 }
 
@@ -307,7 +313,7 @@ else {
   summary.created.push('Input set (' + comps.length + ' variants)')
 }
 
-// Chip: the button chip, Selected x State, a soft square on the chip corner; off is the neutral tag's default look, on the family's stamp by the role collection's mode
+// Chip: the button chip, Selected x State, a soft square on the chip corner; off is the neutral stamp, on the family's stamp by the role collection's mode
 if (existingSet('Chip')) summary.skipped.push('Chip set exists; left as is')
 else {
   const comps = []
@@ -324,7 +330,7 @@ else {
   }
   const set = figma.combineAsVariants(comps, page); set.name = 'Chip'
   set.layoutMode = 'VERTICAL'; set.itemSpacing = 12; set.paddingLeft = set.paddingRight = set.paddingTop = set.paddingBottom = 16
-  set.description = 'The button chip: off on the neutral tag\\'s default look, on on the family\\'s stamp, the family by the role collection\\'s mode. In code: <Chip theme="<family>_chip" selected>.'
+  set.description = 'The button chip: off on the neutral stamp, on on the family\\'s stamp, the family by the role collection\\'s mode. In code: <Chip theme="<family>_chip" selected>.'
   summary.created.push('Chip set (' + comps.length + ' variants)')
 }
 

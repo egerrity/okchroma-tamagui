@@ -165,3 +165,12 @@ the rule it serves. Code cites a decision by number, never by date.
     moved there, and the Button part gained `selected`. The roster's toggle and button chip
     flip on press. The print's Chip set is Selected by State, its off side bound to the
     neutral roster directly.
+29. 2026-09-21. **The button chip is a stamp on both sides.** Off, it is the neutral stamp,
+    fill, edge and on-text with the neutral stamp's hover and pressed fills; on, it is the
+    family's stamp with its own. Decision 28 had the off side on the neutral tag's default
+    look, resting under hover and press; the owner's reading is that the chip is the stamp
+    in neutral until it is chosen, so its interaction is the engine's stamp interaction and
+    nothing rests. The print's off side binds the neutral stamp's roster variables by state.
+    A selected Button hovers and presses on the selected ladder too, so the tiers declare
+    `backgroundSelectedHover` and `backgroundSelectedPress`, and the printed Button set is
+    Kind by State, primary, outline, ghost and toggle, in place of Tier by State.

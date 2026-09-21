@@ -83,7 +83,9 @@ one keyword the map may hold: it names the absence of a paint, not a color.
 | `backgroundHover` | `<family>-solid-bg-hover` | `<family>-subtle-bg-hover` | `<family>-hint-bg-hover` | `<family>-hint-bg-hover` |
 | `backgroundPress` | `<family>-solid-bg-pressed` | `<family>-subtle-bg-pressed` | `<family>-hint-bg-pressed` | `<family>-hint-bg-pressed` |
 | `backgroundFocus` | `<family>-solid-bg-enabled` | `<family>-subtle-bg-enabled` | `<family>-hint-bg-enabled` | `<family>-hint-bg-enabled` |
-| `backgroundSelected` | `<family>-solid-bg-enabled` | `<family>-subtle-bg-selected` | `<family>-hint-bg-selected` | `<family>-hint-bg-selected` |
+| `backgroundSelected` | `<family>-solid-bg-enabled` | `<family>-subtle-bg-selected` | `<family>-subtle-bg-enabled` | `<family>-subtle-bg-enabled` |
+| `backgroundSelectedHover` | `<family>-solid-bg-hover` | `<family>-subtle-bg-hover` | `<family>-subtle-bg-hover` | `<family>-subtle-bg-hover` |
+| `backgroundSelectedPress` | `<family>-solid-bg-pressed` | `<family>-subtle-bg-pressed` | `<family>-subtle-bg-pressed` | `<family>-subtle-bg-pressed` |
 | `color`, `colorHover`, `colorPress`, `colorFocus` | `<family>-solid-fg` | `<family>-fg` | `<family>-fg-on-hint` | `<family>-fg-on-hint` |
 | `borderColor` and its hover, press, focus | `<family>-solid-border` | `transparent` | `transparent` | the family's tint |
 | `outlineColor` | inherited | inherited | inherited | inherited |
@@ -120,16 +122,16 @@ The chips, on their levels. `packages/theme/src/map/display.ts`.
 ### The button chip, `<family>_chip`
 
 For the seven color families; the pole families have no chalk. The button chip has no
-hierarchy. Off, it wears the neutral tag's default look; on, it is the family's stamp, with
-the stamp's own hover and pressed fills. Opacity is for interaction; a real fill has no
-interaction rung in the register, so the off chip rests on its fill (decision 28).
-`<Chip theme="brand_chip" selected>`.
+hierarchy. Off, it is the neutral stamp; on, it is the family's stamp; each side takes its
+stamp's own hover and pressed fills (decision 29). `<Chip theme="brand_chip" selected>`.
 
 | Tamagui key | okchroma name |
 |---|---|
-| `background`, `backgroundHover`, `backgroundPress`, `backgroundFocus` | `neutral-paper-3` |
-| `color`, `colorHover`, `colorPress`, `colorFocus` | `neutral-pencil-47` |
-| `borderColor`, `borderColorHover`, `borderColorPress`, `borderColorFocus` | `neutral-chalk-15` |
+| `background`, `backgroundFocus` | `neutral-stamp-fill` |
+| `backgroundHover` | `neutral-stamp-fill-hover` |
+| `backgroundPress` | `neutral-stamp-fill-pressed` |
+| `color`, `colorHover`, `colorPress`, `colorFocus` | `neutral-stamp-on` |
+| `borderColor`, `borderColorHover`, `borderColorPress`, `borderColorFocus` | `neutral-stamp-edge` |
 | `backgroundSelected` | `<family>-stamp-fill` |
 | `backgroundSelectedHover` | `<family>-stamp-fill-hover` |
 | `backgroundSelectedPress` | `<family>-stamp-fill-pressed` |

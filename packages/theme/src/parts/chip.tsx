@@ -5,9 +5,9 @@ import { disabledOpacity } from '../../dist/brands.ts'
 
 // The button chip: a filter or an action on a family (`theme="brand_chip"`), a soft square
 // on the chip corner, small. It is the kit's Button under another shape, so press, hover,
-// focus and the keyboard are the kit's. Off it wears the theme's resting rows; `selected`
-// moves it onto the theme's selected rows, the family's stamp, with the stamp's own hover
-// and press. Sizes: `$xs` (the default) and `$xxs`, the two chip heights.
+// focus and the keyboard are the kit's. Off it is the neutral stamp, the theme's resting
+// rows; `selected` moves it onto the theme's selected rows, the family's stamp; each side
+// hovers and presses on its own stamp. Sizes: `$xs` (the default) and `$xxs`, the two chip heights.
 const ChipFrame = styled(KitButton, {
   name: 'Chip',
   size: '$xs',

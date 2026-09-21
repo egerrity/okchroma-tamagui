@@ -24,8 +24,14 @@ export const Button = withStaticProperties(
     disabledStyle: { opacity: disabledOpacity },
     variants: {
       size: { ...kitSize, '...size': (val: any, extras: any) => ({ ...kitSize['...size'](val, extras), borderRadius: '$full', minWidth: minWidthAt(val) }) },
-      // a toggle shown on: the ground the theme names for a selected control
-      selected: { true: { backgroundColor: '$backgroundSelected' } },
+      // a toggle shown on: the ground the theme names for a selected control, and its own hover and press
+      selected: {
+        true: {
+          backgroundColor: '$backgroundSelected',
+          hoverStyle: { backgroundColor: '$backgroundSelectedHover' },
+          pressStyle: { backgroundColor: '$backgroundSelectedPress' },
+        },
+      },
       disabled: { true: { pointerEvents: 'none', focusable: false } },
     } as const,
     // the kit pre-expands its own default size, so the default is restated here to run the wrapper

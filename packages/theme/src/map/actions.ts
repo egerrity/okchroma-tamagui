@@ -7,6 +7,7 @@
 // is the ground a toggle keeps while it is on: a toggle is hint off and subtle on, so the
 // hint and outline tiers take the subtle tier's resting ground; the subtle tier takes its
 // own selected rung; the solid tier is already filled, so it stays on its resting stamp.
+// A selected control's hover and press climb that tier's own ladder.
 import { type KeyMap, same, BORDER_KEYS, COLOR_KEYS } from './keys.ts'
 
 /** `<family>`: edges only. The focus ring stays the base's neutral highlighter everywhere. */
@@ -20,6 +21,8 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundPress: '<family>-solid-bg-pressed',
     backgroundFocus: '<family>-solid-bg-enabled',
     backgroundSelected: '<family>-solid-bg-enabled',
+    backgroundSelectedHover: '<family>-solid-bg-hover',
+    backgroundSelectedPress: '<family>-solid-bg-pressed',
     ...same(COLOR_KEYS, '<family>-solid-fg'),
     ...same(BORDER_KEYS, '<family>-solid-border'),
   },
@@ -29,6 +32,8 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundPress: '<family>-subtle-bg-pressed',
     backgroundFocus: '<family>-subtle-bg-enabled',
     backgroundSelected: '<family>-subtle-bg-selected',
+    backgroundSelectedHover: '<family>-subtle-bg-hover',
+    backgroundSelectedPress: '<family>-subtle-bg-pressed',
     ...same(COLOR_KEYS, '<family>-fg'),
     ...same(BORDER_KEYS, 'transparent'),
   },
@@ -38,6 +43,8 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundPress: '<family>-hint-bg-pressed',
     backgroundFocus: '<family>-hint-bg-enabled',
     backgroundSelected: '<family>-subtle-bg-enabled',
+    backgroundSelectedHover: '<family>-subtle-bg-hover',
+    backgroundSelectedPress: '<family>-subtle-bg-pressed',
     ...same(COLOR_KEYS, '<family>-fg-on-hint'),
     ...same(BORDER_KEYS, 'transparent'),
   },
@@ -47,6 +54,8 @@ export const TIERS: Readonly<Record<'solid' | 'subtle' | 'hint' | 'outline', Key
     backgroundPress: '<family>-hint-bg-pressed',
     backgroundFocus: '<family>-hint-bg-enabled',
     backgroundSelected: '<family>-subtle-bg-enabled',
+    backgroundSelectedHover: '<family>-subtle-bg-hover',
+    backgroundSelectedPress: '<family>-subtle-bg-pressed',
     ...same(COLOR_KEYS, '<family>-fg-on-hint'),
     ...same(BORDER_KEYS, '<tint>'),
   },
