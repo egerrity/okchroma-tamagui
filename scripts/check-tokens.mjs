@@ -8,7 +8,8 @@
 //      declares the same theme names and keys.
 //   B. App and screen code writes no color literal in a style prop, and every `$` reference
 //      is a theme key or a stock token name.
-//   C. A theme prop on a Button or a Chip ends in a tier: solid, subtle, hint or outline.
+//   C. A theme prop on a Button ends in a tier: solid, subtle, hint or outline. A Chip names a
+//      color family, never a theme.
 //   D. Nothing imports the theme builder.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
@@ -64,10 +65,8 @@ for (const brand of BRAND_NAMES) {
   for (const f of INTERACTION_FAMILIES) {
     if (!families.includes(f)) fail(`A: the register family ${f} is missing from dist/brands.ts`)
     for (const suffix of ['', '_solid', '_subtle', '_hint', '_outline']) if (!themes[`light_${f}${suffix}`]) fail(`A: ${brand}: light_${f}${suffix} is missing`)
-    if (f !== 'neutral-strong' && f !== 'neutral-inverse') {
-      if (!themes[`light_${f}_chip`]) fail(`A: ${brand}: light_${f}_chip is missing`)
+    if (f !== 'neutral-strong' && f !== 'neutral-inverse')
       for (const level of ['stamp', 'strong', 'default']) if (!themes[`light_${f}_indicator-${level}`]) fail(`A: ${brand}: light_${f}_indicator-${level} is missing`)
-    }
   }
   // every brand declares the same theme names and keys, so one brand's type stands for all
   const ks = Object.entries(themes).map(([n, keys]) => n + ':' + Object.keys(keys).sort().join(',')).sort().join('|')
@@ -88,6 +87,7 @@ const walk = (dir) => {
 }
 for (const d of ['apps', 'packages']) walk(join(root, d))
 const themeKeys = new Set(Object.keys(themes.light))
+const colorFamilies = INTERACTION_FAMILIES.filter(f => f !== 'neutral-strong' && f !== 'neutral-inverse')
 const tokenRef = /^\$(\d+(\.\d+)?|true|body|heading|button|xxs|xs|sm|md|lg|chip|full|icon|content)$/
 
 for (const p of files) {
@@ -102,10 +102,15 @@ for (const p of files) {
     const ref = `$${m[1]}`
     if (!tokenRef.test(ref) && !themeKeys.has(m[1])) fail(`B: ${rel} reads ${ref}, which no theme declares`)
   }
-  for (const m of code.matchAll(/<(Button|Chip)\b[^>]*?\btheme=(?:"([^"]*)"|\{`([^`]*)`\})/gs)) {
-    const value = m[2] ?? m[3]
-    const named = m[1] === 'Chip' ? /_chip$/ : /_(solid|subtle|hint|outline)$|_\$\{tier\}$/
-    if (!named.test(value)) fail(`C: ${rel} gives a ${m[1]} theme="${value}", which names no ${m[1] === 'Chip' ? 'family chip' : 'tier'}`)
+  for (const m of code.matchAll(/<Button\b[^>]*?\btheme=(?:"([^"]*)"|\{`([^`]*)`\})/gs)) {
+    const value = m[1] ?? m[2]
+    if (!/_(solid|subtle|hint|outline)$|_\$\{tier\}$/.test(value)) fail(`C: ${rel} gives a Button theme="${value}", which names no tier`)
+  }
+  // a Chip picks its own tier theme from `selected` (parts/chip.tsx); the call site names the family
+  for (const m of code.matchAll(/<Chip(?![\w.])([^>]*)>/gs)) {
+    const fam = m[1].match(/\bfamily=(?:"([^"]*)"|\{[^}]*\})/)
+    if (!fam) fail(`C: ${rel} gives a Chip no family`)
+    else if (fam[1] !== undefined && !colorFamilies.includes(fam[1])) fail(`C: ${rel} gives a Chip family="${fam[1]}", which names no color family`)
   }
   if (/@tamagui\/theme-builder|\bcreateThemes\b/.test(code)) fail(`D: ${rel} reaches for the theme builder`)
 }

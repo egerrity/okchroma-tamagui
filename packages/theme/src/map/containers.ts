@@ -11,11 +11,9 @@ export const BASE: KeyMap = {
   backgroundPress: 'neutral-hint-bg-pressed',
   backgroundFocus: 'neutral-hint-bg-enabled',
   backgroundSelected: 'neutral-hint-bg-selected',
-  // the keys a selected button chip reads (map/display.ts), declared here so every `$` reference resolves
+  // the keys a selected Button reads (parts.tsx), declared here so every `$` reference resolves
   backgroundSelectedHover: 'neutral-hint-bg-selected',
   backgroundSelectedPress: 'neutral-hint-bg-selected',
-  colorSelected: 'neutral-fg',
-  borderColorSelected: 'neutral-chalk-11',
   ...same(COLOR_KEYS, 'neutral-pen-70'),
   placeholderColor: 'neutral-pencil-47',
   ...same(BORDER_KEYS, 'neutral-chalk-11'),

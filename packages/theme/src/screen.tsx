@@ -26,7 +26,7 @@ export function Screen() {
 
       <XStack gap="$2" flexWrap="wrap" alignItems="center">
         {filters.map(([key, label]) => (
-          <Chip key={key} theme="brand_chip" selected={active.has(key)} aria-pressed={active.has(key)} onPress={() => toggle(key)}>
+          <Chip key={key} family="brand" selected={active.has(key)} aria-pressed={active.has(key)} onPress={() => toggle(key)}>
             {active.has(key) ? `\u2713 ${label}` : label}
           </Chip>
         ))}

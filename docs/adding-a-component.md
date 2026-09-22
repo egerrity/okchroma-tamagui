@@ -12,14 +12,14 @@ Decide which group the component belongs to the way the design files group it:
 `containers`, `actions`, `inputs`, `display`. Then decide what it reads.
 
 - If it reads what a tier already gives (ground, hover, pressed, selected, text, edge), it
-  needs no rows: it takes `theme="<family>_<tier>"` like a Button. The interactive chip is
-  this case.
+  needs no rows: it takes `theme="<family>_<tier>"` like a Button. The button chip is
+  this case: `neutral_solid` off, `<family>_solid` on.
 - If it reads something of its own, it gets a component sub-theme in its group's file: a
   small object of Tamagui keys to engine names, expanded per family by the generator
   when it says `<family>`. The tag chip's levels are this case (`map/display.ts`). Add the
   same rows to `docs/map.md` under the group.
 - If it needs a key no theme declares yet, add the key to the base theme in
-  `map/containers.ts` too, so the check can see it (the chip's `backgroundSelected`).
+  `map/containers.ts` too, so the check can see it (the toggle's `backgroundSelectedHover`).
 
 Then `npm run tokens && npm run check`.
 
@@ -28,10 +28,11 @@ Then `npm run tokens && npm run check`.
 A file under `packages/theme/src/parts/`, exported from `parts.tsx`. A part is a styled
 frame with a `name` (that is how the sub-theme finds it) and, if it has text, a styled
 text. Build it on the closest kit component when one exists, so press, hover, focus and
-the keyboard are the kit's: the interactive chip is the kit's Button under a pill. Shape
-comes from the foundations' keys (`$xs`, `$chip`), color only from theme keys
+the keyboard are the kit's: the button chip is the kit's Button under the chip corner.
+Shape comes from the foundations' keys (`$xs`, `$chip`), color only from theme keys
 (`$background`, `$color`, `$borderColor`). A prop that changes color maps to a theme key
-(`selected` to `$backgroundSelected`); it never names a color.
+(the Button's `selected` to `$backgroundSelected`) or picks the theme (the button chip's
+`selected` picks the family's solid tier over the neutral's); it never names a color.
 
 ## 3. Its place in the exhibit
 

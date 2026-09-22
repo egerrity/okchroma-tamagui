@@ -5,11 +5,11 @@
 import { useState } from 'react'
 import { H4, Paragraph, SizableText, XStack, YStack } from 'tamagui'
 import { Button, Chip, IndicatorChip } from './parts.tsx'
+import type { ColorFamily } from './parts/chip.tsx'
 import { families } from '../dist/brands.ts'
 import { LEVEL_NAMES } from './map/display.ts'
 
 type Family = (typeof families)[number]
-type ColorFamily = Exclude<Family, `neutral-${string}`>
 // the chips exist for the color families; the pole families have no chalk
 const isColorFamily = (f: Family): f is ColorFamily => !f.startsWith('neutral-')
 
@@ -98,11 +98,11 @@ export function Roster() {
             <>
               <Label>button chip</Label>
               <XStack gap="$2" flexWrap="wrap" alignItems="center">
-                <Chip theme={`${family}_chip`} selected={!!on[`${family}-chip`]} aria-pressed={!!on[`${family}-chip`]} onPress={() => flip(`${family}-chip`)}>
+                <Chip family={family} selected={!!on[`${family}-chip`]} aria-pressed={!!on[`${family}-chip`]} onPress={() => flip(`${family}-chip`)}>
                   {on[`${family}-chip`] ? '\u2713 on' : 'off'}
                 </Chip>
-                <Chip theme={`${family}_chip`} selected>{'\u2713 on'}</Chip>
-                <Chip theme={`${family}_chip`} disabled>disabled</Chip>
+                <Chip family={family} selected>{'\u2713 on'}</Chip>
+                <Chip family={family} disabled>disabled</Chip>
               </XStack>
               <Label>tag chip</Label>
               <XStack gap="$2" flexWrap="wrap" alignItems="center">

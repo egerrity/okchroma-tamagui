@@ -171,7 +171,7 @@ else {
     const c = component(f, v.opacity); c.name = 'Selected=' + (v.on ? 'on' : 'off') + ', State=' + v.state
     comps.push(c)
   }
-  finishSet(comps, 'Chip', 'The button chip: off is the neutral stamp (the variant\'s mode is neutral), on is the family\'s stamp by the color family mode on the instance. In code: <Chip theme="<family>_chip" selected>.')
+  finishSet(comps, 'Chip', 'The button chip: off is the neutral stamp (the variant\'s mode is neutral), on is the family\'s stamp by the color family mode on the instance. In code: <Chip family="<family>" selected>.')
 }
 
 if (existingSet('IndicatorChip')) summary.skipped.push('IndicatorChip set exists; left as is')

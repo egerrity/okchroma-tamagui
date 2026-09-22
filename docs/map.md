@@ -26,6 +26,7 @@ Keys the kit reads on anything not given a sub-theme.
 | `backgroundPress` | `neutral-hint-bg-pressed` | the next rung |
 | `backgroundFocus` | `neutral-hint-bg-enabled` | transparent; focus is the ring, not a ground |
 | `backgroundSelected` | `neutral-hint-bg-selected` | the ground a control keeps while it is on |
+| `backgroundSelectedHover`, `backgroundSelectedPress` | `neutral-hint-bg-selected` | declared so a selected Button's references resolve on the base |
 | `color` | `neutral-pen-70` | body text |
 | `colorHover`, `colorPress`, `colorFocus` | `neutral-pen-70` | text does not move on the base |
 | `placeholderColor` | `neutral-pencil-47` | the lowest text stop |
@@ -117,26 +118,17 @@ edge is the brand's highlighter; invalid moves the edge rows to critical and not
 
 ## Display
 
-The chips, on their levels. `packages/theme/src/map/display.ts`.
+The chips. `packages/theme/src/map/display.ts` holds the tag chip's levels; the button
+chip has no rows of its own.
 
-### The button chip, `<family>_chip`
+### The button chip
 
 For the seven color families; the pole families have no chalk. The button chip has no
 hierarchy. Off, it is the neutral stamp; on, it is the family's stamp; each side takes its
-stamp's own hover and pressed fills (decision 29). `<Chip theme="brand_chip" selected>`.
-
-| Tamagui key | okchroma name |
-|---|---|
-| `background`, `backgroundFocus` | `neutral-stamp-fill` |
-| `backgroundHover` | `neutral-stamp-fill-hover` |
-| `backgroundPress` | `neutral-stamp-fill-pressed` |
-| `color`, `colorHover`, `colorPress`, `colorFocus` | `neutral-stamp-on` |
-| `borderColor`, `borderColorHover`, `borderColorPress`, `borderColorFocus` | `neutral-stamp-edge` |
-| `backgroundSelected` | `<family>-stamp-fill` |
-| `backgroundSelectedHover` | `<family>-stamp-fill-hover` |
-| `backgroundSelectedPress` | `<family>-stamp-fill-pressed` |
-| `colorSelected` | `<family>-stamp-on` |
-| `borderColorSelected` | `<family>-stamp-edge` |
+stamp's own hover and pressed fills (decision 29). The stamp is the solid tier, so the chip
+takes `neutral_solid` off and `<family>_solid` on: a Button on the solid tier under the
+chip corner, whose `selected` changes the family and not a key, the way the print's host
+changes mode (decision 31). `<Chip family="brand" selected>`.
 
 ### The tag chip, `<family>_indicator-stamp`, `<family>_indicator-strong`, `<family>_indicator-default`
 

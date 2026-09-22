@@ -189,3 +189,13 @@ the rule it serves. Code cites a decision by number, never by date.
     itself. Figma and code say the same names: the map's `<family>-<leaf>` is the
     collection's `<leaf>` by mode; the register's family-agnostic names stay in CSS, where
     the state layer is a scope rather than a component.
+31. 2026-09-22. **The button chip is the solid tier by family.** Every `<family>_chip`
+    theme held the neutral stamp beside the family's stamp, and both halves were the solid
+    tier already: the off side equalled `neutral_solid` and the on side `<family>_solid`, key
+    for key, in every brand and both modes. The `_chip` themes are gone. A Chip takes a
+    `family`, and `selected` picks its theme, `neutral_solid` off and `<family>_solid` on; the
+    chip carries no selected keys, and the base theme drops `colorSelected` and
+    `borderColorSelected`, which nothing read but the chip. This is decision 30's rule read
+    back into code: the chip's off and on are a change of family, the mode on the print's
+    host, not a state layer. The toggle keeps its selected keys and variant, because its on
+    state is a rung on the same family, which no tier theme pairs with the outline edge.
