@@ -217,3 +217,36 @@ the rule it serves. Code cites a decision by number, never by date.
     a plain field, not segments. No package on web; the system picker's module on native,
     which Expo Go already carries. The rules a picker follows that no screen shows are in
     `docs/date-picker.md`.
+33. 2026-09-22. **The picker's tint stays pen-70; the label rule is the system's; the role
+    waits for Android.** The question left open under decision 32 was whether the system
+    picker's label flip, white on a dark tint and black on a light one, is designed or
+    incidental. Apple's documentation for the calendar view, the date picker, its inline style,
+    the tint color and the Human Interface Guidelines say nothing about it; the one Apple
+    statement found, a 2021 forum reply from a frameworks engineer, calls a white tint
+    unsupported "due to the nature of the white-text in the Calendar", so no flip existed then.
+    The rule was read from UIKit in the iOS 26.5 simulator runtime: a private default on the
+    calendar view's platform metrics sets the selected-today label black when the tint's luma,
+    Rec. 709 weights on the sRGB values as written, times alpha, is above 0.8, and white
+    otherwise; the selected day's text and today's number are the tint itself. Deliberate code,
+    not a promise, and it has moved once already. Through the built themes, pen-70 in dark
+    sits at luma 0.875 to 0.921, every label black, 0.075 above the line; in light at 0.134 to
+    0.205, every label white; pen-58 in dark straddles the line, which is why the pencil failed.
+    Android was settled the same day: the community picker takes no color from a prop on
+    Android; its dialog reads the app theme, written at build time by the picker's config
+    plugin, so a development build and never Expo Go, one accent per app. The framework dialog
+    draws the circle in the control-activated color and its label in the theme's inverse text,
+    white in light and black in dark; the Material dialog draws primary and on-primary. No
+    flip, and no per-family or per-instance tint. Four options were weighed. The closest system
+    color and the default tint fail the 4.5 to 1 line on Apple's own documented values, none of
+    the thirteen holds it in both modes on our plane and the default blue's white label reads
+    4.0 in light and 3.6 in dark, and both are brand-blind, so they are out. Pen-70 stays the
+    value on both platforms. Rule E now holds the rule itself: the label each platform draws,
+    at 4.5 to 1, and a margin of 0.05 from the iOS line, so a stop that drifts toward it fails
+    the build before a release moves it. A named engine role for the picker's tint is deferred
+    until an Android development build exists, because Android dictates its shape: brand-level,
+    a fill and an on-color per mode, exported through the picker's config plugin, with the
+    per-family tint on iOS an extra the role does not promise; an engine addition, recorded
+    here and not patched in this repo. The alternative that needs no platform rule remains our
+    own cells on native, at the cost of the system picker's VoiceOver and touch tuning. The
+    probe that reads the rule out of any installed runtime is a scratch tool; promoting it
+    beside the check is open.

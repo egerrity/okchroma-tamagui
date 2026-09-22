@@ -12,10 +12,11 @@
 //      DayCell name a color family, never a theme.
 //   D. Nothing imports the theme builder.
 //   E. The native date picker's tint, the family's pen-70, reads as text on the dialog's plane
-//      at 4.5 to 1 in both modes, carries white at 4.5 to 1 in light, and carries black at
-//      4.5 to 1 in dark, in every brand and family (docs/date-picker.md). The picker draws its
-//      label white on a dark tint and black on a light one; the flip was observed above the
-//      lightness of every pen-58 and below that of every pen-70 in dark.
+//      at 4.5 to 1 in both modes and carries, at 4.5 to 1, the label each platform draws on it,
+//      in every brand and family (docs/date-picker.md, decision 33). iOS picks that label by
+//      the tint's luma on the sRGB values as written, black above 0.8 and white otherwise, so
+//      the tint also keeps a margin from that line; Android draws the theme's inverse text,
+//      white in light and black in dark.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -80,23 +81,36 @@ for (const brand of BRAND_NAMES) {
 }
 const themes = byBrand[BRAND_NAMES[0]].themes
 
-// ── E. the native picker's tint holds its white label ────────────────────────
+// ── E. the native picker's tint carries the label each platform draws ────────
 const luminance = (hex) => {
   const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
   return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
 }
 const contrast = (a, b) => { const la = luminance(a), lb = luminance(b); return (Math.max(la, lb) + 0.05) / (Math.min(la, lb) + 0.05) }
+// iOS chooses the selected-today label from the tint's luma on the sRGB values as written, no
+// linearizing: black above the line, white at or below it. The system's own rule, read from its
+// code and promised nowhere (decision 33); the margin is what a stop must keep from the line.
+const IOS_LABEL_LINE = 0.8
+const IOS_LABEL_MARGIN = 0.05
+const luma = (hex) => { const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255); return 0.2126 * r + 0.7152 * g + 0.0722 * b }
+const labelName = (label) => (label === '#ffffff' ? 'white' : 'black')
 for (const brand of BRAND_NAMES) {
   for (const mode of ['light', 'dark']) {
     const plane = byBrand[brand].themes[mode]['surface-high']
     for (const f of INTERACTION_FAMILIES.filter(f => f !== 'neutral-strong' && f !== 'neutral-inverse')) {
       const hex = byBrand[brand].themes[mode][`${f}-pen-70`]
-      if (!hex || !hex.startsWith('#')) { fail(`E: ${brand}: ${mode} ${f}-pen-70 is missing or not a hex`); continue }
+      if (!hex || !/^#[0-9a-fA-F]{6}$/.test(hex)) { fail(`E: ${brand}: ${mode} ${f}-pen-70 is missing or not an opaque hex`); continue }
       const asText = contrast(hex, plane)
       if (asText < 4.5) fail(`E: ${brand}: ${f}-pen-70 on surface-high in ${mode} is ${asText.toFixed(2)} to 1, under 4.5`)
-      const label = mode === 'light' ? '#ffffff' : '#000000'
-      const underLabel = contrast(hex, label)
-      if (underLabel < 4.5) fail(`E: ${brand}: the picker's ${mode === 'light' ? 'white' : 'black'} label on ${f}-pen-70 in ${mode} is ${underLabel.toFixed(2)} to 1, under 4.5`)
+      const l = luma(hex)
+      if (Math.abs(l - IOS_LABEL_LINE) < IOS_LABEL_MARGIN) fail(`E: ${brand}: ${f}-pen-70 in ${mode} has luma ${l.toFixed(3)}, within ${IOS_LABEL_MARGIN} of the iOS label line at ${IOS_LABEL_LINE}`)
+      const iosLabel = l > IOS_LABEL_LINE ? '#000000' : '#ffffff'
+      const androidLabel = mode === 'light' ? '#ffffff' : '#000000'
+      const labels = iosLabel === androidLabel ? [[iosLabel, 'both platforms draw']] : [[iosLabel, 'iOS draws'], [androidLabel, 'Android draws']]
+      for (const [label, who] of labels) {
+        const under = contrast(hex, label)
+        if (under < 4.5) fail(`E: ${brand}: the ${labelName(label)} label ${who} on ${f}-pen-70 in ${mode} is ${under.toFixed(2)} to 1, under 4.5`)
+      }
     }
   }
 }

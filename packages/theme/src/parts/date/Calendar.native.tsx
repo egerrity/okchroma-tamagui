@@ -2,10 +2,11 @@
 // and VoiceOver are tuned for it (decision 32). The picker takes one color, its tint, and
 // draws a selected day as tint-colored text on a wash of the tint, and a selected day that
 // is also today as a label on a solid circle of the tint; that label is white on a dark
-// tint and flips to black on a light one. The tint is the family's pen-70: a text stop, so
-// it reads on the plane in both modes; dark enough in light to hold white; light enough in
-// dark, in every brand and family, to flip the label (docs/date-picker.md). The check's
-// rule E holds the ratios. The range rules are the model's.
+// tint and black on a light one, by the system's own luma rule (decision 33). The tint is
+// the family's pen-70: a text stop, so it reads on the plane in both modes; dark enough in
+// light to hold white; light enough in dark, in every brand and family, to flip the label
+// (docs/date-picker.md). The check's rule E holds the ratios and the margin from the rule's
+// line. The range rules are the model's.
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useMemo } from 'react'
 import { Paragraph, YStack, useTheme, useThemeName } from 'tamagui'
