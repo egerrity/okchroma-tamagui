@@ -35,8 +35,8 @@ lives inside a Tamagui component, which the theme cannot reach, opens the contin
 - [ ] Each field is labelled, and the format is an instruction tied to it, not only a placeholder.
 - [ ] An impossible or misordered date marks its own field invalid, and the message tied to it names the fix.
 - [ ] The presets are buttons with a pressed state, and one fills both fields.
-- [ ] The calendar opens from its button only, never on focus of a field.
-- [ ] The calendar is a dialog: labelled, focus inside on open, Escape closes, focus returns to the button.
+- [ ] The calendar opens from a field's own button only, never on focus of a field; the button is attached to the field, named for it, and its name confirms the date once set.
+- [ ] The calendar is a dialog: labelled, focus inside on open, Escape closes, focus returns to the button. On web it is not modal: anchored to the button, no scrim, an outside press closes it and leaves focus where it went, Tab cycles inside.
 - [ ] The grid is one tab stop; arrows move by day and week, Page keys by month, Home and End to the week's ends; crossing a month turns the page.
 - [ ] Every cell is named with its full date and its state; cells in the range are selected.
 - [ ] A month change and a completed range are announced once.
@@ -106,3 +106,25 @@ then the presets; cells are 40 pixels; the ends are the stamp with its on-text, 
 the selected ground, today the neutral edge, the panel the high plane. Owed by hand: the
 same run with a real keyboard, VoiceOver on the native fields and the system picker, and
 the browser name.
+
+**2026-09-22, late, light and dark, Vite dev server, trusted key and mouse events through
+Chrome's debugging protocol (the scenario is outside the repository), the calendar as a
+popover (decision 34).** All ten lines pass in both modes, 42 checks each: the 37 of the
+run above, with the dialog line now reading labelled and not modal, one element with the
+role, and five for the popover: it is anchored to the Calendar button, above or below,
+inside the window; no scrim, the ground over the page stays clear; the panel is sized to
+its months, 618 wide at 900; six Tabs stay inside; a press on the start field closes it
+and leaves focus on the field. Escape still closes and returns focus to the button. Owed by
+hand: the same run with a real keyboard, VoiceOver, and the browser name.
+
+**2026-09-22, later still, light and dark, Vite dev server, trusted key and mouse events
+through Chrome's debugging protocol (the scenario is outside the repository), the calendar
+button attached to each field (decision 35).** All ten lines pass in both modes, 46 checks
+each: the 42 of the run above and four for the buttons: each field has its own, named
+Choose start date and Choose end date; the button is attached to its field, the same
+height, one shared edge, square where they meet and the field's corner outside; its name
+shows as a tooltip; and once a range is picked the start's name reads Change start date
+with the date. Escape returns focus to the field's button; Tab runs start, its button, end,
+its button, then the presets. The popover hangs from the field's button, shifted into the
+window when the button's edge would put it outside. Owed by hand: the same run with a real
+keyboard, VoiceOver, and the browser name.

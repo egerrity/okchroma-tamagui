@@ -7,11 +7,15 @@ map rows each state reads, and the accessibility contract the checklist tests.
 
 ## What it is
 
-Two labelled fields, start and end, with the format written beside them; a row of preset
-ranges as button chips; a button that opens the calendar aid. The fields alone complete a
-range. The aid differs by platform and the rest is one file:
+Two labelled fields, start and end, with the format written beside them, each with a
+calendar button attached to its trailing edge; a row of preset ranges as button chips. The
+fields alone complete a range. The button's name says what it does, Choose start date, and
+once a date is set confirms it, Change start date and the date; on web the name also shows
+as a tooltip. The aid differs by platform and the rest is one file:
 
-- Web: a calendar dialog built to the grid pattern, one or two months wide.
+- Web: a calendar popover anchored below the field's button, built to the grid pattern, one
+  or two months wide, sized to its months. A dialog by role and not modal: no scrim, the
+  page stays in view, an outside press closes it (decision 34).
 - Native: the operating system's inline date picker for the field being edited, in the same
   dialog, tinted with the family's pen-70.
 
@@ -23,6 +27,7 @@ A single-date mode is the same component with one field.
 |---|---|
 | End picked before start | The two swap. |
 | A pick while both ends are set | The range restarts; the pick is the new start. |
+| The first pick after opening from a field | Sets that field's end: from Start, the pick is the new start and the end is chosen next; from End, the pick is the new end, swapping if it comes before the start. The calendar opens on that field's date. |
 | Disabled days inside a range | Allowed. A disabled day cannot be picked, but a range may span one. |
 | Start equal to end | Allowed: a one-day range. |
 | Days before the minimum or after the maximum | Disabled in the grid; typed, an error names the bound. |
@@ -33,6 +38,7 @@ A single-date mode is the same component with one field.
 | Typed end before start | The end field takes the critical theme; the message names the start. |
 | Week start and names | From the device locale. |
 | Months shown on web | Two side by side from 640 wide, else one. |
+| Where the calendar opens on web | Below its button, aligned to whichever of its edges keeps the panel in the window; above it when there is no room below; over it when there is room on neither side; a panel taller than the room scrolls inside. |
 | Days outside the month | Not drawn; the cell is empty. |
 | Today | Marked with the neutral outline; when today is an end of the range, the stamp wins and the name still says today. |
 | Dates | Calendar days, year, month and day, never instants; the model converts only to format. |
@@ -52,9 +58,10 @@ No row is added for the picker. Every state is a tier or a stop that exists.
 | Weekday header | `neutral-pencil-47` |
 | Month heading, the field labels | body text |
 | Month navigation | `neutral_hint` buttons |
+| The fields' calendar buttons | `neutral_outline` Buttons attached to the field, the glyph in the theme's text color |
 | Presets | `<family>` button chips |
 | The fields | the Input themes; `critical` when invalid |
-| The dialog | the DialogOverlay and DialogContent themes |
+| The calendar's container | on web the popover panel, the PopperContent theme, the dialog's panel without its scrim; on native the DialogOverlay and DialogContent themes |
 | The native picker's tint | `<family>-pen-70`, the same stop in both modes. The picker takes one color and makes two drawings with it: a selected day as tint-colored text on a wash of the tint, and a selected day that is also today as a label on a solid circle of the tint. iOS picks that label by the tint's luma on the sRGB values as written: black above 0.8, white at or below it. That is the system's own rule, read from its code and promised nowhere (decision 33). Android's picker draws the theme's inverse text, white in light and black in dark, the same pairing. Pen-70 is a text stop, so it reads on the plane in both modes; in light it is dark and holds white at twelve to one or better; in dark it sits above the line in every brand and family and holds black at fifteen to one or better. The check's rule E holds the ratios for both labels and a margin of 0.05 from the line. |
 
 The band: cells inside the range abut with square corners; the start is rounded on its
@@ -68,8 +75,10 @@ The lines `docs/checklist-web-a11y.md` tests for the picker, in the order they m
 2. Each field is labelled, and the format is an instruction tied to it, not a placeholder.
 3. An invalid field says so, and its message is tied to it and names the fix.
 4. The presets are buttons with a pressed state.
-5. The calendar opens only from its button, never on focus of a field.
+5. The calendar opens only from a field's own button, never on focus of a field.
 6. The calendar is a dialog: labelled, focus inside on open, Escape closes, focus returns.
+   On web it is not modal: anchored to its button, no scrim, an outside press closes it
+   and leaves focus on the control it went to, and Tab cycles inside it.
 7. The grid is one tab stop. Arrow keys move by day and by week, Page keys by month, Home
    and End to the ends of the week, Enter picks, and crossing a month boundary turns the page.
 8. Every cell is named with its full date and its state: today, start of range, end of

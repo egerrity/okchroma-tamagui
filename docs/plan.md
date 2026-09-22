@@ -165,6 +165,19 @@ UI is not installed and not planned.
   wrapper, where the tab index is an overridable default; the day cell is.
 - Comments say why the code is as it is, in the present tense, with no date.
 
+- The kit's `Popover.Content` puts a dialog role on two nested elements: the popper's
+  floating element carries `dialog` from floating-ui, unlabelled, and the frame carries
+  whatever is passed. The date range field puts the role and its names on one element of
+  its own, the panel, and strips the floating element's role once mounted (decision 34).
+- A press anywhere under a `Popover` root counts as inside it and does not dismiss, and the
+  kit's fullscreen press-catcher under an open popover renders into a portal wrapper with no
+  box, so it covers nothing. The root wraps the anchor alone; the rest of the field sits
+  outside it and a press on it closes the calendar.
+- The popover's focus trap holds focus until the panel unmounts, after its exit animation,
+  so a press on a control outside closes the popover and then takes that control's focus
+  back. The field records the pressed control in `onInteractOutside` and focuses it from
+  `onCloseAutoFocus`.
+
 ## Not in scope
 
 Wrappers, more than three components, spacing and type ownership, a docs site, an MCP

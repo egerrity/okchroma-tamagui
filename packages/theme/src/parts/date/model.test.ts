@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { addDays, addMonths, daysInMonth, weekday, monthGrid, startOfWeek, pick, position, validate, presets, localeInfo, parse, formatField, formatLong, iso, plain, daysBetween } from './model.ts'
+import { addDays, addMonths, daysInMonth, weekday, monthGrid, startOfWeek, pick, pickFrom, position, validate, presets, localeInfo, parse, formatField, formatLong, iso, plain, daysBetween } from './model.ts'
 
 test('arithmetic ignores daylight saving', () => {
   assert.equal(iso(addDays(plain(2026, 3, 7), 1)), '2026-03-08')   // US clocks change 2026-03-08
@@ -30,6 +30,15 @@ test('the pick rules: start, end, swap, restart, one day', () => {
   r = pick(r, plain(2026, 9, 15), 'range'); assert.deepEqual(r, { start: plain(2026, 9, 15), end: null }) // restart
   r = pick(r, plain(2026, 9, 15), 'range'); assert.deepEqual(r, { start: plain(2026, 9, 15), end: plain(2026, 9, 15) }) // one day
   assert.deepEqual(pick({ start: a, end: null }, b, 'single'), { start: b, end: b })
+})
+test('a pick from a field sets that end: from the start it restarts, from the end it replaces or swaps', () => {
+  const a = plain(2026, 9, 10), b = plain(2026, 9, 20), c = plain(2026, 9, 25)
+  assert.deepEqual(pickFrom({ start: a, end: b }, c, 'range', 'end'), { start: a, end: c })                              // a later end replaces
+  assert.deepEqual(pickFrom({ start: a, end: b }, plain(2026, 9, 5), 'range', 'end'), { start: plain(2026, 9, 5), end: a }) // an earlier end swaps
+  assert.deepEqual(pickFrom({ start: a, end: b }, c, 'range', 'start'), { start: c, end: null })                         // from the start, restart
+  assert.deepEqual(pickFrom({ start: null, end: null }, c, 'range', 'end'), { start: c, end: null })                     // no start yet: the pick is the start
+  assert.deepEqual(pickFrom({ start: a, end: b }, c, 'single', 'end'), { start: c, end: c })
+  assert.deepEqual(pickFrom({ start: a, end: null }, c, 'range', null), pick({ start: a, end: null }, c, 'range'))
 })
 test('positions inside, at the ends, and in preview', () => {
   const r = { start: plain(2026, 9, 10), end: plain(2026, 9, 20) }

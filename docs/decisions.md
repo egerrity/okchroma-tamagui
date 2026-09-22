@@ -250,3 +250,50 @@ the rule it serves. Code cites a decision by number, never by date.
     own cells on native, at the cost of the system picker's VoiceOver and touch tuning. The
     probe that reads the rule out of any installed runtime is a scratch tool; promoting it
     beside the check is open.
+34. 2026-09-22. **The web calendar is an anchored popover, not a modal dialog.** The owner
+    judged the calendar dialog on web and asked for two things: freedom on its size, and a
+    way to open it without an overlay. The size was an accident: the kit's dialog panel
+    sizes to its widest child, the one-line keyboard instruction, so on a wide window the
+    panel was as wide as that sentence. On web the calendar now opens in the kit's Popover,
+    anchored below the Calendar button and aligned to its leading edge, flipping above when
+    the window has no room below and shifting to stay inside it; no scrim, the page stays in
+    view, an outside press closes it, Escape closes it, focus lands on the day on open,
+    returns to the button on Escape or Done and goes to the control an outside press went
+    to, and Tab cycles inside. The instructions take no width of their own and stretch to
+    the calendar's, so the panel is as wide as its months; a window too short for the months
+    caps the panel at the room the popper reports and scrolls it, and a window with room on
+    neither side shifts it over its button. It is a dialog by role and not modal, so
+    contract line 6 holds as written, with the web lines added. Three kit traps were found
+    on the way and are in `docs/plan.md`: the popper's floating element carries a dialog
+    role of its own, a press under the popover root counts as inside, and the focus trap
+    holds until the panel is gone. Native keeps the kit's dialog around the system picker: the container splits by
+    platform at the field, the way the calendar already does. The popover's panel is the
+    popper's frame, so the map gains a `PopperContent` theme reading the dialog panel's
+    rows, plane, edge and shadow, no new color. Two things are open: under the one-month
+    width a bottom sheet is the honest small-screen form, and the kit's Adapt can turn the
+    popover into one when a sheet has its theme rows; and the print's dialog panel stands
+    for the popover's until a set is cut. Foreclosed: opening the calendar on focus of a
+    field, which decision 32 rules out; the popover opens from the button alone.
+35. 2026-09-22. **Each field carries its own calendar button, attached.** The owner judged
+    the popover on web and found one thing confusing: the calendar had to be reached from a
+    button standing off to the side, when it belongs to the field. Two placements were
+    weighed. Overlaid inside the field's box, the convention most people know, the button
+    would share the field's hit area, borrow its padding and have to fit its focus ring
+    inside the field's border. Attached, butted to the field's trailing edge and sharing its
+    height and edge, it reads as part of the field and stays its own box, which is what the
+    ARIA Authoring Practices date picker example does and what the kit's own copy-paste date
+    picker does. Attached won. Each field now ends in a `neutral_outline` Button, square
+    where they meet and the field's corner outside, one shared edge, a calendar glyph drawn
+    in the theme's text color so no icon set is needed. Its name is Choose start date, or
+    Choose end date, and once a date is set Change start date and the date, so a screen
+    reader hears the pick confirmed; on web the name also shows as a tooltip on hover. The
+    calendar opens on that field's date and its first pick sets that field's end: from
+    Start, the pick is the new start and the end is chosen next; from End, the pick is the
+    new end, swapping if it comes before the start; the range rules take over after it,
+    on both platforms, held by a model test. The standalone Calendar button is gone, so the
+    tab order runs start, its button, end, its button, then the presets, two stops instead
+    of one. Contract line 5 now reads from a field's own button. Foreclosed: an overlay
+    inside the field, and opening the calendar from the field's text or its focus. Open: the
+    kit's Tooltip, which would give the name on keyboard focus too, waits until its trigger
+    is known not to wrap the button the way the dialog's does (decision 17).
+

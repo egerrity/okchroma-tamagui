@@ -9,8 +9,8 @@ import { Button } from '../../parts.tsx'
 import type { ColorFamily } from '../chip.tsx'
 import { DayCell } from './DayCell.tsx'
 import {
-  type Bounds, type Locale, type Mode, type PlainDate, type Range, type Weekday,
-  addDays, addMonths, compare, equal, formatLong, formatMonth, iso, monthGrid, outOfBounds, pick, position, sameMonth, startOfMonth, startOfWeek, today as deviceToday,
+  type Bounds, type Locale, type Mode, type PlainDate, type Range, type Weekday, type Which,
+  addDays, addMonths, compare, equal, formatLong, formatMonth, iso, monthGrid, outOfBounds, pickFrom, position, sameMonth, startOfMonth, startOfWeek, today as deviceToday,
 } from './model.ts'
 
 export type CalendarProps = {
@@ -26,16 +26,21 @@ export type CalendarProps = {
   describedById: string
   /** spoken once, politely: a month turned, a range completed */
   announce: (text: string) => void
-  /** true after the dialog opened: the focused day takes focus */
+  /** true once the calendar opened: the focused day takes focus */
   autoFocus?: boolean
+  /** the field whose button opened the calendar: it opens on that end's date, and the first pick sets that end */
+  from?: Which
 }
 
 const TWO_MONTHS_FROM = 640
 
-export function Calendar({ family, locale, mode, value, onChange, bounds, labelId, describedById, announce, autoFocus }: CalendarProps) {
+export function Calendar({ family, locale, mode, value, onChange, bounds, labelId, describedById, announce, autoFocus, from }: CalendarProps) {
   const todayDate = useMemo(() => deviceToday(), [])
-  const [focused, setFocused] = useState<PlainDate>(value.start ?? todayDate)
-  const [view, setView] = useState<PlainDate>(startOfMonth(value.start ?? todayDate))
+  const initial = from === 'end' ? value.end ?? value.start ?? todayDate : value.start ?? todayDate
+  const [focused, setFocused] = useState<PlainDate>(initial)
+  const [view, setView] = useState<PlainDate>(startOfMonth(initial))
+  // the end the first pick sets, from the field that opened the calendar; the range rules take over after it
+  const [armed, setArmed] = useState<Which | null>(from ?? null)
   const [hover, setHover] = useState<PlainDate | null>(null)
   const [byKeyboard, setByKeyboard] = useState(false)
   const [months, setMonths] = useState(() => (typeof window !== 'undefined' && window.innerWidth >= TWO_MONTHS_FROM ? 2 : 1))
@@ -93,7 +98,8 @@ export function Calendar({ family, locale, mode, value, onChange, bounds, labelI
   }
 
   const choose = (day: PlainDate) => {
-    const next = pick(value, day, mode)
+    const next = pickFrom(value, day, mode, armed)
+    setArmed(null)
     onChange(next)
     setFocused(day)
     if (next.start && next.end) announce(mode === 'single' ? `Selected ${formatLong(next.start, locale)}` : `Selected ${formatLong(next.start, locale)} to ${formatLong(next.end, locale)}`)

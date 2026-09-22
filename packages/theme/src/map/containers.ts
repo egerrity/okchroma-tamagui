@@ -26,3 +26,8 @@ export const DIALOG: Readonly<Record<'DialogOverlay' | 'DialogContent', KeyMap>>
   DialogOverlay: { background: 'scrim' },
   DialogContent: { background: 'surface-high', borderColor: 'neutral-chalk-11', shadowColor: 'shadow-08' },
 }
+
+/** `PopperContent`: the kit's popover panel, the popper's frame under `Popover.Content`; the dialog's panel without its scrim */
+export const POPOVER: Readonly<Record<'PopperContent', KeyMap>> = {
+  PopperContent: { background: 'surface-high', borderColor: 'neutral-chalk-11', shadowColor: 'shadow-08' },
+}

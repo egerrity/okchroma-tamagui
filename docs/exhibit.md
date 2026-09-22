@@ -22,7 +22,9 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
   the same four disabled, the button chip off and on, and the tag chip's levels. For judging
   the map row by row.
 - **The date range** (`docs/date-picker.md`). On the screen, a Statement period pair in the
-  card: two fields, the presets, the calendar button, and the calendar dialog judged open.
+  card: two fields, each with its calendar button attached, the presets, and the calendar
+  judged open: on web a popover anchored below the field's button with no scrim, sized to
+  its months; on native the dialog.
   On the roster, one row per color family of the day cell in its states, day, today, start,
   inside, end and disabled, abutting as a band. Native shows the fields, the presets and
   the system picker in the dialog.
@@ -79,3 +81,30 @@ on web, the contract's 37 checks in both modes under trusted key events
 (`docs/checklist-web-a11y.md`), and the band's six states in every family by computed
 style; on native, the picker's tint by pixel in both modes and both of its selected
 drawings. Unjudged: the owner has not yet answered per row.
+
+**2026-09-22, late, brand `eggplant`, okchroma 0.6.1, decision 34, the calendar as a popover.**
+Web from headless Chrome at 900 by 1600: `picker-web-light`, `picker-web-dark`, the calendar
+open as a popover below its button, sized to its two months, a range across two months, the
+page in view behind it and no scrim. Read back: the contract's lines in both modes under
+trusted key and mouse events, 42 checks each (`docs/checklist-web-a11y.md`): one element
+with the dialog role, labelled, not modal; anchored to the button, above or below, inside
+the window; the panel 618 wide at 900; the ground over the page clear; six Tabs stay
+inside; a press on the start field closes it and leaves focus on the field; Escape closes
+and returns focus to the button; the panel the high plane. At 400 by 800, one month, the
+panel shifts over its field and stays inside the window, read back by rectangle; the
+bottom sheet remains the small-screen form to build. Native unchanged in its path, the
+dialog around the system picker; the screen re-shot after the change renders the fields
+with their values. These files replace the 2026-09-22 `picker-web-*` pair under the same
+names; that pair stays in the history. Unjudged: the owner has not yet answered per row.
+
+**2026-09-22, later still, brand `eggplant`, okchroma 0.6.1, decision 35, the attached
+calendar buttons.** Web from headless Chrome at 900 by 1600: `picker-web-light`,
+`picker-web-dark`, each field ending in its calendar button, the popover open from the
+start's button below the field with a range across two months. Read back: the contract's
+lines in both modes, 46 checks each (`docs/checklist-web-a11y.md`), the button attached by
+rectangle and computed corner, named for its field and confirming the date once set; at
+400 by 800, one month, inside the window, by rectangle. Native from Expo Go on an iPhone 17
+Pro simulator, the screen re-shot: the two fields stacked, each with its button attached
+and the glyph drawn in the text color; the dialog path unchanged. These files replace the
+earlier 2026-09-22 `picker-web-*` pair under the same names; that pair stays in the
+history. Unjudged: the owner has not yet answered per row.

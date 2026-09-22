@@ -49,6 +49,18 @@ and `$shadowColor`, so each gets a component sub-theme (decision 13).
 | `borderColor` | inherited | `neutral-chalk-11` |
 | `shadowColor` | inherited | `shadow-08` |
 
+### Popover theme, `PopperContent`
+
+The kit's popover panel is the popper's frame under `Popover.Content`, so the sub-theme
+carries the popper's name. It is the dialog's panel without its scrim: the web calendar
+opens in it, anchored to its button (decision 34).
+
+| Tamagui key | `PopperContent` |
+|---|---|
+| `background` | `surface-high` |
+| `borderColor` | `neutral-chalk-11` |
+| `shadowColor` | `shadow-08` |
+
 ## Actions
 
 The family edge themes and the four tiers a control takes. `packages/theme/src/map/actions.ts`.

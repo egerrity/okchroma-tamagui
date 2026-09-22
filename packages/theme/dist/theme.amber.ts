@@ -1101,6 +1101,11 @@ export const themes = {
     "borderColor": "#dedbd9",
     "shadowColor": "rgba(0, 0, 0, 0.08)"
   },
+  "light_PopperContent": {
+    "background": "#ffffff",
+    "borderColor": "#dedbd9",
+    "shadowColor": "rgba(0, 0, 0, 0.08)"
+  },
   "dark": {
     "alpha-transparent": "transparent",
     "alpha-away-from-bg-06": "rgba(255, 255, 255, 0.06)",
@@ -2195,6 +2200,11 @@ export const themes = {
     "background": "rgba(0, 0, 0, 0.64)"
   },
   "dark_DialogContent": {
+    "background": "#232120",
+    "borderColor": "#353332",
+    "shadowColor": "rgba(0, 0, 0, 0.48)"
+  },
+  "dark_PopperContent": {
     "background": "#232120",
     "borderColor": "#353332",
     "shadowColor": "rgba(0, 0, 0, 0.48)"
@@ -3300,6 +3310,11 @@ export const sources = {
     "borderColor": "neutral-chalk-11",
     "shadowColor": "shadow-08"
   },
+  "light_PopperContent": {
+    "background": "surface-high",
+    "borderColor": "neutral-chalk-11",
+    "shadowColor": "shadow-08"
+  },
   "dark": {
     "alpha-transparent": "alpha-transparent",
     "alpha-away-from-bg-06": "alpha-away-from-bg-06",
@@ -4394,6 +4409,11 @@ export const sources = {
     "background": "scrim"
   },
   "dark_DialogContent": {
+    "background": "surface-high",
+    "borderColor": "neutral-chalk-11",
+    "shadowColor": "shadow-08"
+  },
+  "dark_PopperContent": {
     "background": "surface-high",
     "borderColor": "neutral-chalk-11",
     "shadowColor": "shadow-08"

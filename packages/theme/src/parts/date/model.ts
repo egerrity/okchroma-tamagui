@@ -66,8 +66,15 @@ export function pick(range: Range, date: PlainDate, mode: Mode): Range {
   if (!range.start || range.end) return { start: date, end: null }
   return compare(date, range.start) < 0 ? { start: date, end: range.start } : { start: range.start, end: date }
 }
+export type Which = 'start' | 'end'
+/** a pick after opening the calendar from a field's button: from the start, the pick is the new start and the end is chosen next; from the end, the pick is the new end, swapping when it comes before the start */
+export function pickFrom(range: Range, date: PlainDate, mode: Mode, from: Which | null): Range {
+  if (mode === 'single' || !from) return pick(range, date, mode)
+  if (from === 'start' || !range.start) return { start: date, end: null }
+  return compare(date, range.start) < 0 ? { start: date, end: range.start } : { start: range.start, end: date }
+}
 /** a typed value for one end; the other end stays, and a typed end before the start is kept for validation to name */
-export const setEnd = (range: Range, which: 'start' | 'end', date: PlainDate | null): Range =>
+export const setEnd = (range: Range, which: Which, date: PlainDate | null): Range =>
   which === 'start' ? { start: date, end: range.end } : { start: range.start, end: date }
 
 export type Position = 'start' | 'end' | 'single' | 'inside' | 'preview' | null
