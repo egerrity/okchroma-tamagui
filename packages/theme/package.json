@@ -11,7 +11,8 @@
     "./stock": "./src/stock.ts",
     "./parts": "./src/parts.tsx",
     "./brands": "./src/brands.ts",
-    "./dist/brands": "./dist/brands.ts"
+    "./dist/brands": "./dist/brands.ts",
+    "./map-astryx": "./src/map-astryx.ts"
   },
   "scripts": {
     "build": "node --experimental-strip-types src/build.ts",

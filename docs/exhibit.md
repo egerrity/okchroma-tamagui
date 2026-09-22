@@ -30,6 +30,14 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
   the system picker in the dialog.
 - Web: Vite on port 8350. Native: Expo Go on an iPhone simulator.
 
+- **The Astryx web app** (`apps/web-astryx`, `docs/map-astryx.md`). Astryx's own
+  components under the Astryx map, one brand at a time (`?brand=`), beside Astryx's own
+  generator seeded with the brand's hex as the baseline. Three exhibits: the Button set
+  (primary, secondary, ghost, destructive, enabled and disabled) in two panels grouped by
+  candidate; Astryx's Filterable Table page template whole, the candidate on a toggle, the
+  roster in one realistic screen; and the pairing, this app beside the Tamagui apps on the
+  same brand, judged for one system across two renderers. Dark on dark; light behind the
+  toggle; `?view=`, `?candidate=`, `?mode=`.
 - **The native aid, compared.** The Statement period's calendar on the phone, two ways on a
   top-row toggle: the system's inline picker, the shipped aid (decision 32), and the PoC's
   own grid, the web calendar's file verbatim inside the same dialog, so the band and its ends
@@ -127,3 +135,16 @@ listeners). The grid starts the week on Monday, from the model's locale on Herme
 picker starts on Sunday. Cells are 40 points, as on web; nothing is announced on iOS. The
 owner keeps both aids and puts the grid first; the verdict on the grid, the light shots and
 the accessibility work continue on another machine.
+
+**2026-09-22, brands `poc` (`#E93D82`) and `eggplant`, okchroma 0.6.1, decision 38, Astryx on
+web.** From Vite on 5177 in the app's browser pane at 800 wide, dark, light behind the
+toggle. The Button set: the okchroma panel carries the stamp with its on-text on primary,
+the neutral subtle tier on secondary, the critical pencil-47 on destructive; the Astryx
+generator's panel carries its own accent, its neutral tinted from the seed, and the same
+fixed red on destructive under both seeds, since its generator leaves the status colors at
+defaults. The Filterable Table page renders whole under the Astryx map with no console or
+server errors, the stamp on New job, the compact layout at that width. The pairing: the
+app's values for `eggplant` matched `dist/theme.eggplant.ts` name for name on a sample of
+26, the green second family included; the Tamagui screen shows brand-alt on its Preview
+button and Astryx has no slot for it. Shots owed: the Button panels and the table, both
+modes.

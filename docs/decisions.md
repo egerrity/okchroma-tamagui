@@ -324,3 +324,20 @@ the rule it serves. Code cites a decision by number, never by date.
     Dynamic Type), is deferred: the owner finishes on another machine. Foreclosed: nothing.
     Open: the week starts on Monday in the grid, from the model's locale on Hermes, and on
     Sunday in the system picker; the light shots; the accessibility list.
+
+38. 2026-09-22. **Astryx is the web renderer, Tamagui the native one, one build feeds both.**
+    The owner's goal is one okchroma system on two renderers, pointed at the Figma library:
+    Astryx on web for the breadth of its components, Tamagui on native. The Astryx proof of
+    concept moves in as `apps/web-astryx`, reading `dist/theme.<brand>.ts`, the rows by engine
+    name the build already writes before the Tamagui keys are applied, through the Astryx map,
+    `packages/theme/src/map-astryx.ts`, with its reasoning in `docs/map-astryx.md`. No engine
+    call of its own, no copy of the brands: a brand reads the same value for the same name on
+    both renderers, and the check's rules A and D already fit it. The seed input the proof had
+    is dropped: a new hex is a brand and a build, never a literal, the discipline the repository
+    keeps. `apps/web` stays as the same-file control for native until the grid verdict is in.
+    The four rulings on the map (the accent as the stamp with the fork owed, disabled text as a
+    color, the muted grounds on paper-3, hue families only where Astryx assigns a role) stand
+    as recorded in the map's doc. Foreclosed: a runtime engine in the web app. Open: the
+    check's rule for the Astryx map; the copied page template, which the check reads as this
+    proof's code although it is reference; Code Connect's platform labels for the print; the
+    shots of the Astryx exhibits in both modes.

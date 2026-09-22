@@ -30,7 +30,7 @@ day one; WCAG; the non-color foundations owned as data (decision 23).
 .github/copilot-instructions.md      the rules and commands
 .github/instructions/theme.instructions.md   the theme package's rule
 AGENTS.md                            pointers to the external contracts
-docs/                                plan, map, exhibit, decisions, checklist, adding-a-component, shots/
+docs/                                plan, map, map-astryx, exhibit, decisions, checklist, adding-a-component, shots/
 reference/kitchenui/                 copied reference, not maintained
 packages/theme/
   src/brands.ts                      one object per client: the elections (decision 22)
@@ -44,8 +44,10 @@ packages/theme/
   src/parts.tsx                      the two one-line extensions (decision 15) and the parts index
   src/parts/chip.tsx                 the chips the kit does not ship (decision 25)
   src/screen.tsx, src/roster.tsx     the exhibit, shared by both apps
+  src/map-astryx.ts                  docs/map-astryx.md as data: Astryx's tokens onto engine names (decision 38)
 apps/web                             Vite + @tamagui/vite-plugin, port 8350
 apps/native                          Expo, run in Expo Go, port 8081
+apps/web-astryx                      Vite + Astryx's StyleX plugin, port 5177: the web renderer on the build's rows
 scripts/check-tokens.mjs             the check
 scripts/figma/print.ts               generates the Plugin API code for the print
 scripts/figma/lib.ts                 the path the extended plugin writes each name under

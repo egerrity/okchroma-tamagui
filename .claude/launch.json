@@ -4,7 +4,12 @@
     {
       "name": "poc-web",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["--prefix", "apps/web", "run", "dev"],
+      "runtimeArgs": [
+        "--prefix",
+        "apps/web",
+        "run",
+        "dev"
+      ],
       "port": 8350
     },
     {
@@ -12,6 +17,17 @@
       "runtimeExecutable": "./scripts/start-ios.sh",
       "runtimeArgs": [],
       "port": 8081
+    },
+    {
+      "name": "web-astryx",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "apps/web-astryx",
+        "run",
+        "dev"
+      ],
+      "port": 5177
     }
   ]
 }
