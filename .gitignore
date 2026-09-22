@@ -5,3 +5,6 @@ apps/web/dist/
 *.log
 .env*.local
 apps/web/.tamagui/
+
+# session material, never in the history
+scratch/
