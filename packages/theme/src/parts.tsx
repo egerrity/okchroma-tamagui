@@ -43,5 +43,7 @@ export const Button = withStaticProperties(
 // The kit colors the placeholder only through this prop; the theme names the key.
 export const Input = styled(KitInput, { placeholderTextColor: '$placeholderColor' })
 
-// The components the kit does not ship, one file each under parts/ (decision 25).
+// The components the kit does not ship, one file each under parts/ (decision 25); the date
+// range picker is a directory of its own (decision 32).
 export { Chip, IndicatorChip } from './parts/chip.tsx'
+export { DateRangeField, DayCell } from './parts/date/index.ts'

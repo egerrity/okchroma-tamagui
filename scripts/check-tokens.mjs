@@ -8,9 +8,11 @@
 //      declares the same theme names and keys.
 //   B. App and screen code writes no color literal in a style prop, and every `$` reference
 //      is a theme key or a stock token name.
-//   C. A theme prop on a Button ends in a tier: solid, subtle, hint or outline. A Chip names a
-//      color family, never a theme.
+//   C. A theme prop on a Button ends in a tier: solid, subtle, hint or outline. A Chip and a
+//      DayCell name a color family, never a theme.
 //   D. Nothing imports the theme builder.
+//   E. The native date picker's tint carries white text at the text bar, 4.5 to 1, in every
+//      brand, family and mode (docs/date-picker.md): the pencil in light, the highlighter in dark.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -75,6 +77,24 @@ for (const brand of BRAND_NAMES) {
 }
 const themes = byBrand[BRAND_NAMES[0]].themes
 
+// ── E. the native picker's tint holds its white label ────────────────────────
+const luminance = (hex) => {
+  const c = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255).map(v => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+}
+const contrastWithWhite = (hex) => 1.05 / (luminance(hex) + 0.05)
+const TINT = { light: 'pencil-47', dark: 'highlighter-26' }
+for (const brand of BRAND_NAMES) {
+  for (const mode of ['light', 'dark']) {
+    for (const f of INTERACTION_FAMILIES.filter(f => f !== 'neutral-strong' && f !== 'neutral-inverse')) {
+      const hex = byBrand[brand].themes[mode][`${f}-${TINT[mode]}`]
+      if (!hex || !hex.startsWith('#')) { fail(`E: ${brand}: ${mode} ${f}-${TINT[mode]} is missing or not a hex`); continue }
+      const ratio = contrastWithWhite(hex)
+      if (ratio < 4.5) fail(`E: ${brand}: white on ${f}-${TINT[mode]} in ${mode} is ${ratio.toFixed(2)} to 1, under 4.5`)
+    }
+  }
+}
+
 // ── B, C, D. the code ────────────────────────────────────────────────────────
 const files = []
 const walk = (dir) => {
@@ -106,11 +126,11 @@ for (const p of files) {
     const value = m[1] ?? m[2]
     if (!/_(solid|subtle|hint|outline)$|_\$\{tier\}$/.test(value)) fail(`C: ${rel} gives a Button theme="${value}", which names no tier`)
   }
-  // a Chip picks its own tier theme from `selected` (parts/chip.tsx); the call site names the family
-  for (const m of code.matchAll(/<Chip(?![\w.])([^>]*)>/gs)) {
-    const fam = m[1].match(/\bfamily=(?:"([^"]*)"|\{[^}]*\})/)
-    if (!fam) fail(`C: ${rel} gives a Chip no family`)
-    else if (fam[1] !== undefined && !colorFamilies.includes(fam[1])) fail(`C: ${rel} gives a Chip family="${fam[1]}", which names no color family`)
+  // a Chip and a DayCell pick their own tier theme (parts/chip.tsx, parts/date/DayCell.tsx); the call site names the family
+  for (const m of code.matchAll(/<(Chip|DayCell)(?![\w.])((?:[^>]|=>)*)>/gs)) {
+    const fam = m[2].match(/\bfamily=(?:"([^"]*)"|\{[^}]*\})/)
+    if (!fam) fail(`C: ${rel} gives a ${m[1]} no family`)
+    else if (fam[1] !== undefined && !colorFamilies.includes(fam[1])) fail(`C: ${rel} gives a ${m[1]} family="${fam[1]}", which names no color family`)
   }
   if (/@tamagui\/theme-builder|\bcreateThemes\b/.test(code)) fail(`D: ${rel} reaches for the theme builder`)
 }

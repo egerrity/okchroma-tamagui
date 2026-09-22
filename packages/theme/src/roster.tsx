@@ -4,7 +4,7 @@
 // as the demo's token cards do. The toggle and the button chip flip on press.
 import { useState } from 'react'
 import { H4, Paragraph, SizableText, XStack, YStack } from 'tamagui'
-import { Button, Chip, IndicatorChip } from './parts.tsx'
+import { Button, Chip, DayCell, IndicatorChip } from './parts.tsx'
 import type { ColorFamily } from './parts/chip.tsx'
 import { families } from '../dist/brands.ts'
 import { LEVEL_NAMES } from './map/display.ts'
@@ -17,6 +17,16 @@ const TIERS = ['solid', 'subtle', 'hint'] as const
 const STATES = ['enabled', 'hover', 'pressed', 'selected'] as const
 // the text a tier's ground carries, per the register
 const TEXT_ON = { solid: 'solid-fg', subtle: 'fg', hint: 'fg-on-hint' } as const
+// the day cell's states as a band, a week from the 14th (docs/date-picker.md)
+const DAYS = [
+  { d: 14, place: null },
+  { d: 15, place: null, today: true },
+  { d: 16, place: 'start' },
+  { d: 17, place: 'inside' },
+  { d: 18, place: 'inside' },
+  { d: 19, place: 'end' },
+  { d: 20, place: null, disabled: true },
+] as const
 // the button hierarchy: a kind and the tier it takes; the toggle is the outline shape, shown on when pressed
 const KINDS = [
   { kind: 'primary', tier: 'solid' },
@@ -108,6 +118,14 @@ export function Roster() {
               <XStack gap="$2" flexWrap="wrap" alignItems="center">
                 {LEVEL_NAMES.map(level => (
                   <IndicatorChip key={level} theme={`${family}_indicator-${level}`}><IndicatorChip.Text>{level}</IndicatorChip.Text></IndicatorChip>
+                ))}
+              </XStack>
+              <Label>date range</Label>
+              <XStack alignItems="center">
+                {DAYS.map(day => (
+                  <DayCell key={day.d} family={family} place={day.place} today={'today' in day} unavailable={'disabled' in day} tabIndex={-1} aria-hidden>
+                    {String(day.d)}
+                  </DayCell>
                 ))}
               </XStack>
             </>

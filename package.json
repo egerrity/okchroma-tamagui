@@ -10,11 +10,12 @@
     "tokens": "npm run build -w @poc/theme",
     "check": "node --experimental-strip-types scripts/check-tokens.mjs",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "build": "npm run tokens && npm run check && npm run typecheck",
+    "build": "npm run tokens && npm run check && npm run test && npm run typecheck",
     "web": "npm run dev -w web",
     "native": "npm run start -w native",
     "figma:print": "node --experimental-strip-types scripts/figma/print.ts",
-    "figma:print:mcp": "node --experimental-strip-types scripts/figma/print.ts --mcp"
+    "figma:print:mcp": "node --experimental-strip-types scripts/figma/print.ts --mcp",
+    "test": "node --experimental-strip-types --test packages/theme/src/parts/date/*.test.ts"
   },
   "overrides": {
     "react": "19.2.3",

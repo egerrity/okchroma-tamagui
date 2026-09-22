@@ -1,9 +1,10 @@
 // The exhibit's screen (docs/exhibit.md): one account form, rendered by both apps from
 // this file. Every color arrives through the theme prop or a `$` reference to a theme key;
 // nothing is tuned here.
-import { useRef, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { Card, Dialog, H2, Label, Paragraph, XStack, YStack, type TamaguiElement } from 'tamagui'
-import { Button, Chip, IndicatorChip, Input } from './parts.tsx'
+import { Button, Chip, DateRangeField, IndicatorChip, Input } from './parts.tsx'
+import { EMPTY, today, type Range } from './parts/date/index.ts'
 
 export function Screen() {
   // The dialog is controlled and opened by a real Button, so keyboard activation is the
@@ -16,6 +17,9 @@ export function Screen() {
   const [active, setActive] = useState<Set<string>>(() => new Set(['all']))
   const toggle = (key: string) => setActive(f => { const n = new Set(f); n.has(key) ? n.delete(key) : n.add(key); return n })
   const filters = [['all', 'All'], ['unread', 'Unread'], ['flagged', 'Flagged']] as const
+  // the statement period: a range that ends no later than today (docs/date-picker.md)
+  const [period, setPeriod] = useState<Range>(EMPTY)
+  const bounds = useMemo(() => ({ max: today() }), [])
   return (
     <YStack gap="$4" padding="$4" maxWidth={720} width="100%">
       <H2>Account</H2>
@@ -50,6 +54,7 @@ export function Screen() {
           <Input id="email" theme="critical" defaultValue="not an address" aria-invalid />
           <Paragraph theme="critical_hint" size="$sm">Enter an email address.</Paragraph>
         </YStack>
+        <DateRangeField id="period" label="Statement period" family="brand" value={period} onChange={setPeriod} bounds={bounds} />
       </Card>
 
       <XStack gap="$3" flexWrap="wrap">

@@ -159,6 +159,10 @@ UI is not installed and not planned.
   the brand rung. Web resolves both the same. The toggle is on that path; the button chip
   is not, since it changes theme instead (decision 31). A part that must color by a prop on
   native passes the key as a prop, never through a variant.
+- The kit's Button writes `tabIndex: 0` after its own props, so no `tabIndex` or
+  `focusable` prop reaches the element, and a disabled Button keeps its tab stop. A part
+  that must control the tab stop is built on `Button.Frame`, the styled element under that
+  wrapper, where the tab index is an overridable default; the day cell is.
 - Comments say why the code is as it is, in the present tense, with no date.
 
 ## Not in scope

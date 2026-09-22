@@ -12,8 +12,8 @@ ranges as button chips; a button that opens the calendar aid. The fields alone c
 range. The aid differs by platform and the rest is one file:
 
 - Web: a calendar dialog built to the grid pattern, one or two months wide.
-- Native: the operating system's inline date picker for the field being edited, tinted with
-  the family's pencil, in the same dialog.
+- Native: the operating system's inline date picker for the field being edited, in the same
+  dialog, tinted with the family stop that holds its white label.
 
 A single-date mode is the same component with one field.
 
@@ -55,7 +55,7 @@ No row is added for the picker. Every state is a tier or a stop that exists.
 | Presets | `<family>` button chips |
 | The fields | the Input themes; `critical` when invalid |
 | The dialog | the DialogOverlay and DialogContent themes |
-| The native picker's tint | `<family>-pencil-47`, per mode, because the picker draws the selected day as tint-colored text on a wash of the tint, not as on-text over a fill |
+| The native picker's tint | the family stop that carries white text at the text bar in that mode: `<family>-pencil-47` in light, `<family>-highlighter-26` in dark. The picker draws the selected day as white text on a solid circle of the tint in both appearances, so the tint has to hold white; no one stop does in both modes. This is the proof's one per-mode stop, forced by the control, and the check's rule E holds it for every brand and family. |
 
 The band: cells inside the range abut with square corners; the start is rounded on its
 leading side, the end on its trailing side, a one-day range on both.
