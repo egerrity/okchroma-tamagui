@@ -46,3 +46,17 @@ iPhone 17 Pro simulator: `screen-native-light`, `screen-native-dark`,
 `roster-native-light`, `roster-native-dark`, `dialog-native-light`. Every color on screen
 was read back from the DOM on web as the engine's value for the recorded name; native
 shows the same values from the same file. Unjudged: the owner has not yet answered per row.
+
+**2026-09-22, brand `eggplant` (`#431C5B`, exact second family `#4BCD3E`), okchroma 0.6.1,
+after decision 31.** Web from Vite on 8350 through headless Chrome at 640 wide, the first
+1000 pixels of the page: `screen-web-light`, `screen-web-dark`, `roster-web-light`,
+`roster-web-dark`, and the baseline `screen-web-stock-light`, `screen-web-stock-dark`.
+Native from Expo Go on an iPhone 17 Pro simulator: `screen-native-light`,
+`screen-native-dark`, `roster-native-light` and `roster-native-dark` (framed at the brand
+family, whose rows fill a phone screen), `dialog-native-light`, `dialog-native-dark`. Read
+back: on web, every button chip, toggle and tag on the roster by computed style in both
+modes; on native, by pixel against the generated theme, on the screen, the brand family's
+roster rows and the dialog in both modes. Every value is the engine's for the recorded
+name, with one exception recorded in `docs/plan.md` Traps: on iOS a selected Button takes
+the root theme's selected ground. These files replace the 2026-09-15 set under the same
+names; that set stays in the history. Unjudged: the owner has not yet answered per row.

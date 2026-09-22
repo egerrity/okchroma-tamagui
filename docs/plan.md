@@ -151,6 +151,14 @@ UI is not installed and not planned.
   extraction is off. Pointed at `config.ts` it fails on every file with "Cannot convert
   undefined or null to object" and "Must provide components"; the app still renders,
   because the theme is applied at runtime, but the log is all noise.
+- On iOS, a `$` theme key written inside a `styled()` variant resolves against the root
+  theme, not the component's; the same key written as a prop resolves against the
+  component's theme. Read back by pixel on the roster's brand family: the toggle's
+  `selected` variant renders the neutral 16 percent rung in place of the brand's subtle
+  rung, while `backgroundColor="$backgroundSelected"` as a prop on the same family renders
+  the brand rung. Web resolves both the same. The toggle is on that path; the button chip
+  is not, since it changes theme instead (decision 31). A part that must color by a prop on
+  native passes the key as a prop, never through a variant.
 - Comments say why the code is as it is, in the present tense, with no date.
 
 ## Not in scope
