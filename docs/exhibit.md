@@ -21,6 +21,11 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
   as grounds through their rungs with `Aa` on each, the button hierarchy as buttons with
   the same four disabled, the button chip off and on, and the tag chip's levels. For judging
   the map row by row.
+- **The date range** (`docs/date-picker.md`). On the screen, a Statement period pair in the
+  card: two fields, the presets, the calendar button, and the calendar dialog judged open.
+  On the roster, one row per color family of the day cell in its states, day, today, start,
+  inside, end and disabled, abutting as a band. Native shows the fields, the presets and
+  the system picker in the dialog.
 - Web: Vite on port 8350. Native: Expo Go on an iPhone simulator.
 
 ## Ground and grouping

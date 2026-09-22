@@ -199,3 +199,18 @@ the rule it serves. Code cites a decision by number, never by date.
     back into code: the chip's off and on are a change of family, the mode on the print's
     host, not a state layer. The toggle keeps its selected keys and variant, because its on
     state is a rung on the same family, which no tier theme pairs with the outline edge.
+32. 2026-09-22. **The date range picker, input first.** The extended component is a date
+    range picker with a single-date mode, built through the component path and held by the
+    same check: two labelled fields with the format beside them, preset ranges as button
+    chips, and a calendar as an aid that is never required. The fields alone complete a
+    range; that is the first line of its accessibility contract. The aid splits by platform
+    the way the animation driver does: on web a calendar dialog built to the grid pattern,
+    one tab stop with arrow, Page, Home and End keys; on native the system's inline picker,
+    because touch and VoiceOver are tuned for it, tinted with the family's pencil, since the
+    picker draws the selected day as tint-colored text and the pencil is the stop the engine
+    guarantees as text. Range first because a range model degrades to a single date and the
+    reverse retrofit does not. No map row is added: a day is the neutral hint tier, today the
+    neutral outline, the ends the family stamp, the inside the selected ground. Typed entry is
+    a plain field, not segments. No package on web; the system picker's module on native,
+    which Expo Go already carries. The rules a picker follows that no screen shows are in
+    `docs/date-picker.md`.
