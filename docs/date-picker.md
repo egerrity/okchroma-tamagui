@@ -17,7 +17,9 @@ as a tooltip. The aid differs by platform and the rest is one file:
   or two months wide, sized to its months. A dialog by role and not modal: no scrim, the
   page stays in view, an outside press closes it (decision 34).
 - Native: the operating system's inline date picker for the field being edited, in the same
-  dialog, tinted with the family's pen-70.
+  dialog, tinted with the family's pen-70. The picker shows one selected day, so the
+  dialog's heading names the end the next pick sets, Choose a start date or Choose an end
+  date, on both platforms (decision 36).
 
 A single-date mode is the same component with one field.
 

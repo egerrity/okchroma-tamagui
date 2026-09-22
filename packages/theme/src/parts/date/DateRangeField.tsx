@@ -14,7 +14,7 @@ import { Calendar } from './Calendar'
 import {
   type Bounds, type Mode, type PlainDate, type Problem, type Range, type Which,
   EMPTY, formatField, formatLong, formatShort, localeInfo, parse, presets as presetsFor, sameRange, setEnd, today as deviceToday, validate,
-} from './model.ts'
+ nextEnd } from './model.ts'
 
 export type DateRangeFieldProps = {
   /** the root of every id the field's parts carry */
@@ -89,22 +89,26 @@ export function DateRangeField({ id, label, family = 'brand', mode = 'range', va
     : p === 'after-max' ? `Enter a date on or before ${formatShort(bounds.max!, loc)}`
     : `Enter an end on or after the start, ${formatShort(value.start!, loc)}`
 
+  // the end the first pick sets, from the field that opened the calendar; the pick rules take over after it
+  const [armed, setArmed] = useState<Which | null>(null)
   const choose = (r: Range) => {
+    setArmed(null)
     onChange(r)
     if (r.start && r.end) announce(mode === 'single' ? `Selected ${formatLong(r.start, loc)}` : `Selected ${formatLong(r.start, loc)} to ${formatLong(r.end, loc)}`)
   }
 
-  const openFrom = (which: Which) => { lastOpened.current = which; setOpen(which) }
+  const openFrom = (which: Which) => { lastOpened.current = which; setArmed(which); setOpen(which) }
 
   const legendId = `${id}-legend`, hintId = `${id}-format`, monthId = `${id}-month`, instructionsId = `${id}-instructions`
   const titleId = `${id}-title`, descriptionId = `${id}-description`
-  const title = mode === 'single' ? 'Choose a date' : 'Choose a period'
+  // the heading names the end the next pick sets, by the pick rules (decision 36)
+  const title = mode === 'single' ? 'Choose a date' : nextEnd(value, mode, armed) === 'start' ? 'Choose a start date' : 'Choose an end date'
   const description = mode === 'single' ? 'Or type the date in the field.' : 'Or type the dates in the fields.'
   const instructions = isWeb
     ? mode === 'single'
       ? 'Arrow keys move between days, Page Up and Page Down between months, Home and End to the ends of the week. Enter chooses. Escape closes.'
       : 'Arrow keys move between days, Page Up and Page Down between months, Home and End to the ends of the week. Enter chooses the start, then the end. Escape closes.'
-    : mode === 'single' ? 'Choose a day.' : 'Choose the start, then the end.'
+    : ''
   const endName = (which: Which) => (mode === 'single' ? 'date' : which === 'start' ? 'start date' : 'end date')
   // the button's name says what it does and, once a date is set, confirms it
   const buttonName = (which: Which) => (value[which] ? `Change ${endName(which)}, ${formatLong(value[which]!, loc)}` : `Choose ${endName(which)}`)
@@ -112,8 +116,8 @@ export function DateRangeField({ id, label, family = 'brand', mode = 'range', va
   // the panel's width is the calendar's: the instructions take no width of their own and stretch to it
   const body = (which: Which, done: React.ReactNode) => (
     <>
-      <Paragraph id={instructionsId} size="$sm" {...(isWeb ? { width: 0, minWidth: '100%' } : {})}>{instructions}</Paragraph>
-      <Calendar family={family} locale={loc} mode={mode} value={value} onChange={choose} bounds={bounds} labelId={monthId} describedById={instructionsId} announce={announce} autoFocus={isWeb} from={which} />
+      {instructions ? <Paragraph id={instructionsId} size="$sm" {...(isWeb ? { width: 0, minWidth: '100%' } : {})}>{instructions}</Paragraph> : null}
+      <Calendar family={family} locale={loc} mode={mode} value={value} onChange={choose} bounds={bounds} labelId={monthId} describedById={instructionsId} announce={announce} autoFocus={isWeb} from={armed ?? which} />
       <XStack gap="$3" justifyContent="flex-end">
         <Button theme="neutral_hint" onPress={() => choose(EMPTY)}>Clear</Button>
         {done}

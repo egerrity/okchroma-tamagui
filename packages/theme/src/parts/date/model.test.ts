@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { addDays, addMonths, daysInMonth, weekday, monthGrid, startOfWeek, pick, pickFrom, position, validate, presets, localeInfo, parse, formatField, formatLong, iso, plain, daysBetween } from './model.ts'
+import { addDays, addMonths, daysInMonth, weekday, monthGrid, startOfWeek, pick, pickFrom, nextEnd, position, validate, presets, localeInfo, parse, formatField, formatLong, iso, plain, daysBetween } from './model.ts'
 
 test('arithmetic ignores daylight saving', () => {
   assert.equal(iso(addDays(plain(2026, 3, 7), 1)), '2026-03-08')   // US clocks change 2026-03-08
@@ -82,4 +82,17 @@ test('parsing follows the locale, accepts ISO, rejects nonsense', () => {
   assert.deepEqual(parse('22.9.2026', gb), plain(2026, 9, 22)); assert.deepEqual(parse('  22 9 2026 ', gb), plain(2026, 9, 22))
   assert.equal(parse('31/02/2026', gb), null); assert.equal(parse('13/1/2026', us), null); assert.equal(parse('9/2/026', us), null)
   assert.equal(parse('tomorrow', us), null); assert.equal(parse('', us), null); assert.equal(parse('9/2', us), null)
+})
+test('the end the next pick sets follows the pick rules', () => {
+  const a = plain(2026, 9, 10), b = plain(2026, 9, 20)
+  const none = { start: null, end: null }, open = { start: a, end: null }, full = { start: a, end: b }
+  assert.equal(nextEnd(none, 'range', null), 'start'); assert.equal(nextEnd(open, 'range', null), 'end'); assert.equal(nextEnd(full, 'range', null), 'start')
+  assert.equal(nextEnd(full, 'range', 'start'), 'start')                 // opened from Start: the pick is the new start
+  assert.equal(nextEnd(open, 'range', 'end'), 'end'); assert.equal(nextEnd(none, 'range', 'end'), 'start') // from End with no start, the pick is the start
+  assert.equal(nextEnd(none, 'single', null), 'start'); assert.equal(nextEnd(full, 'single', 'end'), 'start')
+  // the rule agrees with the pick itself
+  for (const [r, f] of [[none, null], [open, null], [full, null], [full, 'start'], [open, 'end'], [none, 'end']] as const) {
+    const picked = pickFrom(r, plain(2026, 9, 15), 'range', f)
+    assert.equal(nextEnd(r, 'range', f), picked.end ? 'end' : 'start')
+  }
 })

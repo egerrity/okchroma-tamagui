@@ -73,6 +73,11 @@ export function pickFrom(range: Range, date: PlainDate, mode: Mode, from: Which 
   if (from === 'start' || !range.start) return { start: date, end: null }
   return compare(date, range.start) < 0 ? { start: date, end: range.start } : { start: range.start, end: date }
 }
+/** the end the next pick sets, by the rule of pickFrom: the field that opened the calendar until its pick, then the start when there is no start or the range is complete, else the end */
+export function nextEnd(range: Range, mode: Mode, from: Which | null): Which {
+  if (mode === 'single' || !from) return !range.start || range.end ? 'start' : 'end'
+  return from === 'start' || !range.start ? 'start' : 'end'
+}
 /** a typed value for one end; the other end stays, and a typed end before the start is kept for validation to name */
 export const setEnd = (range: Range, which: Which, date: PlainDate | null): Range =>
   which === 'start' ? { start: date, end: range.end } : { start: range.start, end: date }

@@ -8,7 +8,7 @@
 // (docs/date-picker.md). The check's rule E holds the ratios and the margin from the rule's
 // line. The range rules are the model's.
 import DateTimePicker from '@react-native-community/datetimepicker'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Paragraph, YStack, useTheme, useThemeName } from 'tamagui'
 import type { ColorFamily } from '../chip.tsx'
 import { type Bounds, type Locale, type Mode, type Range, type Which, formatLong, fromLocalDate, pickFrom, toLocalDate, today as deviceToday } from './model.ts'
@@ -24,8 +24,8 @@ export type CalendarProps = {
   describedById: string
   announce: (text: string) => void
   autoFocus?: boolean
-  /** the field whose button opened the calendar: the picker opens on that end's date, and the first pick sets that end */
-  from?: Which
+  /** the field whose button opened the calendar, until its pick: the picker opens on that end's date, and the pick sets that end */
+  from?: Which | null
 }
 
 /** the picker's tint: the family's pen-70, the same stop in both modes (docs/date-picker.md) */
@@ -38,15 +38,14 @@ export function Calendar({ family, locale, mode, value, onChange, bounds, from }
   const todayDate = useMemo(() => deviceToday(), [])
   const choosingEnd = mode === 'range' && !!value.start && !value.end
   const shown = from === 'end' ? value.end ?? value.start ?? todayDate : value.start ?? todayDate
-  // the end the first pick sets, from the field that opened the calendar; the range rules take over after it
-  const [armed, setArmed] = useState<Which | null>(from ?? null)
+  // what is set so far; the dialog's heading says which end the next pick sets
+  const status =
+    mode === 'single'
+      ? value.start ? `Chosen: ${formatLong(value.start, locale)}` : ''
+      : choosingEnd ? `Start ${formatLong(value.start!, locale)}.` : value.start && value.end ? `${formatLong(value.start, locale)} to ${formatLong(value.end, locale)}.` : ''
   return (
     <YStack gap="$2">
-      <Paragraph size="$sm">
-        {mode === 'single'
-          ? value.start ? `Chosen: ${formatLong(value.start, locale)}` : 'Choose a date'
-          : choosingEnd ? `Start ${formatLong(value.start!, locale)}. Choose the end.` : value.start && value.end ? `${formatLong(value.start, locale)} to ${formatLong(value.end, locale)}. Choose a day to start again.` : 'Choose the start'}
-      </Paragraph>
+      {status ? <Paragraph size="$sm">{status}</Paragraph> : null}
       <DateTimePicker
         value={toLocalDate(shown)}
         mode="date"
@@ -56,7 +55,7 @@ export function Calendar({ family, locale, mode, value, onChange, bounds, from }
         locale={locale.tag}
         minimumDate={bounds.min ? toLocalDate(bounds.min) : undefined}
         maximumDate={bounds.max ? toLocalDate(bounds.max) : undefined}
-        onChange={(_event, date) => { if (date) { onChange(pickFrom(value, fromLocalDate(date), mode, armed)); setArmed(null) } }}
+        onChange={(_event, date) => { if (date) onChange(pickFrom(value, fromLocalDate(date), mode, from ?? null)) }}
       />
     </YStack>
   )

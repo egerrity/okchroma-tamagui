@@ -297,3 +297,17 @@ the rule it serves. Code cites a decision by number, never by date.
     kit's Tooltip, which would give the name on keyboard focus too, waits until its trigger
     is known not to wrap the button the way the dialog's does (decision 17).
 
+36. 2026-09-22. **The calendar dialog's heading names the end the next pick sets.** The native
+    aid is the system's inline picker, which shows one selected day, so a dialog named Choose a
+    period promised what the control could not show. The owner weighed the PoC's own grid on
+    native and set it aside on its accessibility cost, VoiceOver names and states, focus on open,
+    announcements, 44-point targets and Dynamic Type, all owed by hand, and chose the copy. The
+    heading is Choose a start date or Choose an end date, by `nextEnd` in the model, the rule
+    `pickFrom` already applies: the field that opened the calendar until its pick, then the start
+    when there is no start or the range is complete, else the end. The field holds the armed end
+    and passes it live, so the heading and the pick read one value. One rule on both platforms,
+    so one file holds the copy; the lines that repeated it, "Choose the start, then the end" and
+    the picker's own "Choose the start" and "Choose the end", are gone, and the picker's line only
+    confirms what is set. Held by a model test that checks the rule against the pick itself.
+    Foreclosed: nothing; the grid on native stays the alternative decision 33 names, hers to
+    resurrect. Open: the shots in `docs/shots/` after the owner's look.
