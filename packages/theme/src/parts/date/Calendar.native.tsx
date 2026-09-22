@@ -1,9 +1,10 @@
 // The native calendar: the system's inline date picker for the end being chosen, since touch
-// and VoiceOver are tuned for it (decision 32). The picker draws the selected day as white
-// text on a solid circle of the tint, in both appearances, so the tint is the family stop
-// that carries white text at the text bar in that mode: the pencil in light, the highlighter
-// in dark. That is the one per-mode stop in the proof, forced by the control; the check's
-// rule E holds it for every brand and family. The range rules are the model's.
+// and VoiceOver are tuned for it (decision 32). The picker draws a selected day as tint-colored
+// text on a wash of the tint, and a selected day that is also today as white text on a solid
+// circle of the tint. The tint is the family's pencil, the stop the engine guarantees as
+// text on paper, which also carries white in light; in dark, white on the pencil is the one
+// case under the bar, and it is the control's own drawing (docs/date-picker.md). The check's
+// rule E holds the rest for every brand and family. The range rules are the model's.
 import DateTimePicker from '@react-native-community/datetimepicker'
 import { useMemo } from 'react'
 import { Paragraph, YStack, useTheme, useThemeName } from 'tamagui'
@@ -23,13 +24,13 @@ export type CalendarProps = {
   autoFocus?: boolean
 }
 
-/** the stop under the picker's white label, per mode (docs/date-picker.md) */
-export const tintName = (family: ColorFamily, scheme: 'light' | 'dark') => (scheme === 'dark' ? `${family}-highlighter-26` : `${family}-pencil-47`)
+/** the picker's tint: the family's pencil, the same stop in both modes (docs/date-picker.md) */
+export const tintName = (family: ColorFamily) => `${family}-pencil-47`
 
 export function Calendar({ family, locale, mode, value, onChange, bounds }: CalendarProps) {
   const theme = useTheme()
   const scheme = useThemeName().startsWith('dark') ? 'dark' : 'light'
-  const tint = (theme as any)[tintName(family, scheme)]?.val as string | undefined
+  const tint = (theme as any)[tintName(family)]?.val as string | undefined
   const todayDate = useMemo(() => deviceToday(), [])
   const choosingEnd = mode === 'range' && !!value.start && !value.end
   const shown = choosingEnd ? value.start! : value.end ?? value.start ?? todayDate

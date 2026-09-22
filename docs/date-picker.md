@@ -13,7 +13,7 @@ range. The aid differs by platform and the rest is one file:
 
 - Web: a calendar dialog built to the grid pattern, one or two months wide.
 - Native: the operating system's inline date picker for the field being edited, in the same
-  dialog, tinted with the family stop that holds its white label.
+  dialog, tinted with the family's pencil.
 
 A single-date mode is the same component with one field.
 
@@ -55,7 +55,7 @@ No row is added for the picker. Every state is a tier or a stop that exists.
 | Presets | `<family>` button chips |
 | The fields | the Input themes; `critical` when invalid |
 | The dialog | the DialogOverlay and DialogContent themes |
-| The native picker's tint | the family stop that carries white text at the text bar in that mode: `<family>-pencil-47` in light, `<family>-highlighter-26` in dark. The picker draws the selected day as white text on a solid circle of the tint in both appearances, so the tint has to hold white; no one stop does in both modes. This is the proof's one per-mode stop, forced by the control, and the check's rule E holds it for every brand and family. |
+| The native picker's tint | `<family>-pencil-47`, the same stop in both modes. The picker draws a selected day as tint-colored text on a wash of the tint, so the tint is a text stop, and the pencil is the one the engine guarantees on paper. A selected day that is also today it draws as white text on a solid circle of the tint: in light the pencil carries white at the bar; in dark it does not, at about 2.3 to 1, and that one drawing is the control's own. The check's rule E holds the tint as text on the dialog's plane in both modes and white on the tint in light, for every brand and family. |
 
 The band: cells inside the range abut with square corners; the start is rounded on its
 leading side, the end on its trailing side, a one-day range on both.
@@ -83,6 +83,12 @@ identified in text ([Error Identification](https://www.w3.org/WAI/WCAG22/Underst
 with a suggested fix ([Error Suggestion](https://www.w3.org/WAI/WCAG22/Understanding/error-suggestion.html));
 fields carry labels or instructions ([Labels or Instructions](https://www.w3.org/WAI/WCAG22/Understanding/labels-or-instructions.html));
 targets meet the minimum size ([Target Size (Minimum)](https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html)).
+
+## Known limit
+
+The system picker in dark, when the selected day is today: the control draws white on the
+tint, and the family's pencil in dark is a light stop. Every other day it draws is at the
+bar. Choosing another tint for dark would move the failure onto every selected day instead.
 
 ## Not in it
 
