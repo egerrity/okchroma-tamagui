@@ -69,7 +69,8 @@ export const DayCell = forwardRef<TamaguiElement, DayCellProps>(function DayCell
   const off = unavailable ? { opacity: disabledOpacity, pointerEvents: 'none' as const, 'aria-disabled': true } : {}
   return (
     <DayCellFrame ref={ref} theme={theme as any} {...(ground as any)} {...(corners as any)} {...(off as any)} {...rest}>
-      <DayCellText>{children}</DayCellText>
+      {/* the label carries the theme itself: on iOS the frame's theme does not reach a child's `$color` (docs/plan.md, Traps) */}
+      <DayCellText theme={theme as any}>{children}</DayCellText>
     </DayCellFrame>
   )
 })

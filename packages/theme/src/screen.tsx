@@ -5,8 +5,11 @@ import { useMemo, useRef, useState } from 'react'
 import { Card, Dialog, H2, Label, Paragraph, XStack, YStack, type TamaguiElement } from 'tamagui'
 import { Button, Chip, DateRangeField, IndicatorChip, Input } from './parts.tsx'
 import { EMPTY, today, type Range } from './parts/date/index.ts'
+import type { CalendarAid } from './parts/date/DateRangeField.tsx'
+export type { CalendarAid }
 
-export function Screen() {
+/** `aid`: the native calendar aid, the PoC's grid or the system picker (decision 37); web ignores it */
+export function Screen({ aid }: { aid?: CalendarAid } = {}) {
   // The dialog is controlled and opened by a real Button, so keyboard activation is the
   // browser's own; the kit's Dialog.Trigger with asChild renders its child as a span with a
   // button role instead. On close the kit focuses its trigger ref, which nothing sets here,
@@ -54,7 +57,7 @@ export function Screen() {
           <Input id="email" theme="critical" defaultValue="not an address" aria-invalid />
           <Paragraph theme="critical_hint" size="$sm">Enter an email address.</Paragraph>
         </YStack>
-        <DateRangeField id="period" label="Statement period" family="brand" value={period} onChange={setPeriod} bounds={bounds} />
+        <DateRangeField id="period" label="Statement period" family="brand" value={period} onChange={setPeriod} bounds={bounds} aid={aid} />
       </Card>
 
       <XStack gap="$3" flexWrap="wrap">

@@ -4,7 +4,7 @@
 // months side by side when the window allows, else one. The preview of a range follows
 // the pointer, or the focused day when the keyboard moves it.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Paragraph, SizableText, XStack, YStack, type TamaguiElement } from 'tamagui'
+import { Paragraph, SizableText, XStack, YStack, isWeb, type TamaguiElement } from 'tamagui'
 import { Button } from '../../parts.tsx'
 import type { ColorFamily } from '../chip.tsx'
 import { DayCell } from './DayCell.tsx'
@@ -43,11 +43,13 @@ export function Calendar({ family, locale, mode, value, onChange, bounds, labelI
   const [armed, setArmed] = useState<Which | null>(from ?? null)
   const [hover, setHover] = useState<PlainDate | null>(null)
   const [byKeyboard, setByKeyboard] = useState(false)
-  const [months, setMonths] = useState(() => (typeof window !== 'undefined' && window.innerWidth >= TWO_MONTHS_FROM ? 2 : 1))
+  // the phone has a `window` with no size and no listeners, so the width rule is web's
+  const [months, setMonths] = useState(() => (isWeb && window.innerWidth >= TWO_MONTHS_FROM ? 2 : 1))
   const cells = useRef(new Map<string, TamaguiElement>())
   const wantFocus = useRef(!!autoFocus)
 
   useEffect(() => {
+    if (!isWeb) return
     const onResize = () => setMonths(window.innerWidth >= TWO_MONTHS_FROM ? 2 : 1)
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)

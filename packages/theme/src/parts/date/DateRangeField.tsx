@@ -11,11 +11,17 @@ import { Dialog, H2, Label, Paragraph, Popover, SizableText, XStack, YStack, isW
 import { Button, Chip, Input } from '../../parts.tsx'
 import type { ColorFamily } from '../chip.tsx'
 import { Calendar } from './Calendar'
+// The PoC's own grid, the web calendar's file, for the native comparison (docs/exhibit.md).
+// The explicit extension bypasses Metro's platform variant: the resolver tries the exact
+// file after `Calendar.tsx.<platform>`, so this is the grid on both platforms.
+import { Calendar as OwnCalendar } from './Calendar.tsx'
 import {
   type Bounds, type Mode, type PlainDate, type Problem, type Range, type Which,
   EMPTY, formatField, formatLong, formatShort, localeInfo, parse, presets as presetsFor, sameRange, setEnd, today as deviceToday, validate,
  nextEnd } from './model.ts'
 
+/** the calendar aid on native: the PoC's own grid, the default, or the system's picker behind the app's toggle (decision 37); web is always the grid */
+export type CalendarAid = 'system' | 'own'
 export type DateRangeFieldProps = {
   /** the root of every id the field's parts carry */
   id: string
@@ -30,6 +36,7 @@ export type DateRangeFieldProps = {
   locale?: string
   /** the preset periods, on by default for a range */
   presets?: boolean
+  aid?: CalendarAid
 }
 
 /** the calendar glyph on a field's button, drawn in the theme's text color so it needs no icon set */
@@ -46,7 +53,7 @@ function CalendarGlyph() {
   )
 }
 
-export function DateRangeField({ id, label, family = 'brand', mode = 'range', value, onChange, bounds = {}, locale: tag, presets = true }: DateRangeFieldProps) {
+export function DateRangeField({ id, label, family = 'brand', mode = 'range', aid = 'own', value, onChange, bounds = {}, locale: tag, presets = true }: DateRangeFieldProps) {
   const loc = useMemo(() => localeInfo(tag), [tag])
   const todayDate = useMemo(() => deviceToday(), [])
   const presetList = useMemo(() => presetsFor(todayDate), [todayDate])
@@ -113,11 +120,12 @@ export function DateRangeField({ id, label, family = 'brand', mode = 'range', va
   // the button's name says what it does and, once a date is set, confirms it
   const buttonName = (which: Which) => (value[which] ? `Change ${endName(which)}, ${formatLong(value[which]!, loc)}` : `Choose ${endName(which)}`)
 
+  const Aid = !isWeb && aid === 'own' ? OwnCalendar : Calendar
   // the panel's width is the calendar's: the instructions take no width of their own and stretch to it
   const body = (which: Which, done: React.ReactNode) => (
     <>
       {instructions ? <Paragraph id={instructionsId} size="$sm" {...(isWeb ? { width: 0, minWidth: '100%' } : {})}>{instructions}</Paragraph> : null}
-      <Calendar family={family} locale={loc} mode={mode} value={value} onChange={choose} bounds={bounds} labelId={monthId} describedById={instructionsId} announce={announce} autoFocus={isWeb} from={armed ?? which} />
+      <Aid family={family} locale={loc} mode={mode} value={value} onChange={choose} bounds={bounds} labelId={monthId} describedById={instructionsId} announce={announce} autoFocus={isWeb} from={armed ?? which} />
       <XStack gap="$3" justifyContent="flex-end">
         <Button theme="neutral_hint" onPress={() => choose(EMPTY)}>Clear</Button>
         {done}

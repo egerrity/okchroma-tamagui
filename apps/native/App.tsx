@@ -9,7 +9,7 @@ import { StatusBar } from 'expo-status-bar'
 import { useFonts, NotoSans_400Regular, NotoSans_500Medium, NotoSans_600SemiBold } from '@expo-google-fonts/noto-sans'
 import { TamaguiProvider, Theme, XStack, YStack } from 'tamagui'
 import { Button } from '@poc/theme/parts'
-import { Screen } from '@poc/theme/screen'
+import { Screen, type CalendarAid } from '@poc/theme/screen'
 import { Roster } from '@poc/theme/roster'
 
 const config =
@@ -23,6 +23,8 @@ export function App() {
   const system = useColorScheme()
   const [mode, setMode] = useState<'light' | 'dark'>(system === 'dark' ? 'dark' : 'light')
   const [page, setPage] = useState<'screen' | 'roster'>('screen')
+  // the calendar aid (docs/exhibit.md): the PoC's own grid first, the system picker behind the toggle (decision 37)
+  const [aid, setAid] = useState<CalendarAid>('own')
   if (!fontsLoaded) return null
   return (
     <SafeAreaProvider>
@@ -38,8 +40,11 @@ export function App() {
                 <Button size="$sm" theme="neutral_hint" onPress={() => setPage(page === 'screen' ? 'roster' : 'screen')}>
                   {page === 'screen' ? 'Roster' : 'Screen'}
                 </Button>
+                <Button size="$sm" theme="neutral_hint" onPress={() => setAid(aid === 'system' ? 'own' : 'system')}>
+                  {aid === 'system' ? 'Own calendar' : 'System calendar'}
+                </Button>
               </XStack>
-              <ScrollView>{page === 'screen' ? <Screen /> : <Roster />}</ScrollView>
+              <ScrollView>{page === 'screen' ? <Screen aid={aid} /> : <Roster />}</ScrollView>
             </SafeAreaView>
           </YStack>
         </Theme>

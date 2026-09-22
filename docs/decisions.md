@@ -311,3 +311,16 @@ the rule it serves. Code cites a decision by number, never by date.
     confirms what is set. Held by a model test that checks the rule against the pick itself.
     Foreclosed: nothing; the grid on native stays the alternative decision 33 names, hers to
     resurrect. Open: the shots in `docs/shots/` after the owner's look.
+
+37. 2026-09-22. **Both calendar aids ship on native, the PoC's own grid first.** The comparison
+    exhibit put the PoC's grid, the web calendar's file, inside the native dialog beside the
+    system picker on a toggle. The owner keeps both: the grid is the default aid, so the dialog
+    that asks for a period shows one, and the system picker stays behind the toggle as the
+    baseline the grid is judged against, its tint rule (decision 33) intact. Two things the port
+    needed: the grid's resize listener is web-only, since the phone's `window` has no listeners;
+    and the day label carries the frame's theme itself, since on iOS the frame's theme did not
+    reach the label's `$color`. The verdict on the grid, and its accessibility work (VoiceOver
+    names and states, focus on open, announcements through the platform's call, 44-point cells,
+    Dynamic Type), is deferred: the owner finishes on another machine. Foreclosed: nothing.
+    Open: the week starts on Monday in the grid, from the model's locale on Hermes, and on
+    Sunday in the system picker; the light shots; the accessibility list.

@@ -30,6 +30,14 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
   the system picker in the dialog.
 - Web: Vite on port 8350. Native: Expo Go on an iPhone simulator.
 
+- **The native aid, compared.** The Statement period's calendar on the phone, two ways on a
+  top-row toggle: the system's inline picker, the shipped aid (decision 32), and the PoC's
+  own grid, the web calendar's file verbatim inside the same dialog, so the band and its ends
+  show on the phone as they do in the web popover. Judged for whether the period reads and
+  whether it feels native; the system picker is the baseline. Nothing about the grid is tuned
+  for the phone here: 40-point cells as on web, no announcements on iOS, the keyboard grid
+  absent. A pick for the grid opens the accessibility work as its price, not this exhibit.
+
 ## Ground and grouping
 
 The page rests on `surface-low`. Dark is judged on a dark canvas; light sits behind a
@@ -108,3 +116,14 @@ Pro simulator, the screen re-shot: the two fields stacked, each with its button 
 and the glyph drawn in the text color; the dialog path unchanged. These files replace the
 earlier 2026-09-22 `picker-web-*` pair under the same names; that pair stays in the
 history. Unjudged: the owner has not yet answered per row.
+
+**2026-09-22, latest, brand `eggplant`, okchroma 0.6.1, decision 37, the native aid compared.**
+Native from the iOS simulator (iPhone 17 Pro), dark, on a cold bundle: `grid-native-dark`, the
+PoC's grid in the dialog with the range 9 to 18, and `picker-native-dark`, the system picker
+under the heading of decision 36. Seen: the band and its ends as in the web popover, once the
+label carried the frame's theme itself (on iOS the frame's theme did not reach the label's
+`$color`) and the grid's resize listener was made web-only (the phone's `window` has no
+listeners). The grid starts the week on Monday, from the model's locale on Hermes; the system
+picker starts on Sunday. Cells are 40 points, as on web; nothing is announced on iOS. The
+owner keeps both aids and puts the grid first; the verdict on the grid, the light shots and
+the accessibility work continue on another machine.
