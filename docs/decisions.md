@@ -206,11 +206,12 @@ the rule it serves. Code cites a decision by number, never by date.
     range; that is the first line of its accessibility contract. The aid splits by platform
     the way the animation driver does: on web a calendar dialog built to the grid pattern,
     one tab stop with arrow, Page, Home and End keys; on native the system's inline picker,
-    because touch and VoiceOver are tuned for it, tinted with the family's pencil in both
-    modes: the picker draws a selected day as tint-colored text, and the pencil is the stop
-    the engine guarantees as text; the one drawing it makes in white, a selected today in
-    dark, is its own and is recorded as the known limit. Range first because a range model
-    degrades to a single date and the
+    because touch and VoiceOver are tuned for it, tinted with the family's pen-70 in both
+    modes. The picker takes one color and draws a selected day as tint-colored text, and a
+    selected today as a label on a solid circle of it, white on a dark tint and black on a
+    light one; pen-70 is a text stop that holds white in light and flips the label in dark,
+    in every brand and family, so both drawings pass in both modes and no stop moves between
+    modes. Range first because a range model degrades to a single date and the
     reverse retrofit does not. No map row is added: a day is the neutral hint tier, today the
     neutral outline, the ends the family stamp, the inside the selected ground. Typed entry is
     a plain field, not segments. No package on web; the system picker's module on native,

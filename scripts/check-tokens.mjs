@@ -11,9 +11,11 @@
 //   C. A theme prop on a Button ends in a tier: solid, subtle, hint or outline. A Chip and a
 //      DayCell name a color family, never a theme.
 //   D. Nothing imports the theme builder.
-//   E. The native date picker's tint, the family's pencil, reads as text on the dialog's plane
-//      at 4.5 to 1 in both modes, and carries white text at 4.5 to 1 in light, in every brand
-//      and family (docs/date-picker.md). White on the pencil in dark is the control's known limit.
+//   E. The native date picker's tint, the family's pen-70, reads as text on the dialog's plane
+//      at 4.5 to 1 in both modes, carries white at 4.5 to 1 in light, and carries black at
+//      4.5 to 1 in dark, in every brand and family (docs/date-picker.md). The picker draws its
+//      label white on a dark tint and black on a light one; the flip was observed above the
+//      lightness of every pen-58 and below that of every pen-70 in dark.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -88,14 +90,13 @@ for (const brand of BRAND_NAMES) {
   for (const mode of ['light', 'dark']) {
     const plane = byBrand[brand].themes[mode]['surface-high']
     for (const f of INTERACTION_FAMILIES.filter(f => f !== 'neutral-strong' && f !== 'neutral-inverse')) {
-      const hex = byBrand[brand].themes[mode][`${f}-pencil-47`]
-      if (!hex || !hex.startsWith('#')) { fail(`E: ${brand}: ${mode} ${f}-pencil-47 is missing or not a hex`); continue }
+      const hex = byBrand[brand].themes[mode][`${f}-pen-70`]
+      if (!hex || !hex.startsWith('#')) { fail(`E: ${brand}: ${mode} ${f}-pen-70 is missing or not a hex`); continue }
       const asText = contrast(hex, plane)
-      if (asText < 4.5) fail(`E: ${brand}: ${f}-pencil-47 on surface-high in ${mode} is ${asText.toFixed(2)} to 1, under 4.5`)
-      if (mode === 'light') {
-        const underWhite = contrast(hex, '#ffffff')
-        if (underWhite < 4.5) fail(`E: ${brand}: white on ${f}-pencil-47 in light is ${underWhite.toFixed(2)} to 1, under 4.5`)
-      }
+      if (asText < 4.5) fail(`E: ${brand}: ${f}-pen-70 on surface-high in ${mode} is ${asText.toFixed(2)} to 1, under 4.5`)
+      const label = mode === 'light' ? '#ffffff' : '#000000'
+      const underLabel = contrast(hex, label)
+      if (underLabel < 4.5) fail(`E: ${brand}: the picker's ${mode === 'light' ? 'white' : 'black'} label on ${f}-pen-70 in ${mode} is ${underLabel.toFixed(2)} to 1, under 4.5`)
     }
   }
 }
