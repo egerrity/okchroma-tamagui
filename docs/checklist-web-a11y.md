@@ -65,3 +65,10 @@ disabled, so a disabled control takes no hover, press or click. Still open, and 
 kit: a disabled button keeps a tab stop, because the core marks the element `disabled`
 only when it recognizes the element as a button, which it does not here. The checklist's
 "not focusable by Tab" line fails on that point; it is announced as disabled.
+
+**2026-09-22, hand run with a real keyboard, two browsers: the Claude desktop app's browser
+pane and Chrome, Vite dev server.** Tab reaches the Delete account button and the dialog
+opens from the keyboard; the key that opened it was not named. Tab does not skip the
+disabled Saved button: the "not focusable by Tab" line fails by hand in both browsers, and
+the failure is inside the kit, as the 2026-09-21 entry says. Not run: Space, Escape, the
+tab trap inside the dialog, and the order the entry above asks for. Mode not named.
