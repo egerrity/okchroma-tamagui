@@ -65,3 +65,17 @@ roster rows and the dialog in both modes. Every value is the engine's for the re
 name, with one exception recorded in `docs/plan.md` Traps: on iOS a selected Button takes
 the root theme's selected ground. These files replace the 2026-09-15 set under the same
 names; that set stays in the history. Unjudged: the owner has not yet answered per row.
+
+**2026-09-22, later, brand `eggplant`, okchroma 0.6.1, decision 32, the date range picker.**
+Web from headless Chrome at 640 wide: `screen-web-light`, `screen-web-dark` and the stock
+baseline, now 1300 tall so the Statement period block and its presets are in frame;
+`roster-web-light`, `roster-web-dark`, with the date range band under each color family;
+`picker-web-light`, `picker-web-dark`, the calendar dialog open at 900 wide with a range
+across two months. Native from Expo Go on an iPhone 17 Pro simulator: `period-native-light`,
+`period-native-dark`, the fields and presets in the card; `picker-native-light`,
+`picker-native-dark`, the dialog holding the system picker with a picked range;
+`roster-native-light`, `roster-native-dark` at the brand family, with the band. Read back:
+on web, the contract's 37 checks in both modes under trusted key events
+(`docs/checklist-web-a11y.md`), and the band's six states in every family by computed
+style; on native, the picker's tint by pixel in both modes and both of its selected
+drawings. Unjudged: the owner has not yet answered per row.

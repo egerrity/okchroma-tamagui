@@ -27,6 +27,21 @@ lives inside a Tamagui component, which the theme cannot reach, opens the contin
 - [ ] Focus returns to the trigger on close.
 - [ ] Content behind is inert while it is open.
 
+## Date range picker
+
+`docs/date-picker.md` holds the contract; these are its lines. The field path comes first.
+
+- [ ] The two fields alone complete a range from the keyboard, no calendar opened.
+- [ ] Each field is labelled, and the format is an instruction tied to it, not only a placeholder.
+- [ ] An impossible or misordered date marks its own field invalid, and the message tied to it names the fix.
+- [ ] The presets are buttons with a pressed state, and one fills both fields.
+- [ ] The calendar opens from its button only, never on focus of a field.
+- [ ] The calendar is a dialog: labelled, focus inside on open, Escape closes, focus returns to the button.
+- [ ] The grid is one tab stop; arrows move by day and week, Page keys by month, Home and End to the week's ends; crossing a month turns the page.
+- [ ] Every cell is named with its full date and its state; cells in the range are selected.
+- [ ] A month change and a completed range are announced once.
+- [ ] A cell is at least 24 by 24 CSS pixels.
+
 ## Record
 
 Date, mode, result per line, and for a failure: theme or component.
@@ -72,3 +87,22 @@ opens from the keyboard; the key that opened it was not named. Tab does not skip
 disabled Saved button: the "not focusable by Tab" line fails by hand in both browsers, and
 the failure is inside the kit, as the 2026-09-21 entry says. Not run: Space, Escape, the
 tab trap inside the dialog, and the order the entry above asks for. Mode not named.
+
+**2026-09-22, light and dark, Vite dev server, trusted key and mouse events through Chrome's
+debugging protocol (the scenario is outside the repository), the date range picker.** All
+ten lines pass in both modes, 37 checks each: the group and the fields are labelled with
+the format tied to both; an impossible date marks the start invalid with a message naming
+the format; an end before the start marks the end invalid with a message naming the start;
+a short typed date is accepted and rewritten in the canonical form; a preset fills both
+fields, clears the error and shows pressed, and the range is announced; Enter on the
+button opens a labelled modal dialog with focus on a day; the grid is named by the month
+heading and described by the instructions; one tab stop among 61 cells, before and after
+moving; ArrowRight, ArrowDown, Home, End, PageUp and PageDown move as the pattern says and
+the heading turns with the page; Enter picks the start with an announcement and an
+instruction, the days between show the preview, Enter picks the end, the cells name start,
+inside and end, four gridcells are selected, the fields show the range, the range is
+announced; Escape closes and focus returns to the button; Tab runs start, end, Calendar,
+then the presets; cells are 40 pixels; the ends are the stamp with its on-text, the inside
+the selected ground, today the neutral edge, the panel the high plane. Owed by hand: the
+same run with a real keyboard, VoiceOver on the native fields and the system picker, and
+the browser name.

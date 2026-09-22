@@ -10,8 +10,8 @@
 //      bound to the plugin's opacity ladder at the register's rung. A host places one
 //      instance stretched over its ground; the family is the `color family` mode on the host.
 //   3. The roster on a page of its own: Button (Kind x State), Chip (Selected x State),
-//      IndicatorChip (Level x Size), Input (State) and Dialog, every fill, edge and text bound
-//      to `color family` rows, light and dark on the file's mode toggle.
+//      IndicatorChip (Level x Size), DayCell (Place x State), Input (State) and Dialog, every
+//      fill, edge and text bound to `color family` rows, light and dark on the file's mode toggle.
 //
 //   node scripts/figma/print.ts          plugin form: logs the summary and closes with one line of it
 //   node scripts/figma/print.ts --mcp    MCP form: ends with `return summary`
@@ -136,6 +136,24 @@ const LEVELS = {
 const indicatorVariants = (Object.keys(LEVELS) as (keyof typeof LEVELS)[]).flatMap(level =>
   [{ size: 'md', height: 32 }, { size: 'sm', height: 24 }].map(s => ({ level, ...s, ...LEVELS[level] })),
 )
+// the day cell (docs/date-picker.md): Place x State. A day and today are neutral on the cell
+// itself; the ends of the range are the family's stamp; inside is the subtle layer, whose
+// resting rung is the selected ground; the preview is the hint layer at its hover rung.
+const PLACES = {
+  day: { layer: 'hint', stroke: null, text: 'pencil-47', neutral: true, corners: 'all' },
+  today: { layer: 'hint', stroke: 'highlighter-26', text: 'pencil-47', neutral: true, corners: 'all' },
+  start: { layer: 'solid', stroke: 'stamp/edge', text: 'stamp/on', neutral: false, corners: 'left' },
+  inside: { layer: 'subtle', stroke: null, text: 'pencil-47', neutral: false, corners: 'none' },
+  end: { layer: 'solid', stroke: 'stamp/edge', text: 'stamp/on', neutral: false, corners: 'right' },
+  single: { layer: 'solid', stroke: 'stamp/edge', text: 'stamp/on', neutral: false, corners: 'all' },
+  preview: { layer: 'hint', stroke: null, text: 'pencil-47', neutral: false, corners: 'none', fixedLayerState: 'hover' },
+} as const
+const dayCellVariants = (Object.keys(PLACES) as (keyof typeof PLACES)[]).flatMap(place =>
+  STATES.map(state => {
+    const p = PLACES[place]
+    return { place, state, layer: p.layer, stroke: p.stroke, text: p.text, neutral: p.neutral, corners: p.corners, layerState: 'fixedLayerState' in p ? p.fixedLayerState : layerState(state), opacity: state === 'disabled' ? Number(tokens.light['disabled-opacity']) : 1 }
+  }),
+)
 // the input: the edge is the family's highlighter-26, the family by the variant's mode
 const inputVariants = [
   { state: 'enabled', family: NEUTRAL },
@@ -158,6 +176,7 @@ const LAYERS = ${JSON.stringify(LAYERS)}
 const BUTTON = ${JSON.stringify(buttonVariants)}
 const CHIP = ${JSON.stringify(chipVariants)}
 const INDICATOR = ${JSON.stringify(indicatorVariants)}
+const DAYCELL = ${JSON.stringify(dayCellVariants)}
 const INPUT = ${JSON.stringify(inputVariants)}
 const PATHS = ${JSON.stringify(paths)}
 
@@ -272,7 +291,8 @@ const layerInto = (host, tier, props) => {
   if (!variant) { summary.missing.push('state-layer/' + tier + ' ' + JSON.stringify(props)); return }
   const inst = variant.createInstance(); host.insertChild(0, inst)
   inst.layoutPositioning = 'ABSOLUTE'; inst.constraints = { horizontal: 'STRETCH', vertical: 'STRETCH' }
-  inst.x = 0; inst.y = 0; inst.resize(host.width, host.height); inst.cornerRadius = host.cornerRadius
+  inst.x = 0; inst.y = 0; inst.resize(host.width, host.height)
+  inst.topLeftRadius = host.topLeftRadius; inst.topRightRadius = host.topRightRadius; inst.bottomLeftRadius = host.bottomLeftRadius; inst.bottomRightRadius = host.bottomRightRadius
   return inst
 }
 
@@ -335,6 +355,23 @@ else {
   finishSet(comps, 'IndicatorChip', 'The tag chip, a label that takes no press, on the scale rows of its level. Family is the color family mode on the instance. In code: <IndicatorChip theme="<family>_indicator-<level>">.')
 }
 
+if (existingSet('DayCell')) summary.skipped.push('DayCell set exists; left as is')
+else {
+  const comps = []
+  for (const v of DAYCELL) {
+    const f = frame('day', 40, 40, 0); f.primaryAxisSizingMode = 'FIXED'; f.counterAxisSizingMode = 'FIXED'; f.resize(40, 40); f.paddingTop = f.paddingBottom = 0
+    const r = v.corners === 'all' ? [10000, 10000, 10000, 10000] : v.corners === 'left' ? [10000, 0, 0, 10000] : v.corners === 'right' ? [0, 10000, 10000, 0] : [0, 0, 0, 0]
+    f.topLeftRadius = r[0]; f.topRightRadius = r[1]; f.bottomRightRadius = r[2]; f.bottomLeftRadius = r[3]
+    if (v.stroke) f.strokes = [solid(cfVar[v.stroke])]
+    f.appendChild(text('15', 'Medium', cfVar[v.text])); f.children[f.children.length - 1].fontSize = 14
+    layerInto(f, v.layer, { state: v.layerState })
+    if (v.neutral) setMode(f, NEUTRAL)
+    const c = component(f, v.opacity); c.name = 'Place=' + v.place + ', State=' + v.state
+    comps.push(c)
+  }
+  finishSet(comps, 'DayCell', 'A day in the date range picker\\'s calendar (docs/date-picker.md). A day and today are neutral on the cell; the ends of the range are the family\\'s stamp by the color family mode on the instance; inside is the subtle layer at rest, the selected ground; the preview is the hint layer at its hover rung; the band is the corners. In code: <DayCell family="<family>" place="<place>">.')
+}
+
 if (page.children.some(n => n.type === 'COMPONENT' && n.name === 'Dialog')) summary.skipped.push('Dialog exists; left as is')
 else {
   const c = figma.createComponent(); c.name = 'Dialog'; c.resize(600, 400); c.fills = []
@@ -377,4 +414,4 @@ const out = mcp
   ? `// GENERATED by scripts/figma/print.ts (MCP form). Paste into the Figma MCP server's script runner.\n${summaryDecl}\ntry {${body}\n} catch (e) { summary.error = String((e && e.stack) || e) }\nreturn summary\n`
   : `// GENERATED by scripts/figma/print.ts (plugin form). Save as scripts/figma/plugin/code.js and load that folder as a development plugin.\n(async () => {\n${summaryDecl}\ntry {${body}\n} catch (e) { summary.error = String((e && e.stack) || e) }\nconsole.log('okchroma-tamagui print', JSON.stringify(summary, null, 1))\nfigma.closePlugin(${summaryLine})\n})()\n`
 process.stdout.write(out)
-process.stderr.write(`print: ${rows.length} color family rows, ${LAYERS.solid.length + LAYERS.subtle.length + LAYERS.hint.length} state-layer variants, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorVariants.length} IndicatorChip, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
+process.stderr.write(`print: ${rows.length} color family rows, ${LAYERS.solid.length + LAYERS.subtle.length + LAYERS.hint.length} state-layer variants, ${buttonVariants.length} Button, ${chipVariants.length} Chip, ${indicatorVariants.length} IndicatorChip, ${dayCellVariants.length} DayCell, ${inputVariants.length} Input variants, ${mcp ? 'MCP' : 'plugin'} form\n`)
