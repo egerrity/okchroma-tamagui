@@ -1,7 +1,8 @@
 // The native app: the exhibit under the theme, light and dark on a toggle. The brand is
 // EXPO_PUBLIC_BRAND, else the first in brands.ts; the config is the map's unless
 // EXPO_PUBLIC_THEME_SOURCE=stock, the baseline. Only the chosen module runs, since
-// createTamagui registers globally.
+// createTamagui registers globally. EXPO_PUBLIC_DEMO=1 is the demo screen, the period
+// block and its aid toggle out (docs/exhibit.md).
 import { useState } from 'react'
 import { ScrollView, useColorScheme } from 'react-native'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
@@ -16,6 +17,7 @@ const config =
   process.env.EXPO_PUBLIC_THEME_SOURCE === 'stock'
     ? require('@poc/theme/stock').config
     : (() => { const m = require('@poc/theme/config'); const b = process.env.EXPO_PUBLIC_BRAND; return m.createConfig(m.isBrand(b) ? b : undefined) })()
+const demo = process.env.EXPO_PUBLIC_DEMO === '1'
 
 export function App() {
   // the faces the fonts' `face` map names; until they load the system font stands in
@@ -40,11 +42,13 @@ export function App() {
                 <Button size="$sm" theme="neutral_hint" onPress={() => setPage(page === 'screen' ? 'roster' : 'screen')}>
                   {page === 'screen' ? 'Roster' : 'Screen'}
                 </Button>
-                <Button size="$sm" theme="neutral_hint" onPress={() => setAid(aid === 'system' ? 'own' : 'system')}>
-                  {aid === 'system' ? 'Own calendar' : 'System calendar'}
-                </Button>
+                {!demo && (
+                  <Button size="$sm" theme="neutral_hint" onPress={() => setAid(aid === 'system' ? 'own' : 'system')}>
+                    {aid === 'system' ? 'Own calendar' : 'System calendar'}
+                  </Button>
+                )}
               </XStack>
-              <ScrollView>{page === 'screen' ? <Screen aid={aid} /> : <Roster />}</ScrollView>
+              <ScrollView>{page === 'screen' ? <Screen aid={aid} demo={demo} /> : <Roster />}</ScrollView>
             </SafeAreaView>
           </YStack>
         </Theme>

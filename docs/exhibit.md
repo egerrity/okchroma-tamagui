@@ -28,6 +28,10 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
   On the roster, one row per color family of the day cell in its states, day, today, start,
   inside, end and disabled, abutting as a band. Native shows the fields, the presets and
   the system picker in the dialog.
+- **The demo screen.** The screen with the Statement period block out: `?demo` on web,
+  `EXPO_PUBLIC_DEMO=1` on native, where the aid toggle goes with it. The demo shows the kit's
+  own components; the picker's accessibility work (decision 37) is open, so it stays off
+  camera. The exhibit itself is unchanged.
 - Web: Vite on port 8350. Native: Expo Go on an iPhone simulator.
 
 - **The Astryx web app** (`apps/web-astryx`, `docs/map-astryx.md`). Astryx's own

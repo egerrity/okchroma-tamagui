@@ -8,8 +8,11 @@ import { EMPTY, today, type Range } from './parts/date/index.ts'
 import type { CalendarAid } from './parts/date/DateRangeField.tsx'
 export type { CalendarAid }
 
-/** `aid`: the native calendar aid, the PoC's grid or the system picker (decision 37); web ignores it */
-export function Screen({ aid }: { aid?: CalendarAid } = {}) {
+/**
+ * `aid`: the native calendar aid, the PoC's grid or the system picker (decision 37); web ignores it.
+ * `demo`: the demo screen, the Statement period block left out (docs/exhibit.md).
+ */
+export function Screen({ aid, demo = false }: { aid?: CalendarAid; demo?: boolean } = {}) {
   // The dialog is controlled and opened by a real Button, so keyboard activation is the
   // browser's own; the kit's Dialog.Trigger with asChild renders its child as a span with a
   // button role instead. On close the kit focuses its trigger ref, which nothing sets here,
@@ -57,7 +60,7 @@ export function Screen({ aid }: { aid?: CalendarAid } = {}) {
           <Input id="email" theme="critical" defaultValue="not an address" aria-invalid />
           <Paragraph theme="critical_hint" size="$sm">Enter an email address.</Paragraph>
         </YStack>
-        <DateRangeField id="period" label="Statement period" family="brand" value={period} onChange={setPeriod} bounds={bounds} aid={aid} />
+        {!demo && <DateRangeField id="period" label="Statement period" family="brand" value={period} onChange={setPeriod} bounds={bounds} aid={aid} />}
       </Card>
 
       <XStack gap="$3" flexWrap="wrap">

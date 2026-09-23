@@ -1,6 +1,7 @@
 // The exhibit under the theme: light and dark on one toggle, the stock baseline behind a
 // reload with `?theme=stock`, the roster on `#roster`, the brand behind a reload with
-// `?brand=<name>`. The mode is top-level state: `?mode=dark` or `?mode=light` sets it (so a
+// `?brand=<name>`, the demo screen with the period block out on `?demo` (docs/exhibit.md).
+// The mode is top-level state: `?mode=dark` or `?mode=light` sets it (so a
 // shot needs no click), the toggle writes it back to the address and to the browser's
 // storage, and the brand and baseline reloads carry the address, so the mode survives them.
 import { useState } from 'react'
@@ -22,6 +23,7 @@ const reloadWith = (edit: (p: URLSearchParams) => void) => { const u = new URL(l
 
 export function App({ config, stock, brand }: { config: TamaguiInternalConfig; stock: boolean; brand?: string }) {
   const asked = new URL(location.href).searchParams.get('mode')
+  const demo = new URL(location.href).searchParams.has('demo')
   const [mode, setModeState] = useState<Mode>(isMode(asked) ? asked : storedMode() ?? (prefersDark() ? 'dark' : 'light'))
   const setMode = (m: Mode) => { setModeState(m); rememberMode(m) }
   const [page, setPage] = useState<'screen' | 'roster'>(location.hash === '#roster' ? 'roster' : 'screen')
@@ -50,7 +52,7 @@ export function App({ config, stock, brand }: { config: TamaguiInternalConfig; s
               ))}
             </XStack>
           )}
-          {page === 'screen' ? <Screen /> : <Roster />}
+          {page === 'screen' ? <Screen demo={demo} /> : <Roster />}
         </YStack>
       </Theme>
     </TamaguiProvider>
