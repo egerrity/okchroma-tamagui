@@ -31,13 +31,12 @@ function hueRows(): Record<string, string> {
 }
 
 export const ASTRYX_TO_OKCHROMA: Record<string, string> = {
-  // The stamp is the CTA fill. Astryx also paints this one token as text (the
-  // check and radio indicators, Step, Icon, MetadataList, sortable table headers)
-  // and as the focus ring; the stamp carries no text promise there, and Astryx
-  // derives hover and pressed itself by mixing tint-hover in, so stamp-fill-hover
-  // and stamp-fill-pressed have no slot to land in.
-  '--color-accent': 'brand-stamp-fill',
-  '--color-on-accent': 'brand-stamp-on',
+  // The stamp is never text. Astryx paints this one token as text (the check and
+  // radio indicators, Step, Icon, MetadataList, sortable table headers), as the
+  // focus ring and as a ground outside buttons, so it takes the brand's text stop
+  // with paper-0 on it. A filled Button maps individually (ASTRYX_BUTTON_MAP).
+  '--color-accent': 'brand-pencil-47',
+  '--color-on-accent': 'paper-0',
   '--color-accent-muted': 'brand-paper-3',
   '--color-text-accent': 'brand-pen-70',
   '--color-icon-accent': 'brand-highlighter-26',
@@ -70,8 +69,10 @@ export const ASTRYX_TO_OKCHROMA: Record<string, string> = {
 
   // Astryx asks one token to be both the status text and the status fill;
   // pencil-47 is the text stop that also serves as the emphasis fill, and paper-0
-  // is its on-text. The muted grounds sit on paper-3 so that neutral-pencil-47,
-  // which Astryx writes on them, stays on a paper it is cleared against.
+  // is its on-text. The destructive Button's fill maps individually
+  // (ASTRYX_BUTTON_MAP). The muted grounds sit on paper-3 so that
+  // neutral-pencil-47, which Astryx writes on them, stays on a paper it is
+  // cleared against.
   '--color-success': 'positive-pencil-47',
   '--color-success-muted': 'positive-paper-3',
   '--color-on-success': 'paper-0',
@@ -93,4 +94,32 @@ export const ASTRYX_TO_OKCHROMA: Record<string, string> = {
   '--color-tint-hover': 'pen-100',
 
   ...hueRows(),
+};
+
+/**
+ * Buttons map individually (docs/map-astryx.md): a filled button is its family's
+ * solid tier, the stamp with its own on-text, its own hover and pressed fills and
+ * its edge, the stamp edge the gate raises when the fill sits close to the page and
+ * transparent otherwise, while the token the rest of the page paints stays on the
+ * text stop above. The Astryx theme takes these as component overrides scoped to
+ * the Button.
+ */
+export const ASTRYX_BUTTON_MAP: Record<
+  'primary' | 'destructive',
+  {fill: string; hover: string; pressed: string; on: string; edge: string}
+> = {
+  primary: {
+    fill: 'brand-solid-bg-enabled',
+    hover: 'brand-solid-bg-hover',
+    pressed: 'brand-solid-bg-pressed',
+    on: 'brand-solid-fg',
+    edge: 'brand-solid-border',
+  },
+  destructive: {
+    fill: 'critical-solid-bg-enabled',
+    hover: 'critical-solid-bg-hover',
+    pressed: 'critical-solid-bg-pressed',
+    on: 'critical-solid-fg',
+    edge: 'critical-solid-border',
+  },
 };

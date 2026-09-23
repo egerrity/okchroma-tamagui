@@ -16,8 +16,10 @@ build's rows, mapped onto Astryx's names. The engine is untouched, and the build
 the Tamagui apps mount, so a brand reads the same value for the same name on both renderers.
 
 Astryx ships its own seed generator (`color: {accent}`; Material HCT; 4.5:1 by tone
-spacing; `--color-border-emphasized` bumped until it clears 3:1). It is the baseline every
-exhibit is judged against.
+spacing; the neutrals tinted from the seed; `--color-border-emphasized` bumped until it
+clears 3:1; the status colors convention-bound and left at Astryx's defaults). Seeded with
+the brand's hex it is Meta's expression of the seed, and the baseline every exhibit is
+judged against (owner, decision 39).
 
 ## Astryx's color roster and how the components consume it
 
@@ -42,12 +44,12 @@ syntax, about 60 data-viz. Consumption counted over `packages/core/src` at 423c8
 
 ## The four rulings (owner, decision 38)
 
-1. **accent, brand-stamp-fill.** Astryx folds the CTA ground and the accent text into one
-   token; okchroma separates them by law. Owner: this is a problem okchroma solves and
-   Astryx reintroduces; if okchroma is kept, Astryx is forked to split the token (and to
-   give stamp-fill-hover and stamp-fill-pressed a slot, since Astryx mixes its own hover).
-   Exposure until then: the check and radio indicators, Step, Icon, MetadataList and the
-   sortable table headers paint the stamp as text; Button itself never does.
+1. **accent.** Astryx folds the CTA ground and the accent text into one token; okchroma
+   separates them by law. Owner: this is a problem okchroma solves and Astryx reintroduces.
+   Resolved without a fork by mapping the Button individually (decision 39, below): the
+   token is the brand's text stop, `brand-pencil-47`, with `paper-0` on it, so the check and
+   radio indicators, Step, Icon, MetadataList and the sortable table headers paint a text
+   stop; the primary Button's fill is the brand's solid tier. The stamp is never text.
 2. **text-disabled, neutral-highlighter-26.** Astryx needs a color there; the opacity-only
    stance on disabled is not a hard rule (owner). Adapter boundary only.
 3. **The muted trio, paper-3.** Derived: neutral-pencil-47 is written on these grounds and
@@ -57,6 +59,19 @@ syntax, about 60 data-viz. Consumption counted over `packages/core/src` at 423c8
    (above); blue is the engine's own info hue. Those five get families. Cyan, orange, pink,
    purple and teal are decoration, not roles, so they are not signals and stay at Astryx's
    defaults, visibly unharmonized on Badge and Token.
+
+## Buttons map individually
+
+A filled button is its family's solid tier: the stamp with its own on-text, its own hover
+and pressed fills and its edge (the stamp edge where the gate raises one, transparent
+otherwise, drawn as a one-pixel border Astryx's Button does not have of its own), the rows
+`ASTRYX_BUTTON_MAP` in `packages/theme/src/map-astryx.ts` names. The theme carries them as theme-local tokens and lands them on the Button through
+Astryx's own component overrides (`components.button`, `variant:primary` and
+`variant:destructive`), scoped to the Button under the theme's attribute, so the page-level
+`--color-accent` and `--color-error` stay on the text stops for everything else Astryx
+paints with them. Owner's rule (decision 39): red text is pencil-47, a red button fill is
+the stamp, and the stamp is never used for text; a component whose fill needs the stamp
+maps individually, as the Tamagui map's tiers do.
 
 The rest of the map is the role layer's own assignments: fg-default, fg-subtle,
 border-default, border-subtle, the elevation planes, the signal bg-emphasis on pencil-47
@@ -75,7 +90,6 @@ motion are not color and are core defaults in both candidates.
 
 - Generating the five decorative hues from the engine. An engine question; hers.
 - paper-3 against paper-5 for the muted grounds: a Banner exhibit.
-- The Astryx fork that splits `--color-accent`.
 - `astryx theme build` and `astryx theme targets --json` to lint and compile the theme for
   SSR once the map settles.
 
@@ -85,12 +99,11 @@ The two maps were written apart and agree on the page ground (`surface-low`), bo
 (`neutral-pen-70`), placeholder and secondary text (`neutral-pencil-47`), the decorative
 edge (`neutral-chalk-11`), the input's 3:1 edge (`neutral-highlighter-26`), the shadow
 (`shadow-08`), the scrim, the solid tier (the stamp with its on-text) and the subtle tier
-(`<family>-subtle-bg-enabled`). They differ in five rows; the first is the owner's, the rest
-follow it.
+(`<family>-subtle-bg-enabled`), and, since decision 39, the destructive button's ground, the
+critical stamp on both. They differ in four rows, which follow from Astryx's structure.
 
 | Role | Tamagui map | Astryx map | Note |
 |---|---|---|---|
-| destructive button ground | `critical-solid-bg-enabled` (the critical stamp) | `critical-pencil-47` | Astryx's `--color-error` is also its error text; the stamp carries no text promise, the same dual duty as the accent, so the accent ruling (stamp, exposure noted, fork later) would apply here too. |
 | focus ring | `neutral-highlighter-26` | the accent | Astryx's Button paints its ring with `--color-accent` in the component; only a fork moves it. |
 | input ground | `surface-high` | `--color-background-surface`, `surface-mid` | one plane apart. |
 | ghost text | `<family>-fg-on-hint` (`pencil-47`) | `--color-text-primary`, `pen-70` | Astryx's ghost is the body text stop. |

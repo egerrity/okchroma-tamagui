@@ -341,3 +341,21 @@ the rule it serves. Code cites a decision by number, never by date.
     check's rule for the Astryx map; the copied page template, which the check reads as this
     proof's code although it is reference; Code Connect's platform labels for the print; the
     shots of the Astryx exhibits in both modes.
+
+39. 2026-09-23. **Buttons map individually; the stamp is never text.** The owner judged the first recordings and found the Astryx destructive
+    button wrong beside the Tamagui Cancel: critical pencil-47 with paper-0 on it, legal for
+    a token Astryx also paints as text, border and dot, looks like ink used as a fill. Her
+    rule: red text is pencil-47, a red button fill is the stamp, and the stamp is never used
+    for text, so a component whose fill needs the stamp maps individually, as the Tamagui
+    map's tiers do. In Astryx that is the theme's own component overrides: the Button's
+    primary and destructive variants take their families' solid tiers, fill, hover, pressed,
+    on-text and edge, through theme-local tokens scoped to the Button, while the page-level
+    `--color-accent` moves from the stamp to `brand-pencil-47` with `paper-0` on it and
+    `--color-error` stays on `critical-pencil-47`. Decision 38's first ruling is resolved by
+    this rather than by a fork. The comparison's baseline stays Astryx's own generator
+    seeded with the brand's hex, Meta's expression of the seed, which the owner confirmed
+    when a session swapped in Astryx's default theme instead. Foreclosed: the fork that splits
+    `--color-accent`; any token with a textless or a text duty on the stamp. Open: whether
+    the engine should carry a text-legal signal stamp, hers, measured in the session
+    handoff; the other filled controls (checkbox, switch, progress) on the text stop, judged
+    later.

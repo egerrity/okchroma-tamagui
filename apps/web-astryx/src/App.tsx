@@ -81,7 +81,7 @@ export default function App() {
               candidate{' '}
               <select value={candidate} onChange={(e) => setCandidate(e.target.value as Candidate)}>
                 <option value="okchroma">okchroma</option>
-                <option value="astryx">astryx generator</option>
+                <option value="astryx">astryx from seed</option>
               </select>
             </label>
           </div>
@@ -99,7 +99,7 @@ export default function App() {
         <header className="controls">{controls}</header>
         <section className="panels">
           <Panel label="okchroma" theme={okchroma} mode={mode} />
-          <Panel label="astryx generator" theme={astryx} mode={mode} />
+          <Panel label="astryx from seed" theme={astryx} mode={mode} />
         </section>
       </main>
     </Theme>

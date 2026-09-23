@@ -36,7 +36,8 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
 
 - **The Astryx web app** (`apps/web-astryx`, `docs/map-astryx.md`). Astryx's own
   components under the Astryx map, one brand at a time (`?brand=`), beside Astryx's own
-  generator seeded with the brand's hex as the baseline. Three exhibits: the Button set
+  generator seeded with the brand's hex, Meta's expression of the seed, as the baseline.
+  Three exhibits: the Button set
   (primary, secondary, ghost, destructive, enabled and disabled) in two panels grouped by
   candidate; Astryx's Filterable Table page template whole, its content a client roster
   (Name, Client ID, Type, Status, a row actions menu, the rest behind View options), the
@@ -153,3 +154,14 @@ app's values for `eggplant` matched `dist/theme.eggplant.ts` name for name on a 
 26, the green second family included; the Tamagui screen shows brand-alt on its Preview
 button and Astryx has no slot for it. Shots owed: the Button panels and the table, both
 modes.
+
+**2026-09-23, brand `bright-blue`, okchroma 0.6.1, decision 39, the Button mapped individually
+and the roster.** From Vite on 5177 through headless Chrome at 1440x900, both modes; the
+recordings folder holds the clips. The Button set: the okchroma panel's primary and
+destructive carry their families' solid tiers, fill, on-text and hover read back as the
+build's rows; secondary the subtle tier; the astryx-from-seed panel carries Meta's expression
+of the seed, its accent and neutrals from the hex and the same fixed red on destructive
+under every brand. The table, a client roster, renders whole
+under both candidates: the row menu's Delete is critical pencil-47 as text, a checked box is
+brand pencil-47 with paper-0 on it, Add client the brand's solid tier. Unjudged: the owner
+has not yet answered per row.
