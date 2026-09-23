@@ -38,10 +38,11 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
   components under the Astryx map, one brand at a time (`?brand=`), beside Astryx's own
   generator seeded with the brand's hex as the baseline. Three exhibits: the Button set
   (primary, secondary, ghost, destructive, enabled and disabled) in two panels grouped by
-  candidate; Astryx's Filterable Table page template whole, the candidate on a toggle, the
-  roster in one realistic screen; and the pairing, this app beside the Tamagui apps on the
-  same brand, judged for one system across two renderers. Dark on dark; light behind the
-  toggle; `?view=`, `?candidate=`, `?mode=`.
+  candidate; Astryx's Filterable Table page template whole, its content a client roster
+  (Name, Client ID, Type, Status, a row actions menu, the rest behind View options), the
+  candidate on a toggle, the roster in one realistic screen; and the pairing, this app
+  beside the Tamagui apps on the same brand, judged for one system across two renderers.
+  Dark on dark; light behind the toggle; `?view=`, `?candidate=`, `?mode=`.
 - **The native aid, compared.** The Statement period's calendar on the phone, two ways on a
   top-row toggle: the system's inline picker, the shipped aid (decision 32), and the PoC's
   own grid, the web calendar's file verbatim inside the same dialog, so the band and its ends

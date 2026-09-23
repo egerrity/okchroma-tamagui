@@ -8,7 +8,7 @@
  * Each filterable field is a Selector, so the closed trigger doubles as the
  * filter chip: unset it reads as the bare field name against the same outlined
  * chrome as the search box, and once set it fills in and expands to the whole
- * clause (`Status is Overdue`) with a clear beside it. Anything the selectors
+ * clause (`Status is Suspended`) with a clear beside it. Anything the selectors
  * can't express — free numeric comparisons, OR groups — swaps to power search,
  * and because both modes read the same filter array, a filter built either way
  * survives the swap.
@@ -23,8 +23,16 @@
  * checkbox selection driving bulk edit — a row can be open without being
  * selected, and vice versa.
  *
- * @input Deterministic fixtures only (field-service jobs for a mechanical
- *   contractor: customers, technicians, fixed ISO schedule times, quotes)
+ * In this proof the template's field keys stay as upstream has them and carry
+ * a client roster instead: `summary` is the client's name, `customer` its
+ * type, `technician` its account owner, `priority` its risk, `scheduledAt` its
+ * last update, `quoted` its balance and `equipment` its contact. The machinery
+ * stays diffable against the upstream template; only labels, values and data
+ * differ, plus a Client ID column and a row actions menu.
+ *
+ * @input Deterministic fixtures only: a client roster generated on load
+ *   (names, ten-digit client IDs, types, statuses, owners, balances, update
+ *   times), none of it a real organisation.
  */
 
 import {useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
@@ -66,6 +74,7 @@ import {MetadataList, MetadataListItem} from '@astryxdesign/core/MetadataList';
 import {Heading, Text} from '@astryxdesign/core/Text';
 import {Button} from '@astryxdesign/core/Button';
 import {IconButton} from '@astryxdesign/core/IconButton';
+import {MoreMenu} from '@astryxdesign/core/MoreMenu';
 import {ToggleButton} from '@astryxdesign/core/ToggleButton';
 import {Icon} from '@astryxdesign/core/Icon';
 import {Avatar} from '@astryxdesign/core/Avatar';
@@ -105,11 +114,10 @@ import {
 } from '@astryxdesign/core/Table';
 import type {TableColumn, TablePlugin} from '@astryxdesign/core/Table';
 import {
+  Ban,
   Bookmark,
   BookmarkPlus,
-  Calendar,
   ChevronDown,
-  CircleX,
   Columns3,
   GripVertical,
   Image as ImageIcon,
@@ -120,6 +128,7 @@ import {
   SlidersHorizontal,
   Table as TableIcon,
   Table2,
+  Trash2,
   UserPlus,
   X,
 } from 'lucide-react';
@@ -138,27 +147,26 @@ const SlidersHorizontalFilled = (props: SVGProps<SVGSVGElement>) => (
 // Data
 // =============================================================================
 
-type JobStatus =
-  'scheduled' | 'in_progress' | 'on_hold' | 'overdue' | 'completed';
-type Priority = 'urgent' | 'high' | 'normal';
+type ClientStatus = 'pending' | 'active' | 'suspended' | 'deactivated' | 'deleted';
+type Risk = 'high' | 'medium' | 'low';
 
-/** The authored shape. Dates are derived on load, so they live on ServiceJob. */
-interface SeedJob {
+/** The authored shape. Dates are derived on load, so they live on Client. */
+interface SeedClient {
   id: string;
   summary: string;
   customer: string;
   address: string;
   technician: string;
-  status: JobStatus;
-  priority: Priority;
+  status: ClientStatus;
+  priority: Risk;
   /** ISO timestamp — the column sorts on this, so it stays a string. */
   scheduledAt: string;
-  /** Quote in whole dollars, kept numeric so it sorts and filters. */
+  /** Balance in whole dollars, kept numeric so it sorts and filters. */
   quoted: number;
   equipment: string;
 }
 
-interface ServiceJob extends SeedJob, Record<string, unknown> {
+interface Client extends SeedClient, Record<string, unknown> {
   /**
    * The same instant as scheduledAt, as a Date. Power search rejects a string
    * date outright, so the date filters read this field while the column reads
@@ -168,430 +176,192 @@ interface ServiceJob extends SeedJob, Record<string, unknown> {
 }
 
 /**
- * The hue variants, not the semantic ones. `warning` and `error` paint a solid
- * fill straight from --color-warning / --color-error, and a theme is free to
- * tune those as ink for text rather than as a surface — the neutral theme does,
- * so Overdue comes out a muddy maroon block. The hue variants read their own
- * background/text pair, which is a tint in every theme, so a column of these
- * stays legible wherever the page is themed. Red is left to carry the one state
- * worth chasing.
- *
- * On hold is grey because nothing is wrong with it — the work is parked, not
- * late — and a colour there would pull the eye off the row that is.
- *
- * The happy path walks the hue wheel in the direction the work travels:
- * Scheduled blue, In progress teal, Completed green. Teal is the stop between
- * the other two, so the ramp reads as progress rather than as three unrelated
- * tags.
+ * The hue variants, not the semantic ones: `warning` and `error` paint a solid
+ * fill straight from --color-warning and --color-error, while a hue variant
+ * reads its own background and text pair, a tint in every theme. The hues here
+ * are the ones the Astryx map assigns to okchroma families (docs/map-astryx.md),
+ * so the column re-themes with the brand. Deleted is grey because nothing is
+ * wrong with it; Deactivated is the one state worth chasing, so it carries red.
  */
 const STATUS_META: Record<
-  JobStatus,
+  ClientStatus,
   {
     label: string;
-    badge: 'neutral' | 'blue' | 'teal' | 'green' | 'red';
+    badge: 'neutral' | 'blue' | 'yellow' | 'green' | 'red';
   }
 > = {
-  scheduled: {label: 'Scheduled', badge: 'blue'},
-  in_progress: {label: 'In progress', badge: 'teal'},
-  on_hold: {label: 'On hold', badge: 'neutral'},
-  overdue: {label: 'Overdue', badge: 'red'},
-  completed: {label: 'Completed', badge: 'green'},
+  pending: {label: 'Pending', badge: 'blue'},
+  active: {label: 'Active', badge: 'green'},
+  suspended: {label: 'Suspended', badge: 'yellow'},
+  deactivated: {label: 'Deactivated', badge: 'red'},
+  deleted: {label: 'Deleted', badge: 'neutral'},
 };
 
 /**
- * Priority is a three-step ramp read down a column, which is what a dot is for:
- * the eye picks out the reds without reading a word. Normal is neutral, so a
- * table of ordinary work is quiet.
+ * Risk is a three-step ramp read down a column, which is what a dot is for:
+ * the eye picks out the reds without reading a word. Low is neutral, so a
+ * roster in good standing is quiet.
  */
 const PRIORITY_META: Record<
-  Priority,
+  Risk,
   {label: string; dot: 'neutral' | 'warning' | 'error'}
 > = {
-  urgent: {label: 'Urgent', dot: 'error'},
-  high: {label: 'High', dot: 'warning'},
-  normal: {label: 'Normal', dot: 'neutral'},
+  high: {label: 'High', dot: 'error'},
+  medium: {label: 'Medium', dot: 'warning'},
+  low: {label: 'Low', dot: 'neutral'},
 };
 
-/** Primary detail-pane action per state — keeps the panel feeling like a tool. */
-const NEXT_ACTION: Record<JobStatus, string> = {
-  scheduled: 'Dispatch technician',
-  in_progress: 'Mark complete',
-  on_hold: 'Check parts order',
-  overdue: 'Reschedule',
-  completed: 'Create follow-up',
+/** Primary detail-pane action per state, so the panel reads as a tool. */
+const NEXT_ACTION: Record<ClientStatus, string> = {
+  pending: 'Approve',
+  active: 'Suspend',
+  suspended: 'Reinstate',
+  deactivated: 'Reactivate',
+  deleted: 'Restore',
 };
 
-// Active work first, then recent completed jobs referenced as site history.
-const seedJobs: SeedJob[] = [
-  {
-    id: 'SJ-2148',
-    summary: 'No cooling — rooftop unit 3',
-    customer: 'Harborview Grand Hotel',
-    address: '1200 Harbor Blvd, Bayside',
-    technician: 'Luis Camarena',
-    status: 'in_progress',
-    priority: 'urgent',
-    scheduledAt: '2026-07-02T08:00:00Z',
-    quoted: 1480,
-    equipment: 'Trane RTU-3, 25-ton (2019)',
-  },
-  {
-    id: 'SJ-2147',
-    summary: 'Quarterly preventive maintenance',
-    customer: 'Northgate Dental Group',
-    address: '88 Northgate Mall, Suite 210',
-    technician: 'Dana Whitfield',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-02T10:30:00Z',
-    quoted: 420,
-    equipment: 'Carrier split system, 5-ton',
-  },
-  {
-    id: 'SJ-2146',
-    summary: 'Walk-in freezer overshooting setpoint',
-    customer: 'Beacon Street Bistro',
-    address: '412 Beacon St',
-    technician: 'Marcus Osei',
-    status: 'on_hold',
-    priority: 'high',
-    scheduledAt: '2026-07-01T13:00:00Z',
-    quoted: 2150,
-    equipment: 'Kolpak walk-in, Copeland compressor',
-  },
-  {
-    id: 'SJ-2145',
-    summary: 'Thermostat replacement, suite 400',
-    customer: 'Pinnacle Property Mgmt',
-    address: '500 Commerce Tower, Floor 4',
-    technician: 'Dana Whitfield',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-02T14:00:00Z',
-    quoted: 310,
-    equipment: 'Honeywell T6 Pro (2 units)',
-  },
-  {
-    id: 'SJ-2144',
-    summary: 'Boiler pilot fails to stay lit',
-    customer: 'Elm & 5th Lofts',
-    address: '501 Elm St',
-    technician: 'Luis Camarena',
-    status: 'overdue',
-    priority: 'high',
-    scheduledAt: '2026-07-01T09:00:00Z',
-    quoted: 760,
-    equipment: 'Weil-McLain CGa boiler (2011)',
-  },
-  {
-    id: 'SJ-2143',
-    summary: 'Condenser coil cleaning',
-    customer: 'Riverside Athletic Club',
-    address: '9 Riverside Way',
-    technician: 'Priya Raman',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-03T07:30:00Z',
-    quoted: 540,
-    equipment: 'Lennox RTU, 20-ton (2018)',
-  },
-  {
-    id: 'SJ-2142',
-    summary: 'Intermittent short cycling',
-    customer: 'Harborview Grand Hotel',
-    address: '1200 Harbor Blvd, Bayside',
-    technician: 'Marcus Osei',
-    status: 'on_hold',
-    priority: 'high',
-    scheduledAt: '2026-07-01T15:30:00Z',
-    quoted: 890,
-    equipment: 'Trane RTU-1, 25-ton (2019)',
-  },
-  {
-    id: 'SJ-2141',
-    summary: 'Emergency steam leak, basement',
-    customer: 'Elm & 5th Lofts',
-    address: '501 Elm St',
-    technician: 'Priya Raman',
-    status: 'in_progress',
-    priority: 'urgent',
-    scheduledAt: '2026-07-01T06:00:00Z',
-    quoted: 3200,
-    equipment: 'Weil-McLain CGa boiler (2011)',
-  },
-  {
-    id: 'SJ-2140',
-    summary: 'Annual fire damper inspection',
-    customer: 'Pinnacle Property Mgmt',
-    address: '500 Commerce Tower, Floor 4',
-    technician: 'Dana Whitfield',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-06T09:00:00Z',
-    quoted: 1250,
-    equipment: 'Building-wide duct network',
-  },
-  {
-    id: 'SJ-2139',
-    summary: 'Ice machine not producing',
-    customer: 'Beacon Street Bistro',
-    address: '412 Beacon St',
-    technician: 'Luis Camarena',
-    status: 'overdue',
-    priority: 'urgent',
-    scheduledAt: '2026-06-30T11:00:00Z',
-    quoted: 680,
-    equipment: 'Hoshizaki KM-660, air cooled',
-  },
-  {
-    id: 'SJ-2138',
-    summary: 'Makeup air unit rebalancing',
-    customer: 'Northgate Dental Group',
-    address: '88 Northgate Mall, Suite 210',
-    technician: 'Priya Raman',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-07T13:00:00Z',
-    quoted: 495,
-    equipment: 'Greenheck MAU, 4000 CFM',
-  },
-  {
-    id: 'SJ-2137',
-    summary: 'Chiller low refrigerant alarm',
-    customer: 'Summit Medical Plaza',
-    address: '77 Summit Ridge Rd',
-    technician: 'Marcus Osei',
-    status: 'in_progress',
-    priority: 'urgent',
-    scheduledAt: '2026-07-01T08:30:00Z',
-    quoted: 4100,
-    equipment: 'Daikin air-cooled chiller, 80-ton',
-  },
-  {
-    id: 'SJ-2136',
-    summary: 'VAV box actuator replacement',
-    customer: 'Summit Medical Plaza',
-    address: '77 Summit Ridge Rd',
-    technician: 'Dana Whitfield',
-    status: 'scheduled',
-    priority: 'high',
-    scheduledAt: '2026-07-03T10:00:00Z',
-    quoted: 720,
-    equipment: 'Titus VAV, zones 12–15',
-  },
-  {
-    id: 'SJ-2135',
-    summary: 'Exhaust fan bearing noise',
-    customer: 'Riverside Athletic Club',
-    address: '9 Riverside Way',
-    technician: 'Luis Camarena',
-    status: 'on_hold',
-    priority: 'normal',
-    scheduledAt: '2026-06-30T14:30:00Z',
-    quoted: 380,
-    equipment: 'Greenheck exhaust fan, pool deck',
-  },
-  {
-    id: 'SJ-2134',
-    summary: 'Humidifier control board fault',
-    customer: 'Summit Medical Plaza',
-    address: '77 Summit Ridge Rd',
-    technician: 'Priya Raman',
-    status: 'overdue',
-    priority: 'high',
-    scheduledAt: '2026-06-29T09:30:00Z',
-    quoted: 1340,
-    equipment: 'DriSteem steam humidifier',
-  },
-  {
-    id: 'SJ-2133',
-    summary: 'Rooftop economizer stuck closed',
-    customer: 'Northgate Dental Group',
-    address: '88 Northgate Mall, Suite 210',
-    technician: 'Marcus Osei',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-08T08:00:00Z',
-    quoted: 610,
-    equipment: 'Carrier split system, 5-ton',
-  },
-  {
-    id: 'SJ-2132',
-    summary: 'Hot water recirculation pump seized',
-    customer: 'Elm & 5th Lofts',
-    address: '501 Elm St',
-    technician: 'Dana Whitfield',
-    status: 'in_progress',
-    priority: 'high',
-    scheduledAt: '2026-07-01T12:00:00Z',
-    quoted: 950,
-    equipment: 'Taco 007 circulator',
-  },
-  {
-    id: 'SJ-2131',
-    summary: 'Split system quote, new tenant build',
-    customer: 'Pinnacle Property Mgmt',
-    address: '500 Commerce Tower, Floor 4',
-    technician: 'Priya Raman',
-    status: 'scheduled',
-    priority: 'normal',
-    scheduledAt: '2026-07-09T11:00:00Z',
-    quoted: 8600,
-    equipment: 'Proposed: Mitsubishi VRF, 6 zones',
-  },
-  {
-    id: 'SJ-2101',
-    summary: 'Compressor contactor replacement',
-    customer: 'Harborview Grand Hotel',
-    address: '1200 Harbor Blvd, Bayside',
-    technician: 'Marcus Osei',
-    status: 'completed',
-    priority: 'high',
-    scheduledAt: '2026-06-24T09:00:00Z',
-    quoted: 640,
-    equipment: 'Trane RTU-3, 25-ton (2019)',
-  },
-  {
-    id: 'SJ-2095',
-    summary: 'Pool dehumidifier service',
-    customer: 'Riverside Athletic Club',
-    address: '9 Riverside Way',
-    technician: 'Dana Whitfield',
-    status: 'completed',
-    priority: 'normal',
-    scheduledAt: '2026-06-22T08:00:00Z',
-    quoted: 720,
-    equipment: 'Seresco NP series dehumidifier',
-  },
-  {
-    id: 'SJ-2088',
-    summary: 'Refrigerant leak diagnostic',
-    customer: 'Beacon Street Bistro',
-    address: '412 Beacon St',
-    technician: 'Luis Camarena',
-    status: 'completed',
-    priority: 'normal',
-    scheduledAt: '2026-06-18T11:00:00Z',
-    quoted: 390,
-    equipment: 'Kolpak walk-in, Copeland compressor',
-  },
-  {
-    id: 'SJ-2081',
-    summary: 'Chiller annual certification',
-    customer: 'Summit Medical Plaza',
-    address: '77 Summit Ridge Rd',
-    technician: 'Priya Raman',
-    status: 'completed',
-    priority: 'high',
-    scheduledAt: '2026-06-15T07:00:00Z',
-    quoted: 2450,
-    equipment: 'Daikin air-cooled chiller, 80-ton',
-  },
-  {
-    id: 'SJ-2067',
-    summary: 'RTU belt and filter service',
-    customer: 'Pinnacle Property Mgmt',
-    address: '500 Commerce Tower, Floor 4',
-    technician: 'Dana Whitfield',
-    status: 'completed',
-    priority: 'normal',
-    scheduledAt: '2026-06-12T08:30:00Z',
-    quoted: 280,
-    equipment: 'York RTU, 15-ton (2016)',
-  },
-  {
-    id: 'SJ-2044',
-    summary: 'Cooling tower fan bearing replacement',
-    customer: 'Harborview Grand Hotel',
-    address: '1200 Harbor Blvd, Bayside',
-    technician: 'Marcus Osei',
-    status: 'completed',
-    priority: 'high',
-    scheduledAt: '2026-05-28T07:30:00Z',
-    quoted: 1120,
-    equipment: 'BAC cooling tower, cell 2',
-  },
-  {
-    id: 'SJ-2019',
-    summary: 'Spring maintenance visit',
-    customer: 'Northgate Dental Group',
-    address: '88 Northgate Mall, Suite 210',
-    technician: 'Dana Whitfield',
-    status: 'completed',
-    priority: 'normal',
-    scheduledAt: '2026-04-15T10:00:00Z',
-    quoted: 420,
-    equipment: 'Carrier split system, 5-ton',
-  },
+// The roster is generated on load, so every name, ID, contact and address is
+// made here and none of it is a real organisation. Five trades per place, each
+// pairing distinct, gives sixty clients that sort and group like a real book.
+const PLACES = [
+  'Northwind',
+  'Harborview',
+  'Cedar Ridge',
+  'Lantern',
+  'Summit',
+  'Riverstone',
+  'Maple Street',
+  'Orbit',
+  'Copperfield',
+  'Willow Lane',
+  'Granite Peak',
+  'Juniper',
+];
+const TRADES = [
+  'Grocers',
+  'Outfitters',
+  'Home & Garden',
+  'Books',
+  'Sporting Goods',
+  'Pharmacy',
+  'Market',
+  'Electronics',
+  'Hardware',
+  'Bakery',
+  'Fitness',
+  'Pet Supply',
+  'Florist',
+  'Coffee Roasters',
+  'Cycles',
+];
+const TYPES = ['Merchant', 'Partner', 'Agency', 'Enterprise'];
+const OWNERS = ['Dana Whitfield', 'Luis Camarena', 'Marcus Osei', 'Priya Raman'];
+const CONTACT_FIRST = [
+  'Amara',
+  'Ben',
+  'Chloe',
+  'Dev',
+  'Elena',
+  'Farid',
+  'Grace',
+  'Hugo',
+  'Ines',
+  'Jonah',
+  'Keiko',
+  'Liam',
+];
+const CONTACT_LAST = [
+  'Okafor',
+  'Novak',
+  'Marsh',
+  'Iyer',
+  'Costa',
+  'Brennan',
+  'Silva',
+  'Park',
+  'Duarte',
+  'Lindqvist',
+  'Mensah',
+  'Reyes',
+];
+const STREETS = [
+  'Harbor Blvd',
+  'Cedar Ave',
+  'Market St',
+  'Lantern Way',
+  'Summit Rd',
+  'Willow Ln',
+  'Orchard Dr',
+  'Mill St',
+];
+const TOWNS = ['Bayside', 'Northgate', 'Riverton', 'Ashford', 'Pinecrest', 'Eastvale'];
+// Mostly live accounts, the other states spaced through the roster.
+const STATUS_CYCLE: ClientStatus[] = [
+  'active',
+  'active',
+  'pending',
+  'active',
+  'suspended',
+  'active',
+  'active',
+  'deactivated',
+  'active',
+  'pending',
+  'active',
+  'deleted',
+  'active',
+];
+const RISK_CYCLE: Risk[] = [
+  'low',
+  'low',
+  'medium',
+  'low',
+  'low',
+  'high',
+  'low',
+  'low',
+  'low',
+  'medium',
+  'low',
 ];
 
 const DAY_MS = 86_400_000;
+const HOUR_MS = 3_600_000;
 
 /** Read once at load, so a preset's filter value stays referentially stable. */
 const NOW_MS = Date.now();
 
-/**
- * The authored dates are fixed, so they slide into the past as this template
- * ages and an "Upcoming" filter would match nothing. Shifting the whole set on
- * load keeps the backlog straddling today, with the newest job about three
- * weeks out.
- */
-const DATE_SHIFT_MS =
-  NOW_MS +
-  21 * DAY_MS -
-  Math.max(...seedJobs.map(j => Date.parse(j.scheduledAt)));
+const seedClients: SeedClient[] = Array.from({length: 60}, (_, i) => {
+  const place = i % PLACES.length;
+  const round = Math.floor(i / PLACES.length);
+  // Updates spread over the last four months, a handful inside the week.
+  const updatedAt =
+    NOW_MS - ((i * 37) % 120) * DAY_MS - ((i * 7) % 24) * HOUR_MS;
+  return {
+    id: String(3_100_000_000 + i * 12_345_679 + ((i * i) % 97)),
+    summary: `${PLACES[place]} ${TRADES[(place + 4 * round) % TRADES.length]}`,
+    customer: TYPES[(i * 7) % TYPES.length],
+    address: `${100 + ((i * 41) % 880)} ${STREETS[(i * 3) % STREETS.length]}, ${
+      TOWNS[(i * 5) % TOWNS.length]
+    }`,
+    technician: OWNERS[(i * 3) % OWNERS.length],
+    status: STATUS_CYCLE[i % STATUS_CYCLE.length],
+    priority: RISK_CYCLE[i % RISK_CYCLE.length],
+    scheduledAt: new Date(updatedAt).toISOString(),
+    quoted: ((i * 613) % 120) * 100,
+    equipment: `${CONTACT_FIRST[i % CONTACT_FIRST.length]} ${
+      CONTACT_LAST[(i * 5 + round) % CONTACT_LAST.length]
+    }`,
+  };
+});
 
-/**
- * A job in the past can't still be waiting to happen, and one from months ago
- * isn't still under way, so an authored status only survives where the shifted
- * date still supports it.
- */
-function statusForDate(authored: JobStatus, when: number): JobStatus {
-  if (when > NOW_MS) {
-    return 'scheduled';
-  }
-  // Recently missed work is still chaseable; anything older has been closed
-  // out one way or another.
-  const isRecent = when > NOW_MS - 45 * DAY_MS;
-  if (authored === 'scheduled') {
-    return isRecent ? 'overdue' : 'completed';
-  }
-  if (authored === 'in_progress' && !isRecent) {
-    return 'completed';
-  }
-  return authored;
-}
+const allClients: Client[] = seedClients.map(client => ({
+  ...client,
+  scheduledOn: new Date(client.scheduledAt),
+}));
 
-/**
- * The authored rows are cycled backwards through the calendar into a longer
- * backlog, so the infinite scroll below has several batches to fetch. A real
- * screen gets this from its Relay connection instead.
- */
-const allJobs: ServiceJob[] = Array.from({length: 5}, (_, cycle) =>
-  seedJobs.map((job, index) => {
-    // The per-row term decorrelates the cycles, so repeat visits to the same
-    // site spread across the calendar instead of stacking up next to each
-    // other once the table sorts by date.
-    const cycleDays = cycle === 0 ? 0 : cycle * 37 + ((index * 13) % 29);
-    const when =
-      Date.parse(job.scheduledAt) + DATE_SHIFT_MS - cycleDays * DAY_MS;
-    const scheduledOn = new Date(when);
-    return {
-      ...job,
-      id:
-        cycle === 0
-          ? job.id
-          : `SJ-${1999 - (cycle - 1) * seedJobs.length - index}`,
-      status: statusForDate(job.status, when),
-      scheduledAt: scheduledOn.toISOString(),
-      scheduledOn,
-      quoted: cycle === 0 ? job.quoted : job.quoted + ((index * 17) % 9) * 10,
-    };
-  }),
-).flat();
-
-const TECHNICIANS = Array.from(new Set(allJobs.map(j => j.technician))).sort();
-const CUSTOMERS = Array.from(new Set(allJobs.map(j => j.customer))).sort();
+const TECHNICIANS = Array.from(new Set(allClients.map(j => j.technician))).sort();
+const CUSTOMERS = Array.from(new Set(allClients.map(j => j.customer))).sort();
 
 const MONTHS = [
   'Jan',
@@ -641,24 +411,24 @@ const formatMoney = (amount: number) => `$${amount.toLocaleString('en-US')}`;
 // =============================================================================
 
 const fieldDefs = [
-  {key: 'summary', type: 'string', label: 'Summary'},
+  {key: 'summary', type: 'string', label: 'Name'},
   {
     key: 'customer',
     type: 'enum',
-    label: 'Customer',
+    label: 'Type',
     enumValues: CUSTOMERS.map(v => ({value: v, label: v})),
   },
   {
     key: 'technician',
     type: 'enum',
-    label: 'Technician',
+    label: 'Owner',
     enumValues: TECHNICIANS.map(v => ({value: v, label: v})),
   },
   {
     key: 'status',
     type: 'enum',
     label: 'Status',
-    enumValues: (Object.keys(STATUS_META) as JobStatus[]).map(v => ({
+    enumValues: (Object.keys(STATUS_META) as ClientStatus[]).map(v => ({
       value: v,
       label: STATUS_META[v].label,
     })),
@@ -666,20 +436,20 @@ const fieldDefs = [
   {
     key: 'priority',
     type: 'enum',
-    label: 'Priority',
-    enumValues: (Object.keys(PRIORITY_META) as Priority[]).map(v => ({
+    label: 'Risk',
+    enumValues: (Object.keys(PRIORITY_META) as Risk[]).map(v => ({
       value: v,
       label: PRIORITY_META[v].label,
     })),
   },
-  {key: 'quoted', type: 'number', label: 'Quote'},
-  {key: 'scheduledOn', type: 'date', label: 'Scheduled'},
+  {key: 'quoted', type: 'number', label: 'Balance'},
+  {key: 'scheduledOn', type: 'date', label: 'Last update'},
 ] as const;
 
-/** Bounds for the quote range slider, snapped outward to round money. */
+/** Bounds for the balance range slider, snapped outward to round money. */
 const QUOTE_MIN = 0;
 const QUOTE_MAX =
-  Math.ceil(Math.max(...allJobs.map(j => j.quoted)) / 500) * 500;
+  Math.ceil(Math.max(...allClients.map(j => j.quoted)) / 500) * 500;
 const QUOTE_STEP = 100;
 
 /**
@@ -700,11 +470,11 @@ interface FilterField {
 const FILTER_FIELDS: readonly FilterField[] = [
   {
     key: 'priority',
-    label: 'Priority',
+    label: 'Risk',
     operator: 'is',
     operatorLabel: 'is',
     valueType: 'enum',
-    options: (Object.keys(PRIORITY_META) as Priority[]).map(v => ({
+    options: (Object.keys(PRIORITY_META) as Risk[]).map(v => ({
       value: v,
       label: PRIORITY_META[v].label,
     })),
@@ -712,8 +482,8 @@ const FILTER_FIELDS: readonly FilterField[] = [
 ];
 
 /**
- * Fields a reader narrows by picking several at once — "show me on hold and
- * overdue", "these two crews". Priority stays single because its three steps
+ * Fields a reader narrows by picking several at once, "show me suspended and
+ * deactivated", "these two owners". Risk stays single because its three steps
  * are a ramp: picking two of three is the same as excluding one, which the
  * table already shows.
  *
@@ -729,19 +499,19 @@ const MULTI_FILTER_FIELDS: ReadonlyArray<{
   {
     key: 'status',
     label: 'Status',
-    options: (Object.keys(STATUS_META) as JobStatus[]).map(v => ({
+    options: (Object.keys(STATUS_META) as ClientStatus[]).map(v => ({
       value: v,
       label: STATUS_META[v].label,
     })),
   },
   {
     key: 'customer',
-    label: 'Customer',
+    label: 'Type',
     options: CUSTOMERS.map(v => ({value: v, label: v})),
   },
   {
     key: 'technician',
-    label: 'Technician',
+    label: 'Owner',
     options: TECHNICIANS.map(v => ({value: v, label: v})),
   },
 ];
@@ -758,12 +528,15 @@ const PRESET_FILTERS: ReadonlyArray<{
   filter: PowerSearchFilter;
 }> = [
   {
-    key: 'upcoming',
-    label: 'Upcoming',
+    key: 'recent',
+    label: 'Updated this week',
     filter: {
       field: 'scheduledOn',
       operator: 'after',
-      value: {type: 'date_absolute', unixSeconds: Math.floor(NOW_MS / 1000)},
+      value: {
+        type: 'date_absolute',
+        unixSeconds: Math.floor((NOW_MS - 7 * DAY_MS) / 1000),
+      },
     },
   },
 ];
@@ -771,13 +544,13 @@ const PRESET_FILTERS: ReadonlyArray<{
 /** Human-readable value for a filter chip label. */
 const VALUE_LABELS: Record<string, string> = {
   ...Object.fromEntries(
-    (Object.keys(STATUS_META) as JobStatus[]).map(k => [
+    (Object.keys(STATUS_META) as ClientStatus[]).map(k => [
       k,
       STATUS_META[k].label,
     ]),
   ),
   ...Object.fromEntries(
-    (Object.keys(PRIORITY_META) as Priority[]).map(k => [
+    (Object.keys(PRIORITY_META) as Risk[]).map(k => [
       k,
       PRIORITY_META[k].label,
     ]),
@@ -792,25 +565,25 @@ const BULK_EDIT_ACTIONS: ReadonlyArray<{
   key: string;
   label: string;
   icon: React.ReactNode;
-  onClick: (selected: ServiceJob[]) => void;
+  onClick: (selected: Client[]) => void;
 }> = [
   {
-    key: 'assign',
-    label: 'Assign',
+    key: 'owner',
+    label: 'Change owner',
     icon: <Icon icon={UserPlus} size="sm" />,
-    onClick: s => alert(`Assign technician: ${s.map(j => j.id).join(', ')}`),
+    onClick: s => alert(`Change owner: ${s.map(j => j.id).join(', ')}`),
   },
   {
-    key: 'reschedule',
-    label: 'Reschedule',
-    icon: <Icon icon={Calendar} size="sm" />,
-    onClick: s => alert(`Reschedule: ${s.map(j => j.id).join(', ')}`),
+    key: 'suspend',
+    label: 'Suspend',
+    icon: <Icon icon={Ban} size="sm" />,
+    onClick: s => alert(`Suspend: ${s.map(j => j.id).join(', ')}`),
   },
   {
-    key: 'cancel',
-    label: 'Cancel',
-    icon: <Icon icon={CircleX} size="sm" />,
-    onClick: s => alert(`Cancel: ${s.map(j => j.id).join(', ')}`),
+    key: 'delete',
+    label: 'Delete',
+    icon: <Icon icon={Trash2} size="sm" />,
+    onClick: s => alert(`Delete: ${s.map(j => j.id).join(', ')}`),
   },
 ];
 
@@ -886,22 +659,22 @@ const STICKY_END_OPTIONS: ReadonlyArray<{value: StickyEdge; label: string}> = [
 const GROUPING_OPTIONS: ReadonlyArray<{value: GroupField; label: string}> = [
   {value: 'none', label: 'None'},
   {value: 'status', label: 'Status'},
-  {value: 'priority', label: 'Priority'},
-  {value: 'technician', label: 'Technician'},
-  {value: 'customer', label: 'Customer'},
+  {value: 'priority', label: 'Risk'},
+  {value: 'technician', label: 'Owner'},
+  {value: 'customer', label: 'Type'},
 ];
 
 /**
  * The words a section is titled with. The group key is what the heading prints,
  * so it has to be the label and not the stored value — grouping by status would
- * otherwise head its sections "on_hold". Technician and customer are stored as
+ * otherwise head its sections "deactivated". Owner and type are stored as
  * their own labels already, which is what the fallback covers.
  */
-function groupKeyOf(job: ServiceJob, field: GroupField): string {
+function groupKeyOf(client: Client, field: GroupField): string {
   if (field === 'none') {
     return '';
   }
-  const stored = String(job[field]);
+  const stored = String(client[field]);
   return VALUE_LABELS[stored] ?? stored;
 }
 
@@ -925,48 +698,45 @@ const GROUP_ORDERS: Record<GroupField, string[]> = {
 const GROUP_ROW_KEY_PREFIX = '__group_';
 
 /** Fed to the grouping hook while grouping is off, so it flattens nothing. */
-const NO_ROWS: ServiceJob[] = [];
+const NO_ROWS: Client[] = [];
 
 const COLUMN_LABELS: Record<string, string> = {
-  summary: 'Job',
-  customer: 'Customer',
-  technician: 'Technician',
+  summary: 'Name',
+  id: 'Client ID',
+  customer: 'Type',
   status: 'Status',
-  priority: 'Priority',
-  scheduledAt: 'Scheduled',
-  quoted: 'Quote',
-  equipment: 'Equipment',
+  actions: 'Actions',
+  technician: 'Owner',
+  priority: 'Risk',
+  scheduledAt: 'Last update',
+  quoted: 'Balance',
+  equipment: 'Contact',
   address: 'Address',
 };
 
 const ALL_COLUMN_KEYS = [
   'summary',
+  'id',
   'customer',
-  'technician',
   'status',
+  'actions',
+  'technician',
   'priority',
   'scheduledAt',
   'quoted',
   'equipment',
   'address',
 ];
-const DEFAULT_COLUMN_KEYS = [
-  'summary',
-  'customer',
-  'technician',
-  'status',
-  'priority',
-  'scheduledAt',
-  'quoted',
-];
+/** The roster's own columns; the rest come in through View options. */
+const DEFAULT_COLUMN_KEYS = ['summary', 'id', 'customer', 'status', 'actions'];
 
 /**
- * The column that names the row. A table of jobs with no job on it is a table
+ * The column that names the row. A table of clients with no client on it is a table
  * of orphaned attributes, so this one stays: its remove control is disabled and
  * says why. Position is not identity, so it still reorders like any other.
  */
 const LOCKED_COLUMN_KEY = 'summary';
-const LOCKED_COLUMN_MESSAGE = 'Job names every row, so it cannot be removed.';
+const LOCKED_COLUMN_MESSAGE = 'The name is the row, so it cannot be removed.';
 
 /** Pointer travel before a press on the grip becomes a drag rather than a tap. */
 const REORDER_DRAG_THRESHOLD = 5;
@@ -1002,12 +772,12 @@ const INITIAL_VIEW: ViewState = {
   density: 'balanced',
   stickyStart: 'one',
   stickyEnd: 'none',
-  grouping: 'customer',
+  grouping: 'none',
 };
 
 /**
- * The screen opens on open work — every status except Completed. Landing on a
- * list of closed jobs is a poor first impression, and an unfiltered table
+ * The screen opens on live accounts, every status except Deleted. Landing on a
+ * list of deleted clients is a poor first impression, and an unfiltered table
  * shows the filter bar in its resting state, which hides the chip, the result
  * count and Clear all behind a click. The saved-view baseline is the same set,
  * so the template arrives already demonstrating what it is for.
@@ -1018,8 +788,8 @@ const INITIAL_FILTERS: PowerSearchFilter[] = [
     operator: 'is_any_of',
     value: {
       type: 'enum_list',
-      value: (Object.keys(STATUS_META) as JobStatus[]).filter(
-        status => status !== 'completed',
+      value: (Object.keys(STATUS_META) as ClientStatus[]).filter(
+        status => status !== 'deleted',
       ),
     },
   },
@@ -1027,14 +797,14 @@ const INITIAL_FILTERS: PowerSearchFilter[] = [
 
 /**
  * Severity order for the enum columns, because their labels do not sort into
- * it. Alphabetically Priority runs High, Normal, Urgent — which files the rows
- * that matter in the middle. Rank is what a reader means by "sort by
- * priority", so the comparator reaches for this before falling back to a
- * string compare.
+ * it. Alphabetically Risk runs High, Low, Medium, which files the rows that
+ * matter around the ones that do not. Rank is what a reader means by "sort by
+ * risk", so the comparator reaches for this before falling back to a string
+ * compare.
  */
 const SORT_RANKS: Record<string, Record<string, number>> = {
-  priority: {urgent: 0, high: 1, normal: 2},
-  status: {overdue: 0, on_hold: 1, in_progress: 2, scheduled: 3, completed: 4},
+  priority: {high: 0, medium: 1, low: 2},
+  status: {pending: 0, active: 1, suspended: 2, deactivated: 3, deleted: 4},
 };
 
 const PAGE_SIZE = 15;
@@ -1061,38 +831,38 @@ interface SavedView {
 
 const INITIAL_SAVED_VIEWS: SavedView[] = [
   {
-    id: 'needs-dispatch',
-    name: 'Needs dispatch',
+    id: 'pending-approval',
+    name: 'Pending approval',
     filters: [
       {
         field: 'status',
         operator: 'is',
-        value: {type: 'enum', value: 'scheduled'},
+        value: {type: 'enum', value: 'pending'},
       },
     ],
     view: INITIAL_VIEW,
   },
   {
-    id: 'luis-open',
-    name: "Luis's jobs",
+    id: 'priya-accounts',
+    name: "Priya's accounts",
     filters: [
       {
         field: 'technician',
         operator: 'is',
-        value: {type: 'enum', value: 'Luis Camarena'},
+        value: {type: 'enum', value: 'Priya Raman'},
       },
     ],
-    // Technician is redundant once every row is Luis, and the shape of the day
-    // is what this view is for, so it drops that column and groups by status.
+    // The shape of one owner's book is what this view is for, so it groups by
+    // status and brings the risk column in ahead of the actions.
     view: {
       ...INITIAL_VIEW,
-      columnKeys: DEFAULT_COLUMN_KEYS.filter(k => k !== 'technician'),
+      columnKeys: [...DEFAULT_COLUMN_KEYS.slice(0, -1), 'priority', 'actions'],
       grouping: 'status',
     },
   },
   {
-    id: 'high-value',
-    name: 'High value',
+    id: 'high-balance',
+    name: 'High balance',
     filters: [
       {
         // Same operator the range slider writes, so loading this view moves
@@ -1102,9 +872,15 @@ const INITIAL_SAVED_VIEWS: SavedView[] = [
         value: {type: 'integer', value: 1000},
       },
     ],
-    // Money is the point here, so the quote column is pinned to the end edge
-    // and the rows tighten up to get more of them under the eye at once.
-    view: {...INITIAL_VIEW, density: 'compact', stickyEnd: 'one'},
+    // Money is the point here, so the balance column comes in as the last
+    // column, pinned to the end edge, and the rows tighten up to get more of
+    // them under the eye at once.
+    view: {
+      ...INITIAL_VIEW,
+      columnKeys: [...DEFAULT_COLUMN_KEYS.slice(0, -1), 'quoted'],
+      density: 'compact',
+      stickyEnd: 'one',
+    },
   },
 ];
 
@@ -1239,7 +1015,7 @@ function useInfiniteBatches<T>(
 /**
  * Each value is looked up before the join, not after: a many-of clause carries
  * a list of enum keys, and joining first would hand VALUE_LABELS the string
- * "on_hold, overdue", miss, and print the wire names.
+ * "suspended, deactivated", miss, and print the wire names.
  */
 function filterValueText(filter: PowerSearchFilter): string {
   const raw = (filter.value as {value?: unknown}).value;
@@ -1885,7 +1661,7 @@ function LoadingRows({
   columns,
   density,
 }: {
-  columns: TableColumn<ServiceJob>[];
+  columns: TableColumn<Client>[];
   density: Density;
 }) {
   const pad = DENSITY_PADDING[density];
@@ -1893,7 +1669,7 @@ function LoadingRows({
     <VStack
       gap={0}
       role="status"
-      aria-label="Loading more jobs"
+      aria-label="Loading more clients"
       xstyle={styles.skeletonBleed}>
       {Array.from({length: SKELETON_ROWS}, (_, row) => (
         <HStack
@@ -2220,7 +1996,7 @@ export default function TableFilterTemplate() {
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
 
   /** Row whose details are open in the end panel. Independent of bulk selection. */
-  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [activeClientId, setActiveJobId] = useState<string | null>(null);
 
   // The floor keeps the MetadataList's 104px label column from squeezing its
   // values below a readable line; the ceiling stops the panel from taking so
@@ -2269,7 +2045,7 @@ export default function TableFilterTemplate() {
   // --- Misc ------------------------------------------------------------------
   const [isLoading, setIsLoading] = useState(false);
 
-  const {config, applyFilters} = usePowerSearchConfig(fieldDefs, 'Jobs');
+  const {config, applyFilters} = usePowerSearchConfig(fieldDefs, 'Clients');
 
   // A filter change refetches; the top progress bar stands in for that.
   useEffect(() => {
@@ -2282,7 +2058,7 @@ export default function TableFilterTemplate() {
   const isGrouped = groupField !== 'none';
 
   const results = useMemo(() => {
-    const byFilters = applyFilters(filters, allJobs);
+    const byFilters = applyFilters(filters, allClients);
     const q = query.trim().toLowerCase();
     const byQuery = q
       ? byFilters.filter(
@@ -2341,7 +2117,7 @@ export default function TableFilterTemplate() {
   // Grouped, the page unit is the section; flat, it is the row. Passing the
   // key only while grouping keeps an ungrouped view on even page sizes.
   const batchGroupKey = useMemo(
-    () => (isGrouped ? (job: ServiceJob) => groupKeyOf(job, groupField) : null),
+    () => (isGrouped ? (client: Client) => groupKeyOf(client, groupField) : null),
     [groupField, isGrouped],
   );
 
@@ -2492,10 +2268,10 @@ export default function TableFilterTemplate() {
   const quoteLabel = !hasQuoteFilter
     ? undefined
     : quoteLow > QUOTE_MIN && quoteHigh < QUOTE_MAX
-      ? `Quote ${formatMoney(quoteLow)} – ${formatMoney(quoteHigh)}`
+      ? `Balance ${formatMoney(quoteLow)} – ${formatMoney(quoteHigh)}`
       : quoteLow > QUOTE_MIN
-        ? `Quote over ${formatMoney(quoteLow)}`
-        : `Quote under ${formatMoney(quoteHigh)}`;
+        ? `Balance over ${formatMoney(quoteLow)}`
+        : `Balance under ${formatMoney(quoteHigh)}`;
 
   // --- Saved view actions ----------------------------------------------------
   /**
@@ -2593,16 +2369,16 @@ export default function TableFilterTemplate() {
     selectedKeys,
     setSelectedKeys,
   });
-  const selectionPlugin = useTableSelection<ServiceJob>({
+  const selectionPlugin = useTableSelection<Client>({
     ...selectionConfig,
-    getRowLabel: (item: ServiceJob) => `${item.id} ${item.summary}`,
+    getRowLabel: (item: Client) => `${item.id} ${item.summary}`,
     // Row background already means "open in the panel" here, so checking a box
     // must not claim it too — two row states sharing one signal reads as one
     // confused state. The tick is the selection; aria-selected is still set
     // either way, so this costs assistive tech nothing.
     hasRowHighlight: false,
   });
-  const sortablePlugin = useTableSortable<ServiceJob>({
+  const sortablePlugin = useTableSortable<Client>({
     sort,
     onSortChange: setSort,
     allowUnsortedState: true,
@@ -2633,7 +2409,7 @@ export default function TableFilterTemplate() {
   // The checkbox column needs no mention here: the plugin pins the whole
   // contiguous run from the first column through the last key it is given, so
   // naming the first data column carries the selection column with it.
-  const stickyPlugin = useTableStickyColumns<ServiceJob>({
+  const stickyPlugin = useTableStickyColumns<Client>({
     startKeys: stickyKeys(effectiveStickyStart, view.columnKeys, false),
     endKeys: stickyKeys(effectiveStickyEnd, view.columnKeys, true),
   });
@@ -2650,17 +2426,17 @@ export default function TableFilterTemplate() {
   }, []);
 
   const groupBy = useCallback(
-    (item: ServiceJob) => groupKeyOf(item, groupField),
+    (item: Client) => groupKeyOf(item, groupField),
     [groupField],
   );
 
-  const getRowKey = useCallback((item: ServiceJob) => item.id, []);
+  const getRowKey = useCallback((item: Client) => item.id, []);
 
   const {
     plugin: groupPlugin,
     data: groupedRows,
     idKey: groupRowKey,
-  } = useTableGroupedRows<ServiceJob>({
+  } = useTableGroupedRows<Client>({
     // The hook groups the loaded batch, and the batch always ends on a section
     // boundary, so every section it sees is entire. With grouping off it is
     // handed nothing, so it flattens nothing and its plugin goes unused.
@@ -2678,7 +2454,7 @@ export default function TableFilterTemplate() {
   });
 
   const isGroupHeaderRow = useCallback(
-    (item: ServiceJob) => groupRowKey(item).startsWith(GROUP_ROW_KEY_PREFIX),
+    (item: Client) => groupRowKey(item).startsWith(GROUP_ROW_KEY_PREFIX),
     [groupRowKey],
   );
 
@@ -2691,7 +2467,7 @@ export default function TableFilterTemplate() {
    * columns are wrapped to return nothing for the ones about to be thrown
    * away.
    */
-  const groupedPlugin = useMemo<TablePlugin<ServiceJob>>(
+  const groupedPlugin = useMemo<TablePlugin<Client>>(
     () => ({
       ...groupPlugin,
       transformColumns: cols =>
@@ -2701,7 +2477,7 @@ export default function TableFilterTemplate() {
             ? col
             : {
                 ...col,
-                renderCell: (item: ServiceJob) =>
+                renderCell: (item: Client) =>
                   isGroupHeaderRow(item) ? null : renderCell(item),
               };
         }),
@@ -2713,7 +2489,7 @@ export default function TableFilterTemplate() {
    * Opens the detail panel for the clicked row. There is no first-class row
    * activation plugin, so this reaches the `<tr>` through transformBodyRow.
    */
-  const rowActivationPlugin = useMemo<TablePlugin<ServiceJob>>(
+  const rowActivationPlugin = useMemo<TablePlugin<Client>>(
     () => ({
       // The selection column ships at 36px, which centres its checkbox 6px
       // from the table edge. 48px lands it on the 16px content gutter that
@@ -2732,7 +2508,7 @@ export default function TableFilterTemplate() {
         if (isGroupHeaderRow(item)) {
           return props;
         }
-        const isActive = item.id === activeJobId;
+        const isActive = item.id === activeClientId;
         return {
           ...props,
           htmlProps: {
@@ -2767,10 +2543,10 @@ export default function TableFilterTemplate() {
         };
       },
     }),
-    [activeJobId, isGroupHeaderRow],
+    [activeClientId, isGroupHeaderRow],
   );
 
-  const plugins = useMemo<Record<string, TablePlugin<ServiceJob>>>(
+  const plugins = useMemo<Record<string, TablePlugin<Client>>>(
     () => ({
       selection: selectionPlugin,
       sortable: sortablePlugin,
@@ -2793,8 +2569,8 @@ export default function TableFilterTemplate() {
 
   // --- Columns ---------------------------------------------------------------
   /**
-   * Compact is a one-line row, so the Job cell drops its second line and every
-   * text cell clamps rather than wrapping — otherwise a long customer name
+   * Compact is a one-line row, so the Name cell drops its media and every
+   * text cell clamps rather than wrapping, otherwise a long contact name
    * would out-height the row the density just tightened. `maxLines` carries its
    * own hover tooltip for whatever it cut off, which hand-rolled ellipsis
    * would not.
@@ -2802,20 +2578,20 @@ export default function TableFilterTemplate() {
   const isCompact = view.density === 'compact';
   const cellLines = isCompact ? 1 : 0;
   /**
-   * Spacious buys the row enough height for a site photo, so the Job cell
-   * leads with one. Wire the tile to your own image; the placeholder stands in
+   * Spacious buys the row enough height for a logo, so the Name cell leads
+   * with one. Wire the tile to your own image; the placeholder stands in
    * for it here so the row keeps the height the density promised either way.
    */
   const isSpacious = view.density === 'spacious';
 
-  const allColumns: Record<string, TableColumn<ServiceJob>> = useMemo(
+  const allColumns: Record<string, TableColumn<Client>> = useMemo(
     () => ({
       summary: {
         key: 'summary',
-        header: 'Job',
+        header: 'Name',
         width: proportional(2, {minWidth: 240}),
         sortable: true,
-        renderCell: (item: ServiceJob) =>
+        renderCell: (item: Client) =>
           isCompact ? (
             <Text type="body" maxLines={1}>
               {item.summary}
@@ -2832,21 +2608,27 @@ export default function TableFilterTemplate() {
                   <Icon icon={ImageIcon} size="sm" color="secondary" />
                 </AspectRatio>
               ) : null}
-              <VStack gap={0}>
-                <Text type="body">{item.summary}</Text>
-                <Text type="supporting" color="secondary">
-                  {item.id}
-                </Text>
-              </VStack>
+              <Text type="body">{item.summary}</Text>
             </HStack>
           ),
       },
+      id: {
+        key: 'id',
+        header: 'Client ID',
+        width: pixel(150),
+        sortable: true,
+        renderCell: (item: Client) => (
+          <Text type="body" maxLines={1}>
+            {item.id}
+          </Text>
+        ),
+      },
       customer: {
         key: 'customer',
-        header: 'Customer',
+        header: 'Type',
         width: proportional(1, {minWidth: 180}),
         sortable: true,
-        renderCell: (item: ServiceJob) => (
+        renderCell: (item: Client) => (
           <Text type="body" maxLines={cellLines}>
             {item.customer}
           </Text>
@@ -2854,10 +2636,10 @@ export default function TableFilterTemplate() {
       },
       technician: {
         key: 'technician',
-        header: 'Technician',
+        header: 'Owner',
         width: pixel(200),
         sortable: true,
-        renderCell: (item: ServiceJob) => (
+        renderCell: (item: Client) => (
           <HStack gap={2} vAlign="center">
             <Avatar name={item.technician} size="sm" />
             <Text type="body" maxLines={cellLines}>
@@ -2871,24 +2653,54 @@ export default function TableFilterTemplate() {
         header: 'Status',
         width: pixel(150),
         sortable: true,
-        renderCell: (item: ServiceJob) => {
+        renderCell: (item: Client) => {
           const meta = STATUS_META[item.status];
           return <Badge variant={meta.badge} label={meta.label} />;
         },
       },
+      actions: {
+        key: 'actions',
+        header: '',
+        width: pixel(56),
+        align: 'end',
+        // The row's own click ignores buttons, so the menu opens without
+        // opening the panel; View is the panel, on purpose.
+        renderCell: (item: Client) => (
+          <MoreMenu
+            label={`Actions for ${item.summary}`}
+            variant="ghost"
+            size="sm"
+            items={[
+              {label: 'View', onClick: () => setActiveJobId(item.id)},
+              {label: 'Edit', onClick: () => alert(`Edit ${item.summary}`)},
+              {
+                label: NEXT_ACTION[item.status],
+                onClick: () =>
+                  alert(`${NEXT_ACTION[item.status]} ${item.summary}`),
+              },
+              {type: 'divider'},
+              {
+                label: 'Delete',
+                variant: 'destructive',
+                onClick: () => alert(`Delete ${item.summary}`),
+              },
+            ]}
+          />
+        ),
+      },
       priority: {
         key: 'priority',
-        header: 'Priority',
+        header: 'Risk',
         width: pixel(120),
         sortable: true,
-        renderCell: (item: ServiceJob) => {
+        renderCell: (item: Client) => {
           const meta = PRIORITY_META[item.priority];
           return (
             <HStack gap={2} vAlign="center">
               <StatusDot
                 variant={meta.dot}
                 label={meta.label}
-                isPulsing={item.priority === 'urgent'}
+                isPulsing={item.priority === 'high'}
               />
               <Text type="body" maxLines={cellLines}>
                 {meta.label}
@@ -2899,10 +2711,10 @@ export default function TableFilterTemplate() {
       },
       scheduledAt: {
         key: 'scheduledAt',
-        header: 'Scheduled',
+        header: 'Last update',
         width: pixel(160),
         sortable: true,
-        renderCell: (item: ServiceJob) => (
+        renderCell: (item: Client) => (
           <Text type="body" maxLines={cellLines}>
             {formatScheduled(item.scheduledAt)}
           </Text>
@@ -2910,11 +2722,11 @@ export default function TableFilterTemplate() {
       },
       quoted: {
         key: 'quoted',
-        header: 'Quote',
+        header: 'Balance',
         width: pixel(110),
         align: 'end',
         sortable: true,
-        renderCell: (item: ServiceJob) => (
+        renderCell: (item: Client) => (
           <Text type="body" maxLines={cellLines}>
             {formatMoney(item.quoted)}
           </Text>
@@ -2922,9 +2734,9 @@ export default function TableFilterTemplate() {
       },
       equipment: {
         key: 'equipment',
-        header: 'Equipment',
+        header: 'Contact',
         width: proportional(1, {minWidth: 200}),
-        renderCell: (item: ServiceJob) => (
+        renderCell: (item: Client) => (
           <Text type="body" maxLines={cellLines}>
             {item.equipment}
           </Text>
@@ -2934,7 +2746,7 @@ export default function TableFilterTemplate() {
         key: 'address',
         header: 'Address',
         width: proportional(1, {minWidth: 200}),
-        renderCell: (item: ServiceJob) => (
+        renderCell: (item: Client) => (
           <Text type="body" maxLines={cellLines}>
             {item.address}
           </Text>
@@ -2950,7 +2762,7 @@ export default function TableFilterTemplate() {
   );
 
   const selectedCount = selectedKeys.size;
-  const selectedJobs = allJobs.filter(j => selectedKeys.has(j.id));
+  const selectedClients = allClients.filter(j => selectedKeys.has(j.id));
   // The search box narrows the results like any other filter, so it counts
   // towards offering Clear all — otherwise a search with no filters set leaves
   // the reader with a narrowed table and no single way back.
@@ -2985,18 +2797,19 @@ export default function TableFilterTemplate() {
     />
   );
 
-  const activeJob = allJobs.find(j => j.id === activeJobId) ?? null;
-  /** Other jobs at the same site, newest first — the panel's history list. */
-  const siteHistory = useMemo(
+  const activeClient = allClients.find(j => j.id === activeClientId) ?? null;
+  /** Other clients of the same type, most recently updated first, eight at most. */
+  const sameType = useMemo(
     () =>
-      activeJob == null
+      activeClient == null
         ? []
-        : allJobs
+        : allClients
             .filter(
-              j => j.customer === activeJob.customer && j.id !== activeJob.id,
+              j => j.customer === activeClient.customer && j.id !== activeClient.id,
             )
-            .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt)),
-    [activeJob],
+            .sort((a, b) => b.scheduledAt.localeCompare(a.scheduledAt))
+            .slice(0, 8),
+    [activeClient],
   );
 
   // ---------------------------------------------------------------------------
@@ -3333,9 +3146,9 @@ export default function TableFilterTemplate() {
     // is not written until the thumb is released.
     <ComplexSelector<[number, number]>
       key="quote"
-      label="Quote filter"
+      label="Balance filter"
       isLabelHidden
-      placeholder="Quote"
+      placeholder="Balance"
       triggerLabel={quoteLabel}
       size="sm"
       value={quoteDraft}
@@ -3345,7 +3158,7 @@ export default function TableFilterTemplate() {
       {(range, onChange, close) => (
         <VStack gap={4}>
           <VStack gap={0}>
-            <Text type="label">Quote range</Text>
+            <Text type="label">Balance range</Text>
             <Text type="large" hasTabularNumbers>
               {formatMoney(range[0])} – {formatMoney(range[1])}
             </Text>
@@ -3353,7 +3166,7 @@ export default function TableFilterTemplate() {
 
           <VStack gap={1}>
             <Slider
-              label="Quote range"
+              label="Balance range"
               isLabelHidden
               value={range}
               min={QUOTE_MIN}
@@ -3417,9 +3230,9 @@ export default function TableFilterTemplate() {
           a hidden search box reads as a missing feature, not a folded one. */}
       <StackItem xstyle={styles.searchSlot}>
         <TextInput
-          label="Search jobs"
+          label="Search clients"
           isLabelHidden
-          placeholder="Job name"
+          placeholder="Name or client ID"
           size="sm"
           width="100%"
           value={query}
@@ -3600,7 +3413,7 @@ export default function TableFilterTemplate() {
                 variant="ghost"
                 size="sm"
                 icon={action.icon}
-                onClick={() => action.onClick(selectedJobs)}
+                onClick={() => action.onClick(selectedClients)}
               />
             ))}
           </HStack>
@@ -3610,7 +3423,7 @@ export default function TableFilterTemplate() {
             once the actions grow wide enough to break the bar. */}
         <HStack gap={3} vAlign="center">
           <Text type="body">
-            {selectedCount} {selectedCount === 1 ? 'job' : 'jobs'} selected
+            {selectedCount} {selectedCount === 1 ? 'client' : 'clients'} selected
           </Text>
           <Text type="supporting" color="secondary">
             •
@@ -4141,7 +3954,7 @@ export default function TableFilterTemplate() {
    * carry no padding of their own for it to fight.
    */
   const detailBody =
-    activeJob == null ? null : (
+    activeClient == null ? null : (
       <VStack gap={0} xstyle={styles.detailPanel}>
         {/* The only part of the body that knows which host it is in: the sheet
             needs the pill cleared, the docked panel has no pill and would just
@@ -4157,19 +3970,19 @@ export default function TableFilterTemplate() {
                 <VStack gap={2}>
                   <HStack gap={2} vAlign="center">
                     <Badge
-                      variant={STATUS_META[activeJob.status].badge}
-                      label={STATUS_META[activeJob.status].label}
+                      variant={STATUS_META[activeClient.status].badge}
+                      label={STATUS_META[activeClient.status].label}
                     />
                     <StatusDot
-                      variant={PRIORITY_META[activeJob.priority].dot}
-                      label={`${PRIORITY_META[activeJob.priority].label} priority`}
-                      isPulsing={activeJob.priority === 'urgent'}
+                      variant={PRIORITY_META[activeClient.priority].dot}
+                      label={`${PRIORITY_META[activeClient.priority].label} risk`}
+                      isPulsing={activeClient.priority === 'high'}
                     />
                     <Text type="supporting" color="secondary">
-                      {PRIORITY_META[activeJob.priority].label} · {activeJob.id}
+                      {PRIORITY_META[activeClient.priority].label} risk · {activeClient.id}
                     </Text>
                   </HStack>
-                  <Heading level={2}>{activeJob.summary}</Heading>
+                  <Heading level={2}>{activeClient.summary}</Heading>
                 </VStack>
               </StackItem>
               <IconButton
@@ -4185,12 +3998,12 @@ export default function TableFilterTemplate() {
                   evenly however wide the panel is dragged. */}
             <HStack gap={2}>
               <Button
-                label={NEXT_ACTION[activeJob.status]}
+                label={NEXT_ACTION[activeClient.status]}
                 size="sm"
                 width="100%"
               />
               <Button
-                label="Edit job"
+                label="Edit client"
                 variant="secondary"
                 size="sm"
                 width="100%"
@@ -4205,26 +4018,26 @@ export default function TableFilterTemplate() {
           <MetadataList
             columns="single"
             label={{position: 'start', width: 104}}>
-            <MetadataListItem label="Customer">
-              <Text type="body">{activeJob.customer}</Text>
+            <MetadataListItem label="Type">
+              <Text type="body">{activeClient.customer}</Text>
             </MetadataListItem>
-            <MetadataListItem label="Site address">
-              <Text type="body">{activeJob.address}</Text>
+            <MetadataListItem label="Address">
+              <Text type="body">{activeClient.address}</Text>
             </MetadataListItem>
-            <MetadataListItem label="Technician">
-              <Text type="body">{activeJob.technician}</Text>
+            <MetadataListItem label="Owner">
+              <Text type="body">{activeClient.technician}</Text>
             </MetadataListItem>
-            <MetadataListItem label="Scheduled">
+            <MetadataListItem label="Last update">
               <Text type="body">
-                {formatDate(activeJob.scheduledAt, true)},{' '}
-                {formatTime(activeJob.scheduledAt)}
+                {formatDate(activeClient.scheduledAt, true)},{' '}
+                {formatTime(activeClient.scheduledAt)}
               </Text>
             </MetadataListItem>
-            <MetadataListItem label="Equipment">
-              <Text type="body">{activeJob.equipment}</Text>
+            <MetadataListItem label="Contact">
+              <Text type="body">{activeClient.equipment}</Text>
             </MetadataListItem>
-            <MetadataListItem label="Quote">
-              <Text type="body">{formatMoney(activeJob.quoted)}</Text>
+            <MetadataListItem label="Balance">
+              <Text type="body">{formatMoney(activeClient.quoted)}</Text>
             </MetadataListItem>
           </MetadataList>
         </Section>
@@ -4233,24 +4046,23 @@ export default function TableFilterTemplate() {
 
         <Section variant="transparent" padding={4}>
           <VStack gap={2}>
-            <Heading level={3}>Site history</Heading>
-            {siteHistory.length === 0 ? (
+            <Heading level={3}>Same type</Heading>
+            {sameType.length === 0 ? (
               <Text type="supporting" color="secondary">
-                No other visits on file for this site.
+                No other clients of this type.
               </Text>
             ) : (
               <VStack gap={0}>
-                {siteHistory.map(related => (
+                {sameType.map(related => (
                   <Item
                     key={related.id}
                     align="center"
                     label={related.summary}
                     labelLines={2}
-                    // The date leads: this is a list of visits to one site,
-                    // so when it happened is what tells them apart. The
-                    // badge takes the end slot the date used to hold —
-                    // a badge is too wide to lead a row this narrow.
-                    description={`${formatDate(related.scheduledAt, true)} · ${related.technician}`}
+                    // The owner leads and the update date follows; the badge
+                    // takes the end slot, since a badge is too wide to lead a
+                    // row this narrow.
+                    description={`${related.technician} · ${formatDate(related.scheduledAt, true)}`}
                     endContent={
                       <Badge
                         variant={STATUS_META[related.status].badge}
@@ -4287,7 +4099,7 @@ export default function TableFilterTemplate() {
           resizable={detailWidth.props}
           isReversed
           isAlwaysVisible={false}
-          label="Resize job details"
+          label="Resize client details"
         />
         {/* Panel padding is 0 so the dividers reach both edges; each section
             inside re-adds the 16px gutter to keep its content on the same
@@ -4296,7 +4108,7 @@ export default function TableFilterTemplate() {
           resizable={detailWidth.props}
           hasDivider
           padding={0}
-          label="Job details">
+          label="Client details">
           {detailBody}
         </LayoutPanel>
       </>
@@ -4304,15 +4116,15 @@ export default function TableFilterTemplate() {
 
   /**
    * `tall` because this is the reading surface, not a picker: the metadata
-   * list and the site history below it are what the reader opened the row for,
-   * and a mid-height budget would put the history under a scroll before they
+   * list and the same-type list below it are what the reader opened the row
+   * for, and a mid-height budget would put that list under a scroll before they
    * had seen there was any.
    */
   const detailSheet = (
     <BottomSheet
-      isOpen={isCompactSurface && activeJob != null}
+      isOpen={isCompactSurface && activeClient != null}
       onOpenChange={open => !open && setActiveJobId(null)}
-      label="Job details"
+      label="Client details"
       height="tall">
       {detailBody}
     </BottomSheet>
@@ -4330,11 +4142,11 @@ export default function TableFilterTemplate() {
         xstyle={styles.pageShell}
         end={isCompactSurface ? undefined : detailPanel}
         header={
-          <LayoutHeader hasDivider label="Job filters and table actions">
+          <LayoutHeader hasDivider label="Client filters and table actions">
             <VStack gap={0} xstyle={styles.headerWrap}>
               {isLoading && (
                 <ProgressBar
-                  label="Loading jobs"
+                  label="Loading clients"
                   isLabelHidden
                   isIndeterminate
                   xstyle={styles.progress}
@@ -4352,12 +4164,12 @@ export default function TableFilterTemplate() {
                       table templates use. */}
                   <HStack gap={3} vAlign="center">
                     <StackItem size="fill">
-                      <Heading level={1}>Service jobs</Heading>
+                      <Heading level={1}>Clients</Heading>
                     </StackItem>
                     <Button
-                      label="New job"
+                      label="Add client"
                       variant="primary"
-                      onClick={() => alert('New job')}
+                      onClick={() => alert('Add client')}
                     />
                   </HStack>
 
@@ -4371,7 +4183,7 @@ export default function TableFilterTemplate() {
                             config={config}
                             filters={filters}
                             onChange={next => setFilters([...next])}
-                            placeholder='Try "quote > 1000" or "status is Overdue"'
+                            placeholder='Try "balance > 1000" or "status is Suspended"'
                             resultCount={results.length}
                           />
                         ) : isSavedViewsBarOpen ? (
@@ -4471,11 +4283,11 @@ export default function TableFilterTemplate() {
         content={
           /* Default padding (16px) is deliberate: Table bleeds to the edges
              and re-applies it to the first and last cells. */
-          <LayoutContent padding={4} label="Service jobs">
+          <LayoutContent padding={4} label="Clients">
             {results.length === 0 ? (
               <EmptyState
                 icon={<Icon icon={Search} size="lg" />}
-                title="No jobs match these filters"
+                title="No clients match these filters"
                 description="Try clearing a filter, or switch to power search to build a broader query."
                 actions={
                   <>
@@ -4489,7 +4301,7 @@ export default function TableFilterTemplate() {
                 }
               />
             ) : (
-              <Table<ServiceJob>
+              <Table<Client>
                 // Grouping flattens the batch into headers and rows; off, the
                 // batch goes in untouched.
                 data={isGrouped ? groupedRows : rows}
@@ -4525,7 +4337,7 @@ export default function TableFilterTemplate() {
                     vAlign="center"
                     hAlign="center">
                     <Text type="supporting" color="secondary">
-                      All {results.length} jobs loaded
+                      All {results.length} clients loaded
                     </Text>
                   </VStack>
                 )
