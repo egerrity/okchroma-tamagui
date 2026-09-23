@@ -156,8 +156,10 @@ button and Astryx has no slot for it. Shots owed: the Button panels and the tabl
 modes.
 
 **2026-09-23, brand `bright-blue`, okchroma 0.6.1, decision 39, the Button mapped individually
-and the roster.** From Vite on 5177 through headless Chrome at 1440x900, both modes; the
-recordings folder holds the clips. The Button set: the okchroma panel's primary and
+and the roster.** From Vite on 5177 through headless Chrome at 1440x900, both modes;
+`docs/recordings/` holds the clips: the phone at rest and worked, the phone across brands,
+the Clients table worked then re-branded, the comparison, the Tamagui web screen across
+brands, and the gate. The Button set: the okchroma panel's primary and
 destructive carry their families' solid tiers, fill, on-text and hover read back as the
 build's rows; secondary the subtle tier; the astryx-from-seed panel carries Meta's expression
 of the seed, its accent and neutrals from the hex and the same fixed red on destructive
