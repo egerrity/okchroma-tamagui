@@ -25,6 +25,10 @@ body {
   gap: 8px;
   align-items: center;
 }
+.seed {
+  height: 28px;
+  margin: 0 0 24px;
+}
 .panels {
   display: grid;
   grid-template-columns: 1fr 1fr;

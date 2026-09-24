@@ -37,9 +37,8 @@ the dialog's scrim and panel reading as one system, with no value tuned in a com
 - **The Astryx web app** (`apps/web-astryx`, `docs/map-astryx.md`). Astryx's own
   components under the Astryx map, one brand at a time (`?brand=`), beside Astryx's own
   generator seeded with the brand's hex, Meta's expression of the seed, as the baseline.
-  Three exhibits: the Button set
-  (primary, secondary, ghost, destructive, enabled and disabled) in two panels grouped by
-  candidate; Astryx's Filterable Table page template whole, its content a client roster
+  Three exhibits: the Button set, primary and destructive, in two panels grouped by
+  candidate under a wide thin swatch of the seed itself, the thing each is compared to; Astryx's Filterable Table page template whole, its content a client roster
   (Name, Client ID, Type, Status, a row actions menu, the rest behind View options), the
   candidate on a toggle, the roster in one realistic screen; and the pairing, this app
   beside the Tamagui apps on the same brand, judged for one system across two renderers.
@@ -175,3 +174,8 @@ style in both modes against the build's rows: the row at rest transparent, hover
 hint tier's hover, open at its selected rung; the three levels' circles, initials and edges
 the stamp, chalk and paper rows. The Clients clip in `docs/recordings/` re-recorded with the
 hover on camera.
+
+**2026-09-24, later, the comparison cut to the seed.** The Button set is the seed as a swatch
+above the two panels, each holding the primary and the destructive button, light only, so a
+viewer compares each system's filled buttons to the hex they were given. The comparison clip
+in `docs/recordings/` re-recorded as the brand stepping through that view.

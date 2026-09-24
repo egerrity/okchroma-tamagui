@@ -6,7 +6,8 @@ import {buildOkchromaTheme, type BrandName} from './themes/okchromaTheme';
 import {buildAstryxSeedTheme} from './themes/astryxSeedTheme';
 import TableFilterTemplate from './pages/TableFilter';
 
-const VARIANTS = ['primary', 'secondary', 'ghost', 'destructive'] as const;
+// The two filled buttons, the ones the seed above them is compared against.
+const VARIANTS = ['primary', 'destructive'] as const;
 type Mode = 'light' | 'dark';
 type Candidate = 'okchroma' | 'astryx';
 type View = 'button' | 'table';
@@ -97,6 +98,9 @@ export default function App() {
     <Theme theme={pageTheme} mode={mode}>
       <main className="exhibit" data-mode={mode}>
         <header className="controls">{controls}</header>
+        {/* The seed itself, wide and thin above both candidates: what each is compared to. */}
+        <h2 className="label">seed</h2>
+        <div className="seed" style={{background: byBrand[brand].SEED}} />
         <section className="panels">
           <Panel label="okchroma" theme={okchroma} mode={mode} />
           <Panel label="astryx from seed" theme={astryx} mode={mode} />
@@ -115,7 +119,6 @@ function Panel({label, theme, mode}: {label: string; theme: ReturnType<typeof de
           {VARIANTS.map((variant) => (
             <div className="row" key={variant}>
               <Button label={variant} variant={variant} />
-              <Button label={variant} variant={variant} isDisabled />
             </div>
           ))}
         </div>
