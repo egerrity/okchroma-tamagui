@@ -73,6 +73,16 @@ paints with them. Owner's rule (decision 39): red text is pencil-47, a red butto
 the stamp, and the stamp is never used for text; a component whose fill needs the stamp
 maps individually, as the Tamagui map's tiers do.
 
+The table's row states and the avatar's levels go the same way (decision 40). A row is a
+transparent ground, so its hover and its open state take the brand's hint tier rungs,
+`brand-hint-bg-hover` and `brand-hint-bg-selected` (`ASTRYX_TABLE_MAP`), set as the Table's
+own overlay variables inside its scope; the rest of Astryx keeps its pole-at-alpha overlays.
+The avatar takes the tag chip's three levels on the brand family (`ASTRYX_AVATAR_LEVELS`,
+from the Tamagui map's `INDICATOR_LEVELS`): stamp, strong and default, selected by
+`data-level` on the Avatar, whose circle reads the neutral ground and the secondary text
+through its root; the edge is an outline inside the circle. Initials sit on the circle, so
+the stamp is legal there. The Clients page gives a client's avatar its level by type.
+
 The rest of the map is the role layer's own assignments: fg-default, fg-subtle,
 border-default, border-subtle, the elevation planes, the signal bg-emphasis on pencil-47
 with paper-0 on top, the alpha-away-from-bg rungs for the state layers. The owner noted

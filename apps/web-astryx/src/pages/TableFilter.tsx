@@ -96,7 +96,6 @@ import {ProgressBar} from '@astryxdesign/core/ProgressBar';
 import {ResizeHandle, useResizable} from '@astryxdesign/core/Resizable';
 import {Skeleton} from '@astryxdesign/core/Skeleton';
 import {Slider} from '@astryxdesign/core/Slider';
-import {AspectRatio} from '@astryxdesign/core/AspectRatio';
 import {
   PowerSearch,
   usePowerSearchConfig,
@@ -120,7 +119,6 @@ import {
   ChevronDown,
   Columns3,
   GripVertical,
-  Image as ImageIcon,
   Pencil,
   Pin,
   Plus,
@@ -255,6 +253,13 @@ const TRADES = [
   'Cycles',
 ];
 const TYPES = ['Merchant', 'Partner', 'Agency', 'Enterprise'];
+/** The avatar's level by client type: the theme maps three (docs/map-astryx.md). */
+const AVATAR_LEVEL: Record<string, 'stamp' | 'strong' | 'default'> = {
+  Enterprise: 'stamp',
+  Agency: 'strong',
+  Partner: 'strong',
+  Merchant: 'default',
+};
 const OWNERS = ['Dana Whitfield', 'Luis Camarena', 'Marcus Osei', 'Priya Raman'];
 const CONTACT_FIRST = [
   'Amara',
@@ -1539,15 +1544,6 @@ const styles = stylex.create({
     // and replays it, the same way TableRow does for striping and hover.
     '--table-row-overlay': colorVars['--color-overlay-pressed'],
   },
-  // A flex child has no definite width for AspectRatio to derive a height
-  // from, so the tile is pinned here and told not to give the width back when
-  // the cell runs short.
-  jobMedia: {
-    backgroundColor: colorVars['--color-background-muted'],
-    borderRadius: radiusVars['--radius-element'],
-    flexShrink: 0,
-    width: spacingVars['--spacing-12'],
-  },
   detailPanel: {
     minWidth: 0,
   },
@@ -2577,11 +2573,7 @@ export default function TableFilterTemplate() {
    */
   const isCompact = view.density === 'compact';
   const cellLines = isCompact ? 1 : 0;
-  /**
-   * Spacious buys the row enough height for a logo, so the Name cell leads
-   * with one. Wire the tile to your own image; the placeholder stands in
-   * for it here so the row keeps the height the density promised either way.
-   */
+  /** Spacious buys the row enough height for a larger avatar, so the Name cell's grows. */
   const isSpacious = view.density === 'spacious';
 
   const allColumns: Record<string, TableColumn<Client>> = useMemo(
@@ -2591,26 +2583,18 @@ export default function TableFilterTemplate() {
         header: 'Name',
         width: proportional(2, {minWidth: 240}),
         sortable: true,
-        renderCell: (item: Client) =>
-          isCompact ? (
-            <Text type="body" maxLines={1}>
+        renderCell: (item: Client) => (
+          <HStack gap={2} vAlign="center">
+            <Avatar
+              name={item.summary}
+              size={isSpacious ? 'md' : 'sm'}
+              data-level={AVATAR_LEVEL[item.customer]}
+            />
+            <Text type="body" maxLines={cellLines}>
               {item.summary}
             </Text>
-          ) : (
-            <HStack gap={3} vAlign="center">
-              {isSpacious ? (
-                // AspectRatio derives its height from a definite width, which
-                // a flex child does not have — hence the pinned box.
-                <AspectRatio
-                  ratio={4 / 3}
-                  fit="center"
-                  xstyle={styles.jobMedia}>
-                  <Icon icon={ImageIcon} size="sm" color="secondary" />
-                </AspectRatio>
-              ) : null}
-              <Text type="body">{item.summary}</Text>
-            </HStack>
-          ),
+          </HStack>
+        ),
       },
       id: {
         key: 'id',
@@ -3982,7 +3966,14 @@ export default function TableFilterTemplate() {
                       {PRIORITY_META[activeClient.priority].label} risk · {activeClient.id}
                     </Text>
                   </HStack>
-                  <Heading level={2}>{activeClient.summary}</Heading>
+                  <HStack gap={3} vAlign="center">
+                    <Avatar
+                      name={activeClient.summary}
+                      size="md"
+                      data-level={AVATAR_LEVEL[activeClient.customer]}
+                    />
+                    <Heading level={2}>{activeClient.summary}</Heading>
+                  </HStack>
                 </VStack>
               </StackItem>
               <IconButton

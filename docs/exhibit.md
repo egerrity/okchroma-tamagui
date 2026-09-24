@@ -167,3 +167,11 @@ under every brand. The table, a client roster, renders whole
 under both candidates: the row menu's Delete is critical pencil-47 as text, a checked box is
 brand pencil-47 with paper-0 on it, Add client the brand's solid tier. Unjudged: the owner
 has not yet answered per row.
+
+**2026-09-24, brand `bright-blue`, decision 40.** The Clients table's hovered row on the
+brand's highlighter at an opacity and its open row one rung up, and an avatar in the Name
+cell and the detail panel at one of three levels by client type. Read back by computed
+style in both modes against the build's rows: the row at rest transparent, hovered at the
+hint tier's hover, open at its selected rung; the three levels' circles, initials and edges
+the stamp, chalk and paper rows. The Clients clip in `docs/recordings/` re-recorded with the
+hover on camera.

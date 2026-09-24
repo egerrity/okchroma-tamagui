@@ -359,3 +359,15 @@ the rule it serves. Code cites a decision by number, never by date.
     the engine should carry a text-legal signal stamp, hers, measured in the session
     handoff; the other filled controls (checkbox, switch, progress) on the text stop, judged
     later.
+
+40. 2026-09-24. **The table's row states and the avatar's levels map individually.** The
+    owner asked for the Astryx table's hovered row to be the brand's highlighter at an
+    opacity, and for avatars in levels so the brand switch shows on the roster. Both take
+    decision 39's route, the theme's component overrides. The Table's hover and open-row
+    overlays are the brand's hint tier rungs, highlighter-26 at eight and sixteen percent,
+    set inside the Table's scope so the rest of Astryx keeps its pole-at-alpha overlays.
+    The Avatar takes the tag chip's three levels on the brand family, the stamp with its
+    on-text and edge, chalk with the pen, paper with the pencil and a chalk edge, from the
+    Tamagui map's own rows, selected by a level attribute the Name cell sets from the
+    client's type; an avatar carries initials, so the stamp is legal on it. Foreclosed:
+    nothing. Open: what a level means in a real product; here it follows the client's type.

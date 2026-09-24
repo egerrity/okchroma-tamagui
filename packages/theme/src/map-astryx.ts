@@ -10,6 +10,8 @@
  * Token, Icon and Card, not roles); the syntax and data-viz tokens.
  */
 
+import { INDICATOR_LEVELS } from './map/display.ts';
+
 /** Astryx hue families that carry a role, and the okchroma family for each. */
 const HUE_FAMILY = {
   red: 'critical', // FieldStatus and ChatComposer paint error text with text-red
@@ -121,5 +123,50 @@ export const ASTRYX_BUTTON_MAP: Record<
     pressed: 'critical-solid-bg-pressed',
     on: 'critical-solid-fg',
     edge: 'critical-solid-border',
+  },
+};
+
+/**
+ * The table's row states map individually too. A row is a transparent ground, so its
+ * hover and its open state take the brand's hint tier rungs, highlighter-26 at an
+ * opacity, in place of Astryx's pole-at-alpha overlays; the theme sets them as the
+ * Table's own overlay variables inside its scope, so the rest of Astryx keeps its overlays.
+ */
+export const ASTRYX_TABLE_MAP = {
+  rowHover: 'brand-hint-bg-hover',
+  rowActive: 'brand-hint-bg-selected',
+} as const;
+
+const brandRow = (row: string | undefined, level: string, part: string) => {
+  if (row === undefined) {
+    throw new Error(`the indicator level ${level} has no ${part} row`);
+  }
+  return row.replace('<family>', 'brand');
+};
+
+/**
+ * The avatar's three levels are the tag chip's (INDICATOR_LEVELS, docs/map.md) on the
+ * brand family: the stamp with its on-text and edge, chalk with the pen, paper with the
+ * pencil and a chalk edge. An avatar carries initials, so the stamp is legal on it. The
+ * Avatar selects a level with `data-level`, the attribute the theme's selectors read.
+ */
+export const ASTRYX_AVATAR_LEVELS: Record<
+  keyof typeof INDICATOR_LEVELS,
+  {fill: string; on: string; edge: string}
+> = {
+  stamp: {
+    fill: brandRow(INDICATOR_LEVELS.stamp.background, 'stamp', 'fill'),
+    on: brandRow(INDICATOR_LEVELS.stamp.color, 'stamp', 'on'),
+    edge: brandRow(INDICATOR_LEVELS.stamp.borderColor, 'stamp', 'edge'),
+  },
+  strong: {
+    fill: brandRow(INDICATOR_LEVELS.strong.background, 'strong', 'fill'),
+    on: brandRow(INDICATOR_LEVELS.strong.color, 'strong', 'on'),
+    edge: brandRow(INDICATOR_LEVELS.strong.borderColor, 'strong', 'edge'),
+  },
+  default: {
+    fill: brandRow(INDICATOR_LEVELS.default.background, 'default', 'fill'),
+    on: brandRow(INDICATOR_LEVELS.default.color, 'default', 'on'),
+    edge: brandRow(INDICATOR_LEVELS.default.borderColor, 'default', 'edge'),
   },
 };
