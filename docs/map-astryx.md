@@ -114,7 +114,7 @@ critical stamp on both. They differ in four rows, which follow from Astryx's str
 
 | Role | Tamagui map | Astryx map | Note |
 |---|---|---|---|
-| focus ring | `neutral-highlighter-26` | the accent | Astryx's Button paints its ring with `--color-accent` in the component; only a fork moves it. |
+| focus ring | `neutral-highlighter-26` | `brand-highlighter-26` | Astryx rings with its accent through the local `--focus-outline-color`, which its base sheet resolves at the document root, so the map sets that token itself (decision 41); the brand's 3:1 stop keeps Astryx's habit on a legal stop. |
 | input ground | `surface-high` | `--color-background-surface`, `surface-mid` | one plane apart. |
 | ghost text | `<family>-fg-on-hint` (`pencil-47`) | `--color-text-primary`, `pen-70` | Astryx's ghost is the body text stop. |
 | chip text and edge | `pen-58`, `chalk-20` (indicator-strong) | `pen-70`, `chalk-15` (the hue families) | one stop apart each. |

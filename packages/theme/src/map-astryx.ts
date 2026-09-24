@@ -94,6 +94,12 @@ export const ASTRYX_TO_OKCHROMA: Record<string, string> = {
   '--color-shadow': 'shadow-08',
   // The mode-flipping pole Astryx mixes into every hover color.
   '--color-tint-hover': 'pen-100',
+  // Astryx rings every control with this token, which its base sheet defines at the
+  // document root as the accent; a custom property resolves where it is defined, so the
+  // ring would freeze to the page's accent unless the theme sets the token itself. The
+  // brand's 3:1 stop keeps Astryx's habit of a brand ring on a stop legal for a non-text
+  // indicator, so the ring moves with the brand.
+  '--focus-outline-color': 'brand-highlighter-26',
 
   ...hueRows(),
 };

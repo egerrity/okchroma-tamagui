@@ -371,3 +371,14 @@ the rule it serves. Code cites a decision by number, never by date.
     Tamagui map's own rows, selected by a level attribute the Name cell sets from the
     client's type; an avatar carries initials, so the stamp is legal on it. Foreclosed:
     nothing. Open: what a level means in a real product; here it follows the client's type.
+
+41. 2026-09-24. **The focus ring is the brand's highlighter, set through Astryx's own local.**
+    The owner saw the row menu's focus ring stay Astryx's default blue while the brand
+    switched. Astryx rings every control with `--focus-outline-color`, which its base sheet
+    defines at the document root as the accent; a custom property resolves where it is
+    defined, so the ring froze to the page's accent before the theme region changed it. The
+    map now carries that token on `brand-highlighter-26`, the brand's 3:1 stop, so the
+    ring moves with the brand as Astryx's own accent ring would and stays legal for a
+    non-text indicator. The Tamagui map rings its root with the neutral highlighter and its
+    inputs with the brand's; this row follows the inputs. Foreclosed: nothing. Open: whether
+    the two renderers' general rings should agree on neutral or brand, hers.
