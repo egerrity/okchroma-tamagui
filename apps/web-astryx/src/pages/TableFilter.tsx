@@ -2004,9 +2004,11 @@ export default function TableFilterTemplate() {
   });
 
   // --- Sorting ---------------------------------------------------------------
+  // A roster opens by name. Risk sits behind View options, so opening on it would
+  // order the rows by a column the reader cannot see.
   const [sort, setSort] = useState<
     Array<{sortKey: string; direction: 'ascending' | 'descending'}>
-  >([{sortKey: 'priority', direction: 'ascending'}]);
+  >([{sortKey: 'summary', direction: 'ascending'}]);
 
   // --- View options ----------------------------------------------------------
   const [view, setView] = useState<ViewState>(INITIAL_VIEW);
